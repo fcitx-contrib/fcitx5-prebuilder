@@ -1,0 +1,90 @@
+[submodule "anthy-cmake"]
+	path = anthy-cmake
+	url = https://github.com/fcitx5-android/anthy-cmake
+[submodule "default-icon-theme"]
+	path = default-icon-theme
+	url = https://gitlab.freedesktop.org/xdg/default-icon-theme.git
+[submodule "fmt"]
+	path = fmt
+	url = https://github.com/fmtlib/fmt
+[submodule "glib"]
+	path = glib
+	url = https://github.com/GNOME/glib
+[submodule "glog"]
+	path = glog
+	url = https://github.com/google/glog
+[submodule "iso-codes"]
+	path = iso-codes
+	url = https://salsa.debian.org/iso-codes-team/iso-codes
+[submodule "json"]
+	path = json
+	url = https://github.com/nlohmann/json
+[submodule "json-c"]
+	path = json-c
+	url = https://github.com/json-c/json-c
+[submodule "json-glib"]
+	path = json-glib
+	url = https://github.com/GNOME/json-glib
+[submodule "leveldb"]
+	path = leveldb
+	url = https://github.com/google/leveldb
+[submodule "libchewing"]
+	path = libchewing
+	url = https://github.com/chewing/libchewing
+[submodule "libexpat"]
+	path = libexpat
+	url = https://github.com/libexpat/libexpat
+[submodule "libgee"]
+	path = libgee
+	url = https://github.com/GNOME/libgee
+[submodule "libhangul"]
+	path = libhangul
+	url = https://github.com/libhangul/libhangul
+[submodule "libintl"]
+	path = libintl
+	url = https://github.com/j-jorge/libintl-lite
+[submodule "librime"]
+	path = librime
+	url = https://github.com/rime/librime
+[submodule "librime-lua"]
+	path = librime-lua
+	url = https://github.com/hchunhui/librime-lua
+[submodule "librime-octagram"]
+	path = librime-octagram
+	url = https://github.com/lotem/librime-octagram
+[submodule "librime-predict"]
+	path = librime-predict
+	url = https://github.com/rime/librime-predict
+[submodule "libskk"]
+	path = libskk
+	url = https://github.com/ueno/libskk
+[submodule "libthai"]
+	path = libthai
+	url = https://github.com/tlwg/libthai
+[submodule "libuv"]
+	path = libuv
+	url = https://github.com/libuv/libuv
+[submodule "libxkbcommon"]
+	path = libxkbcommon
+	url = https://github.com/xkbcommon/libxkbcommon
+[submodule "lua"]
+	path = lua
+	url = https://github.com/lua/lua
+[submodule "marisa"]
+	path = marisa
+	url = https://github.com/rime/marisa-trie
+[submodule "opencc"]
+	path = opencc
+	url = https://github.com/BYVoid/OpenCC
+[submodule "pcre2"]
+	path = pcre2
+	url = https://github.com/PCRE2Project/pcre2
+[submodule "xkeyboard-config"]
+	path = xkeyboard-config
+	url = https://gitlab.freedesktop.org/xkeyboard-config/xkeyboard-config.git
+[submodule "yaml-cpp"]
+	path = yaml-cpp
+	url = https://github.com/jbeder/yaml-cpp
+[submodule "zstd"]
+	path = zstd
+	url = https://github.com/facebook/zstd

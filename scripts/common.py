@@ -62,7 +62,7 @@ def cache(url: str):
 
 
 class Builder:
-    def __init__(self, name: str, options: list[str] | None=None, js: list[str] | None=None,
+    def __init__(self, name: str, options: list[str] | None=None, js: list[str] | None=None, ios: list[str] | None=None,
                  src='.', build='build', pre_package: Callable[[], None] | None=None):
         self.name = name
         # /path/to/build/ios-arm64/librime
@@ -73,6 +73,7 @@ class Builder:
         self.needs_extract = any(name in deps for deps in dag.values())
         self.pre_package = pre_package
         self.js = js or []
+        self.ios = ios or []
 
     def configure(self):
         pass
@@ -121,6 +122,7 @@ class CMakeBuilder(Builder):
                 f'-DCMAKE_TOOLCHAIN_FILE={ROOT}/ios.cmake',
                 f'-DIOS_PLATFORM={IOS_PLATFORM}'
             ]
+            command += self.ios
         else: # Ninja
             command.append('-DCMAKE_BUILD_TYPE=Release')
 

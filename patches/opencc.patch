@@ -1,0 +1,27 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index 1d8c8e6..6f0b301 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -221,9 +221,9 @@ endif()
+ ######## Subdirectories
+ 
+ add_subdirectory(src)
+-add_subdirectory(doc)
++if(APPLE AND NOT IOS)
+ add_subdirectory(data)
+-add_subdirectory(test)
++endif()
+ 
+ ######## Testing
+ 
+diff --git a/src/CMakeLists.txt b/src/CMakeLists.txt
+index 7768c89..5e5c5b1 100644
+--- a/src/CMakeLists.txt
++++ b/src/CMakeLists.txt
+@@ -205,4 +205,6 @@ endif()
+ 
+ # Subdir
+ 
++if(APPLE AND NOT IOS)
+ add_subdirectory(tools)
++endif()

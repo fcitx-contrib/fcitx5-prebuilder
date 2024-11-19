@@ -1,3 +1,8 @@
 from common import CMakeBuilder
 
-CMakeBuilder('marisa').exec()
+disable_tools = '-DBUILD_TOOLS=OFF'
+
+CMakeBuilder('marisa',
+    js=[disable_tools],
+    ios=[disable_tools]
+).exec()

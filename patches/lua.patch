@@ -1,0 +1,12 @@
+diff --git a/luaconf.h b/luaconf.h
+index 33bb580d..2d1bf2fd 100644
+--- a/luaconf.h
++++ b/luaconf.h
+@@ -72,7 +72,6 @@
+ 
+ #if defined(LUA_USE_IOS)
+ #define LUA_USE_POSIX
+-#define LUA_USE_DLOPEN
+ #endif
+ 
+ 

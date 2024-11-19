@@ -6,4 +6,4 @@ CMakeBuilder('zstd', [
     '-DZSTD_BUILD_TESTS=OFF',
     '-DZSTD_BUILD_SHARED=OFF'
 ], js=['-DZSTD_MULTITHREAD_SUPPORT=OFF'],
-src='build/cmake', build='build-zstd').exec()
+src='build/cmake').exec()

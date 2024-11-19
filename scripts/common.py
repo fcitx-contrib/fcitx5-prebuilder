@@ -1,5 +1,6 @@
 import os
 import platform
+import subprocess
 import sys
 from typing import Callable, Literal, cast
 
@@ -61,9 +62,25 @@ def cache(url: str):
     ])
 
 
+def get_platform_cflags() -> str:
+    if PLATFORM == 'macos':
+        return f'-mmacosx-version-min={MACOS_VERSION}'
+    if PLATFORM == 'ios':
+        if IOS_PLATFORM == 'SIMULATOR':
+            arch = f'-arch {platform.machine()}'
+            sdk = f'-isysroot {subprocess.check_output("xcrun --sdk iphonesimulator --show-sdk-path", shell=True, text=True).strip()}'
+            version = f'-mios-simulator-version-min={IOS_VERSION}'
+        else:
+            arch = '-arch arm64'
+            sdk = f'-isysroot {subprocess.check_output("xcrun --sdk iphoneos --show-sdk-path", shell=True, text=True).strip()}'
+            version = f'-miphoneos-version-min={IOS_VERSION}'
+        return ' '.join((arch, sdk, version))
+    return ''
+
+
 class Builder:
-    def __init__(self, name: str, options: list[str] | None=None, js: list[str] | None=None, ios: list[str] | None=None,
-                 src='.', build='build', pre_package: Callable[[], None] | None=None):
+    def __init__(self, name: str, options: list[str] | None=None, js: list[str] | None=None,
+                 ios: list[str] | None=None, src='.'):
         self.name = name
         # /path/to/build/ios-arm64/librime
         self.dest_dir = f'{ROOT}/build/{TARGET}/{self.name}'
@@ -71,7 +88,6 @@ class Builder:
         self.src = src
         self.build_ = f'build/{TARGET}'
         self.needs_extract = any(name in deps for deps in dag.values())
-        self.pre_package = pre_package
         self.js = js or []
         self.ios = ios or []
 
@@ -84,18 +100,25 @@ class Builder:
     def install(self):
         pass
 
-    def package(self):
+    def pre_package(self):
         pass
+
+    def package(self):
+        os.chdir(f'{self.dest_dir}{INSTALL_PREFIX}')
+        ensure('tar', ['cjf', f'{self.dest_dir}{POSTFIX}.tar.bz2', '*'])
 
     def extract(self):
-        pass
+        directory = f'build/{USR}'
+        os.chdir(ROOT)
+        ensure('mkdir', ['-p', directory])
+        ensure('tar', ['xjf', f'{self.dest_dir}{POSTFIX}.tar.bz2', '-C', directory])
 
     def exec(self):
+        os.chdir(f'{ROOT}/{self.name}')
         self.configure()
         self.build()
         self.install()
-        if self.pre_package:
-            self.pre_package()
+        self.pre_package()
         self.package()
         if self.needs_extract:
             self.extract()
@@ -104,7 +127,6 @@ class Builder:
 class CMakeBuilder(Builder):
     def configure(self):
         os.environ['PKG_CONFIG_PATH'] = f'{ROOT}/build/{USR}/lib/pkgconfig'
-        os.chdir(f'{ROOT}/{self.name}')
         command = ['emcmake'] if PLATFORM == 'js' else []
         command += [
             'cmake',
@@ -151,13 +173,3 @@ class CMakeBuilder(Builder):
     def install(self):
         os.environ['DESTDIR'] = self.dest_dir
         ensure('cmake', ['--install', self.build_])
-
-    def package(self):
-        os.chdir(f'{self.dest_dir}{INSTALL_PREFIX}')
-        ensure('tar', ['cjf', f'{self.dest_dir}{POSTFIX}.tar.bz2', '*'])
-
-    def extract(self):
-        directory = f'build/{USR}'
-        os.chdir(ROOT)
-        ensure('mkdir', ['-p', directory])
-        ensure('tar', ['xjf', f'{self.dest_dir}{POSTFIX}.tar.bz2', '-C', directory])

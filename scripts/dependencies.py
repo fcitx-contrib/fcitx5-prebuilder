@@ -1,5 +1,5 @@
 dag = {
-    'librime': ['boost', 'glog', 'leveldb', 'marisa', 'opencc', 'yaml-cpp'],
+    'librime': ['boost', 'glog', 'leveldb', 'lua', 'marisa', 'opencc', 'yaml-cpp'],
     'opencc': ['marisa'],
 }
 

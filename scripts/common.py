@@ -62,7 +62,8 @@ def cache(url: str):
 
 
 class Builder:
-    def __init__(self, name: str, options: list[str] | None=None, src='.', build='build', pre_package: Callable[[], None] | None=None):
+    def __init__(self, name: str, options: list[str] | None=None, js: list[str] | None=None,
+                 src='.', build='build', pre_package: Callable[[], None] | None=None):
         self.name = name
         # /path/to/build/ios-arm64/librime
         self.dest_dir = f'{ROOT}/build/{TARGET}/{self.name}'
@@ -71,6 +72,7 @@ class Builder:
         self.build_ = f'build/{TARGET}'
         self.needs_extract = any(name in deps for deps in dag.values())
         self.pre_package = pre_package
+        self.js = js or []
 
     def configure(self):
         pass
@@ -128,6 +130,7 @@ class CMakeBuilder(Builder):
                 '-DCMAKE_C_FLAGS=-fPIC',
                 '-DCMAKE_CXX_FLAGS=-fPIC'
             ]
+            command += self.js
 
         if PLATFORM in ('macos', 'ios'):
             command.append(f'-DCMAKE_OSX_DEPLOYMENT_TARGET={PLATFORM_VERSION[PLATFORM]}')

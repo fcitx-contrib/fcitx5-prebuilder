@@ -1,0 +1,39 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index f8285b8..de10f5a 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -264,7 +264,7 @@ endif(BUILD_SHARED_LIBS)
+ if(HAVE_CLANG_THREAD_SAFETY)
+   target_compile_options(leveldb
+     PUBLIC
+-      -Werror -Wthread-safety)
++      -Wthread-safety)
+ endif(HAVE_CLANG_THREAD_SAFETY)
+ 
+ if(HAVE_CRC32C)
+@@ -281,11 +281,6 @@ endif(HAVE_TCMALLOC)
+ find_package(Threads REQUIRED)
+ target_link_libraries(leveldb Threads::Threads)
+ 
+-add_executable(leveldbutil
+-  "db/leveldbutil.cc"
+-)
+-target_link_libraries(leveldbutil leveldb)
+-
+ if(LEVELDB_BUILD_TESTS)
+   enable_testing()
+ 
+diff --git a/util/env_posix.cc b/util/env_posix.cc
+index d84cd1e..88e5fd1 100644
+--- a/util/env_posix.cc
++++ b/util/env_posix.cc
+@@ -781,6 +781,9 @@ PosixEnv::PosixEnv()
+ void PosixEnv::Schedule(
+     void (*background_work_function)(void* background_work_arg),
+     void* background_work_arg) {
++#ifdef __EMSCRIPTEN__
++  return background_work_function(background_work_arg);
++#endif
+   background_work_mutex_.Lock();
+ 
+   // Start the background thread, if we haven't done so already.

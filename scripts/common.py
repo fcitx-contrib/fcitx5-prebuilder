@@ -39,11 +39,13 @@ def patch(project: str, src: str | None = None, dst: str | None = None):
             f'{project}/{dst}'
         ])
     else:
-        ensure('git', [
-            'apply',
-            f'--directory={project}',
-            f'patches/{project}.patch'
-        ])
+        os.chdir(project)
+        if os.system(f'git diff --ignore-submodules --exit-code') == 0:
+            ensure('git', [
+                'apply',
+                f'{ROOT}/patches/{project}.patch'
+            ])
+        os.chdir(ROOT)
 
 
 def cache(url: str):

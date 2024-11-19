@@ -112,9 +112,19 @@ class CMakeBuilder(Builder):
         ]
 
         if PLATFORM == 'ios':
+            # IOS_PLATFORM is recognized by ios.cmake.
             command += [
                 f'-DCMAKE_TOOLCHAIN_FILE={ROOT}/ios.cmake',
                 f'-DIOS_PLATFORM={IOS_PLATFORM}'
+            ]
+        else: # Ninja
+            command.append('-DCMAKE_BUILD_TYPE=Release')
+
+        if PLATFORM == 'js':
+            # emscripten defaults to full-static libs but we want plugins based on these dependencies to be dynamic.
+            command += [
+                '-DCMAKE_C_FLAGS=-fPIC',
+                '-DCMAKE_CXX_FLAGS=-fPIC'
             ]
 
         if PLATFORM in ('macos', 'ios'):

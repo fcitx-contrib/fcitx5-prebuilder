@@ -1,6 +1,6 @@
 .DS_Store
 build
 __pycache__
-boost-*
+/boost*
 *.bz2
 *.xz

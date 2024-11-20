@@ -18,6 +18,8 @@ class LuaBuilder(Builder):
             cflags += ' -DLUA_USE_MACOSX'
         elif PLATFORM == 'ios':
             cflags += ' -DLUA_USE_IOS'
+        elif PLATFORM == 'js':
+            cflags += ' -fPIC'
 
         command += [
             'make',

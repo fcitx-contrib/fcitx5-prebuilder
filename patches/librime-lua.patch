@@ -1,0 +1,46 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index 42f2ebb..7201923 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -1,40 +1,5 @@
+ set(LUA_VERSION "lua" CACHE STRING "lua version")
+-if(NOT EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/thirdparty/lua5.4/lua.h")
+-  find_package(PkgConfig)
+-  if(PkgConfig_FOUND)
+-    foreach(pkg ${LUA_VERSION} lua54 lua53 lua52 luajit lua51)
+-      pkg_check_modules(LUA IMPORTED_TARGET GLOBAL ${pkg})
+-      if(LUA_FOUND)
+-	break()
+-      endif()
+-    endforeach()
+-  endif()
+-  if(LUA_FOUND)
+-    set(LUA_TARGET PkgConfig::LUA)
+-    include_directories(${LUA_INCLUDE_DIRS})
+-  else()
+-    message(FATAL_ERROR "Lua not found, consider using `bash action-install.sh` to download.")
+-  endif()
+-else()
+-  message(STATUS "Using in-tree lua source")
+-  include_directories(thirdparty/lua5.4)
+-  aux_source_directory(thirdparty/lua5.4 LUA_SRC)
+-  add_definitions(-DLUA_COMPAT_5_3)
+-  if(WIN32)
+-    set_property(SOURCE ${LUA_SRC} PROPERTY COMPILE_DEFINITIONS LUA_BUILD_AS_DLL)
+-  else()
+-    set_property(SOURCE ${LUA_SRC} PROPERTY COMPILE_DEFINITIONS LUA_USE_POSIX;LUA_USE_DLOPEN)
+-    execute_process(
+-      COMMAND ${CMAKE_C_COMPILER} -print-multiarch
+-      OUTPUT_VARIABLE multiarch
+-      ERROR_QUIET)
+-    if(multiarch)
+-      string(REGEX REPLACE "[\r\n]" "" multiarch ${multiarch})
+-      add_definitions(-DLUA_MULTIARCH=\"${multiarch}\")
+-      message(STATUS "with multiarch: ${multiarch}")
+-    endif()
+-  endif()
+-endif()
++include_directories(${LUA_INCLUDE_DIR})
+ 
+ aux_source_directory(src RIME_LUA_SRC)
+ aux_source_directory(src/lib RIME_LUA_LIB_SRC)

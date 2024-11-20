@@ -1,0 +1,259 @@
+diff --git a/src/CMakeLists.txt b/src/CMakeLists.txt
+index 16082869..40bf2301 100644
+--- a/src/CMakeLists.txt
++++ b/src/CMakeLists.txt
+@@ -166,6 +166,16 @@ if(BUILD_SHARED_LIBS)
+ else()
+   add_library(rime-static STATIC ${rime_src})
+   target_link_libraries(rime-static ${rime_deps})
++  if (EMSCRIPTEN or (APPLE AND NOT IOS))
++    target_compile_definitions(rime-static -DUSE_WEBVIEW)
++    target_link_options(rime-static PUBLIC
++      LINKER:-U,_f5m_is_linear_layout
++      LINKER:-U,_f5m_is_vertical_lr
++      LINKER:-U,_f5m_is_vertical_rl
++    )
++  endif()
++  target_compile_options(rime-static PRIVATE "-ffile-prefix-map=${CMAKE_SOURCE_DIR}=.")
++  target_compile_definitions(rime-static PRIVATE BOOST_DISABLE_CURRENT_LOCATION)
+   set_target_properties(rime-static PROPERTIES
+     OUTPUT_NAME "rime" PREFIX "lib"
+     ARCHIVE_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR}/lib)
+diff --git a/src/rime/engine.cc b/src/rime/engine.cc
+index 07aa6b7d..7360e0b5 100644
+--- a/src/rime/engine.cc
++++ b/src/rime/engine.cc
+@@ -52,7 +52,6 @@ class ConcreteEngine : public Engine {
+   vector<of<Filter>> filters_;
+   vector<of<Formatter>> formatters_;
+   vector<of<Processor>> post_processors_;
+-  an<Switcher> switcher_;
+ };
+ 
+ // implementations
+diff --git a/src/rime/engine.h b/src/rime/engine.h
+index 2e1c8b81..94a6b500 100644
+--- a/src/rime/engine.h
++++ b/src/rime/engine.h
+@@ -16,6 +16,7 @@ namespace rime {
+ class KeyEvent;
+ class Schema;
+ class Context;
++class Switcher;
+ 
+ class Engine : public Messenger {
+  public:
+@@ -35,6 +36,7 @@ class Engine : public Messenger {
+   void set_active_engine(Engine* engine = nullptr) { active_engine_ = engine; }
+ 
+   RIME_API static Engine* Create();
++  an<Switcher> switcher_;
+ 
+  protected:
+   Engine();
+diff --git a/src/rime/gear/navigator.cc b/src/rime/gear/navigator.cc
+index c3a63621..4d08745c 100644
+--- a/src/rime/gear/navigator.cc
++++ b/src/rime/gear/navigator.cc
+@@ -15,6 +15,9 @@
+ #include <rime/gear/navigator.h>
+ #include <rime/gear/translator_commons.h>
+ 
++extern bool f5m_is_vertical_lr;
++extern bool f5m_is_vertical_rl;
++
+ namespace rime {
+ 
+ static Navigator::ActionDef navigation_actions[] = {
+@@ -72,7 +75,7 @@ ProcessResult Navigator::ProcessKeyEvent(const KeyEvent& key_event) {
+   if (!ctx->IsComposing())
+     return kNoop;
+   TextOrientation text_orientation =
+-      ctx->get_option("_vertical") ? Vertical : Horizontal;
++      (f5m_is_vertical_lr || f5m_is_vertical_rl) ? Vertical : Horizontal;
+   return KeyBindingProcessor::ProcessKeyEvent(key_event, ctx, text_orientation,
+                                               FallbackOptions::All);
+ }
+diff --git a/src/rime/gear/selector.cc b/src/rime/gear/selector.cc
+index 06874103..72af820f 100644
+--- a/src/rime/gear/selector.cc
++++ b/src/rime/gear/selector.cc
+@@ -14,6 +14,16 @@
+ #include <rime/schema.h>
+ #include <rime/gear/selector.h>
+ 
++#ifdef USE_WEBVIEW
++extern bool f5m_is_vertical_lr;
++extern bool f5m_is_vertical_rl;
++extern bool f5m_is_linear_layout;
++#else
++bool f5m_is_vertical_lr = false;
++bool f5m_is_vertical_rl = false;
++bool f5m_is_linear_layout = true;
++#endif
++
+ namespace rime {
+ 
+ static Selector::ActionDef selector_actions[] = {
+@@ -64,7 +74,7 @@ Selector::Selector(const Ticket& ticket)
+     keymap.Bind({XK_KP_End, 0}, &Selector::End);
+   }
+   {
+-    auto& keymap = get_keymap(Vertical | Stacked);
++    auto& keymap = get_keymap(VerticalRL | Stacked);
+     keymap.Bind({XK_Right, 0}, &Selector::PreviousCandidate);
+     keymap.Bind({XK_KP_Right, 0}, &Selector::PreviousCandidate);
+     keymap.Bind({XK_Left, 0}, &Selector::NextCandidate);
+@@ -79,7 +89,7 @@ Selector::Selector(const Ticket& ticket)
+     keymap.Bind({XK_KP_End, 0}, &Selector::End);
+   }
+   {
+-    auto& keymap = get_keymap(Vertical | Linear);
++    auto& keymap = get_keymap(VerticalRL | Linear);
+     keymap.Bind({XK_Up, 0}, &Selector::PreviousCandidate);
+     keymap.Bind({XK_KP_Up, 0}, &Selector::PreviousCandidate);
+     keymap.Bind({XK_Down, 0}, &Selector::NextCandidate);
+@@ -97,12 +107,46 @@ Selector::Selector(const Ticket& ticket)
+     keymap.Bind({XK_End, 0}, &Selector::End);
+     keymap.Bind({XK_KP_End, 0}, &Selector::End);
+   }
++  {
++    auto& keymap = get_keymap(VerticalLR | Stacked);
++    keymap.Bind({XK_Right, 0}, &Selector::NextCandidate);
++    keymap.Bind({XK_KP_Right, 0}, &Selector::NextCandidate);
++    keymap.Bind({XK_Left, 0}, &Selector::PreviousCandidate);
++    keymap.Bind({XK_KP_Left, 0}, &Selector::PreviousCandidate);
++    keymap.Bind({XK_Prior, 0}, &Selector::PreviousPage);
++    keymap.Bind({XK_KP_Prior, 0}, &Selector::PreviousPage);
++    keymap.Bind({XK_Next, 0}, &Selector::NextPage);
++    keymap.Bind({XK_KP_Next, 0}, &Selector::NextPage);
++    keymap.Bind({XK_Home, 0}, &Selector::Home);
++    keymap.Bind({XK_KP_Home, 0}, &Selector::Home);
++    keymap.Bind({XK_End, 0}, &Selector::End);
++    keymap.Bind({XK_KP_End, 0}, &Selector::End);
++  }
++  {
++    auto& keymap = get_keymap(VerticalLR | Linear);
++    keymap.Bind({XK_Up, 0}, &Selector::PreviousCandidate);
++    keymap.Bind({XK_KP_Up, 0}, &Selector::PreviousCandidate);
++    keymap.Bind({XK_Down, 0}, &Selector::NextCandidate);
++    keymap.Bind({XK_KP_Down, 0}, &Selector::NextCandidate);
++    keymap.Bind({XK_Right, 0}, &Selector::NextPage);
++    keymap.Bind({XK_KP_Right, 0}, &Selector::NextPage);
++    keymap.Bind({XK_Left, 0}, &Selector::PreviousPage);
++    keymap.Bind({XK_KP_Left, 0}, &Selector::PreviousPage);
++    keymap.Bind({XK_Prior, 0}, &Selector::PreviousPage);
++    keymap.Bind({XK_KP_Prior, 0}, &Selector::PreviousPage);
++    keymap.Bind({XK_Next, 0}, &Selector::NextPage);
++    keymap.Bind({XK_KP_Next, 0}, &Selector::NextPage);
++    keymap.Bind({XK_Home, 0}, &Selector::Home);
++    keymap.Bind({XK_KP_Home, 0}, &Selector::Home);
++    keymap.Bind({XK_End, 0}, &Selector::End);
++    keymap.Bind({XK_KP_End, 0}, &Selector::End);
++  }
+ 
+   Config* config = engine_->schema()->config();
+   LoadConfig(config, "selector", Horizontal | Stacked);
+   LoadConfig(config, "selector/linear", Horizontal | Linear);
+-  LoadConfig(config, "selector/vertical", Vertical | Stacked);
+-  LoadConfig(config, "selector/vertical/linear", Vertical | Linear);
++  LoadConfig(config, "selector/vertical", VerticalRL | Stacked);
++  LoadConfig(config, "selector/vertical/linear", VerticalRL | Linear);
+ }
+ 
+ inline static bool is_vertical_text(Context* ctx) {
+@@ -126,9 +170,11 @@ ProcessResult Selector::ProcessKeyEvent(const KeyEvent& key_event) {
+     return kNoop;
+ 
+   TextOrientation text_orientation =
+-      is_vertical_text(ctx) ? Vertical : Horizontal;
++      f5m_is_vertical_rl ? VerticalRL :
++      f5m_is_vertical_lr ? VerticalLR :
++      Horizontal;
+   CandidateListLayout candidate_list_layout =
+-      is_linear_layout(ctx) ? Linear : Stacked;
++      f5m_is_linear_layout ? Linear : Stacked;
+   auto result = KeyBindingProcessor::ProcessKeyEvent(
+       key_event, ctx, text_orientation | candidate_list_layout,
+       FallbackOptions::None);
+@@ -197,7 +243,7 @@ inline static bool caret_at_end_of_input(Context* ctx) {
+ }
+ 
+ bool Selector::PreviousCandidate(Context* ctx) {
+-  if (is_linear_layout(ctx) && !caret_at_end_of_input(ctx)) {
++  if (f5m_is_linear_layout && !caret_at_end_of_input(ctx)) {
+     // let navigator handle the arrow key.
+     return false;
+   }
+@@ -207,7 +253,7 @@ bool Selector::PreviousCandidate(Context* ctx) {
+   int index = comp.back().selected_index;
+   if (index <= 0) {
+     // in case of linear layout, fall back to navigator
+-    return !is_linear_layout(ctx);
++    return !f5m_is_linear_layout;
+   }
+   comp.back().selected_index = index - 1;
+   comp.back().tags.insert("paging");
+diff --git a/src/rime/gear/selector.h b/src/rime/gear/selector.h
+index 5e4bfce0..e88aace0 100644
+--- a/src/rime/gear/selector.h
++++ b/src/rime/gear/selector.h
+@@ -14,11 +14,12 @@
+ 
+ namespace rime {
+ 
+-class Selector : public Processor, public KeyBindingProcessor<Selector, 4> {
++class Selector : public Processor, public KeyBindingProcessor<Selector, 8> {
+  public:
+   enum TextOrientation {
+     Horizontal = 0,
+-    Vertical = 1,
++    VerticalRL = 1,
++    VerticalLR = 4,
+   };
+   enum CandidateListLayout {
+     Stacked = 0,
+diff --git a/src/rime/service.h b/src/rime/service.h
+index 2b3111af..95ca87dc 100644
+--- a/src/rime/service.h
++++ b/src/rime/service.h
+@@ -44,11 +44,11 @@ class Session {
+   Schema* schema() const;
+   time_t last_active_time() const { return last_active_time_; }
+   const string& commit_text() const { return commit_text_; }
++  the<Engine> engine_;
+ 
+  private:
+   void OnCommit(const string& commit_text);
+ 
+-  the<Engine> engine_;
+   time_t last_active_time_ = 0;
+   string commit_text_;
+ };
+diff --git a/src/rime_api_impl.h b/src/rime_api_impl.h
+index 7749ce98..b0200a67 100644
+--- a/src/rime_api_impl.h
++++ b/src/rime_api_impl.h
+@@ -15,6 +15,8 @@
+ #include <rime/setup.h>
+ #include <rime/signature.h>
+ #include <rime/switches.h>
++#include <rime/engine.h>
++#include <rime/switcher.h>
+ 
+ #include "rime_api.h"
+ 
+@@ -426,6 +428,13 @@ RIME_DEPRECATED void RimeSetOption(RimeSessionId session_id,
+   if (!ctx)
+     return;
+   ctx->set_option(option, !!value);
++  auto engine = session->engine_.get();
++  auto switcher = engine->switcher_;
++  if (switcher->IsAutoSave(option)) {
++    if (Config* user_config = switcher->user_config()) {
++      user_config->SetBool("var/option/" + std::string(option), value);
++    }
++  }
+ }
+ 
+ RIME_DEPRECATED Bool RimeGetOption(RimeSessionId session_id,

@@ -2,7 +2,7 @@ import os
 import platform
 import subprocess
 import sys
-from typing import Callable, Literal, cast
+from typing import Literal, cast
 
 from dependencies import dag
 

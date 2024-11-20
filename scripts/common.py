@@ -6,7 +6,7 @@ from typing import Literal, cast
 
 from dependencies import dag
 
-MACOS_VERSION = 13
+MACOS_VERSION = 13 # Also need to update meson-macos.ini
 IOS_VERSION = 15
 
 PLATFORM_VERSION = {
@@ -175,11 +175,32 @@ class CMakeBuilder(Builder):
         ensure('cmake', ['--install', self.build_])
 
 
+class MesonBuilder(Builder):
+    def configure(self):
+        os.chdir(f'{ROOT}/{self.name}')
+        ensure('meson', [
+            'setup',
+            self.build_,
+            f'--cross-file={ROOT}/scripts/meson-cross-js.ini' if PLATFORM == 'js' else f'--native-file={ROOT}/scripts/meson-macos.ini',
+            '--buildtype=release',
+            f'--prefix={INSTALL_PREFIX}',
+            '--default-library=static',
+            *self.options
+        ])
+
+    def build(self):
+        ensure('ninja', ['-C', self.build_])
+
+    def install(self):
+        os.environ['DESTDIR'] = self.dest_dir
+        ensure('ninja', ['-C', self.build_, 'install'])
+
+
 class MakeBuilder(Builder):
     def configure(self):
         ensure('./configure', [
             '-C',
-            '--prefix=/usr',
+            f'--prefix={INSTALL_PREFIX}',
             *self.options
         ])
 

@@ -173,3 +173,19 @@ class CMakeBuilder(Builder):
     def install(self):
         os.environ['DESTDIR'] = self.dest_dir
         ensure('cmake', ['--install', self.build_])
+
+
+class MakeBuilder(Builder):
+    def configure(self):
+        ensure('./configure', [
+            '-C',
+            '--prefix=/usr',
+            *self.options
+        ])
+
+    def build(self):
+        ensure('make', ['-j8'])
+
+    def install(self):
+        os.environ['DESTDIR'] = self.dest_dir
+        ensure('make', ['install'])

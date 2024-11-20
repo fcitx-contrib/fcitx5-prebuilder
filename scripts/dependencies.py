@@ -50,7 +50,7 @@ ios = [
 
 js = [
     'boost',
-    'extra-cmake-modules',
+    'ecm',
     'fmt',
     'glog',
     'iso-codes',

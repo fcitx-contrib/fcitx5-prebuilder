@@ -88,3 +88,6 @@
 [submodule "zstd"]
 	path = zstd
 	url = https://github.com/facebook/zstd
+[submodule "ecm"]
+	path = ecm
+	url = https://github.com/KDE/extra-cmake-modules

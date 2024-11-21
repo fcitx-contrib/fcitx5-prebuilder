@@ -4,6 +4,9 @@
 [submodule "default-icon-theme"]
 	path = default-icon-theme
 	url = https://gitlab.freedesktop.org/xdg/default-icon-theme.git
+[submodule "ecm"]
+	path = ecm
+	url = https://github.com/KDE/extra-cmake-modules
 [submodule "fmt"]
 	path = fmt
 	url = https://github.com/fmtlib/fmt
@@ -88,6 +91,3 @@
 [submodule "zstd"]
 	path = zstd
 	url = https://github.com/facebook/zstd
-[submodule "ecm"]
-	path = ecm
-	url = https://github.com/KDE/extra-cmake-modules

@@ -1,0 +1,51 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index a6cd67b..2a324c6 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -1,4 +1,4 @@
+-cmake_minimum_required(VERSION 3.24.0)
++cmake_minimum_required(VERSION 3.22.1)
+ project(libchewing LANGUAGES C)
+ 
+ set(CMAKE_PROJECT_VERSION 0.8.5)
+@@ -216,7 +216,6 @@ if(WITH_RUST)
+     list(APPEND ALL_INC ${INC_DIR}/chewing_rs.h)
+ endif()
+ 
+-add_subdirectory(doc)
+ add_subdirectory(data)
+ if(BUILD_TESTING)
+     add_subdirectory(tests)
+@@ -228,14 +227,20 @@ add_library(common OBJECT
+ 
+     src/porting_layer/src/asprintf.c
+ )
++target_compile_options(common PRIVATE
++    "-ffile-prefix-map=${CMAKE_SOURCE_DIR}=."
++)
+ target_compile_definitions(common PRIVATE
+-    CHEWING_DATADIR=\"${CMAKE_INSTALL_FULL_DATADIR}/libchewing\"
++    CHEWING_DATADIR=\"./libchewing\"
+ )
+ 
+ add_library(libchewing ${ALL_INC} src/chewing.c)
+ set_target_properties(libchewing PROPERTIES LINKER_LANGUAGE C)
++target_compile_options(libchewing PRIVATE
++    "-ffile-prefix-map=${CMAKE_SOURCE_DIR}=."
++)
+ target_compile_definitions(libchewing PRIVATE
+-    CHEWING_DATADIR=\"${CMAKE_INSTALL_FULL_DATADIR}/libchewing\"
++    CHEWING_DATADIR=\"./libchewing\"
+ )
+ if(NOT WITH_RUST)
+     target_sources(common PRIVATE
+@@ -288,6 +293,9 @@ if(NOT WITH_RUST)
+             ${SRC_DIR}/userphrase-hash.c
+         )
+     endif()
++    target_compile_options(userphrase PRIVATE
++        "-ffile-prefix-map=${CMAKE_SOURCE_DIR}=."
++    )
+     target_link_libraries(libchewing
+         PRIVATE common
+         PRIVATE userphrase)

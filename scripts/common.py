@@ -177,7 +177,6 @@ class CMakeBuilder(Builder):
 
 class MesonBuilder(Builder):
     def configure(self):
-        os.chdir(f'{ROOT}/{self.name}')
         ensure('meson', [
             'setup',
             self.build_,

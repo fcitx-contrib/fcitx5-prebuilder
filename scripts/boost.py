@@ -1,5 +1,5 @@
 import os
-from common import CMakeBuilder, cache, ensure
+from common import CMakeBuilder, PLATFORM, cache, ensure
 
 version = '1.86.0'
 
@@ -35,8 +35,13 @@ ensure('sed', [
 ])
 ensure('rm ', ['-f', file + '.bak'])
 
+libs = "algorithm;bimap;container;crc;interprocess;iostreams;multi_index;ptr_container;scope_exit;signals2;uuid"
+
+if PLATFORM == 'macos':
+    libs += ';beast'
+
 CMakeBuilder('boost', [
-    '-DBOOST_INCLUDE_LIBRARIES="algorithm;bimap;container;crc;interprocess;iostreams;multi_index;ptr_container;scope_exit;signals2;uuid"',
+    f'-DBOOST_INCLUDE_LIBRARIES="{libs}"',
     '-DBOOST_IOSTREAMS_ENABLE_BZIP2=Off',
     '-DBOOST_IOSTREAMS_ENABLE_ZLIB=Off',
     '-DBOOST_IOSTREAMS_ENABLE_LZMA=Off',

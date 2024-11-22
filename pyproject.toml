@@ -1,2 +1,2 @@
-[tool.ruff]
+[tool.ruff.lint]
 ignore = ["E501"] # unlimited line length

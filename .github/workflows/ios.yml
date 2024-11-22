@@ -24,7 +24,7 @@ jobs:
           python-version: '3.12'
 
       - name: Build
-        run: python scripts/build.py ios
+        run: python scripts/build.py ios ${{ matrix.platform }}
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4

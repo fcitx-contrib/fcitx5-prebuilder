@@ -1,13 +1,13 @@
 diff --git a/src/CMakeLists.txt b/src/CMakeLists.txt
-index 16082869..40bf2301 100644
+index 16082869..fd2ee87f 100644
 --- a/src/CMakeLists.txt
 +++ b/src/CMakeLists.txt
 @@ -166,6 +166,16 @@ if(BUILD_SHARED_LIBS)
  else()
    add_library(rime-static STATIC ${rime_src})
    target_link_libraries(rime-static ${rime_deps})
-+  if (EMSCRIPTEN or (APPLE AND NOT IOS))
-+    target_compile_definitions(rime-static -DUSE_WEBVIEW)
++  if (EMSCRIPTEN OR (APPLE AND NOT IOS))
++    target_compile_definitions(rime-static PRIVATE -DUSE_WEBVIEW)
 +    target_link_options(rime-static PUBLIC
 +      LINKER:-U,_f5m_is_linear_layout
 +      LINKER:-U,_f5m_is_vertical_lr

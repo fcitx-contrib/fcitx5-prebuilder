@@ -10,6 +10,8 @@ def sort_projects(projects: list[str]) -> list[str]:
     adjacency_list = defaultdict(list)
 
     for project, deps in dag.items():
+        if project not in projects:
+            continue
         for dep in deps:
             adjacency_list[dep].append(project)
 

@@ -20,7 +20,7 @@ jobs:
         run: pip install ruff
 
       - name: Lint
-        run: ruff scripts/*.py
+        run: ruff scripts
 
   macos:
     needs: lint

@@ -5,7 +5,7 @@ on:
 
 jobs:
   build:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     env:
       EMSCRIPTEN_VERSION: '3.1.71'
     steps:
@@ -44,3 +44,7 @@ jobs:
           title: "JS Build"
           files: |
             build/js/*.tar.bz2
+
+      - name: Setup tmate session
+        if: ${{ failure() }}
+        uses: mxschmitt/action-tmate@v3

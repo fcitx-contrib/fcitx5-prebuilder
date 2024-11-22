@@ -55,6 +55,7 @@ jobs:
       - name: Download artifact
         uses: actions/download-artifact@v4
         with:
+          pattern: artifact-macos*
           merge-multiple: true
 
       - name: Release

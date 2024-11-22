@@ -1,0 +1,78 @@
+diff --git a/Makefile.am b/Makefile.am
+index c5ae55c..562caf8 100644
+--- a/Makefile.am
++++ b/Makefile.am
+@@ -14,7 +14,7 @@
+ # You should have received a copy of the GNU General Public License
+ # along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ 
+-SUBDIRS = libskk rules tools tests po
++SUBDIRS = libskk rules po
+ DISTCHECK_CONFIGURE_FLAGS = --enable-docs --enable-fep
+ ACLOCAL_AMFLAGS = -I m4
+ 
+@@ -22,7 +22,7 @@ if HAVE_VALADOC
+ SUBDIRS += docs
+ endif
+ 
+-DIST_SUBDIRS = libskk rules tools tests docs po
++DIST_SUBDIRS = libskk rules po
+ 
+ GITIGNOREFILES =				\
+ 	ABOUT-NLS				\
+diff --git a/configure.ac b/configure.ac
+index e78082d..799419f 100644
+--- a/configure.ac
++++ b/configure.ac
+@@ -87,7 +87,6 @@ AC_SUBST(LIBSKK_CFLAGS)
+ LIBSKK_LIBS="$GIO_LIBS $GEE_LIBS $JSON_GLIB_LIBS $XKBCOMMON_LIBS"
+ AC_SUBST(LIBSKK_LIBS)
+ 
+-GOBJECT_INTROSPECTION_CHECK([0.9.0])
+ 
+ AM_PROG_VALAC([0.14.0])
+ AC_SUBST(VALAC)
+@@ -159,8 +158,5 @@ AC_CONFIG_FILES([Makefile
+ libskk/Makefile
+ libskk/libskk.pc
+ rules/Makefile
+-tools/Makefile
+-tests/Makefile
+-docs/Makefile
+ po/Makefile.in])
+ AC_OUTPUT
+diff --git a/libskk/Makefile.am b/libskk/Makefile.am
+index c96dc1f..44c460f 100644
+--- a/libskk/Makefile.am
++++ b/libskk/Makefile.am
+@@ -79,17 +79,6 @@ libskk_la_SOURCES =				\
+ 	completion.vala			\
+ 	$(NULL)
+ 
+-if HAVE_INTROSPECTION
+-girdir = $(datadir)/gir-1.0
+-gir_DATA = Skk-@SKK_API_VERSION@.gir
+-
+-typelibdir = $(libdir)/girepository-1.0
+-typelib_DATA = Skk-@SKK_API_VERSION@.typelib
+-
+-Skk-@SKK_API_VERSION@.typelib: Skk-@SKK_API_VERSION@.gir
+-	@INTROSPECTION_COMPILER@ --shared-library=libskk -o $@ $^
+-endif
+-
+ Skk-@SKK_API_VERSION@.gir skk-internals-@SKK_API_VERSION@.vapi skk-@SKK_API_VERSION@.vapi: libskk.la
+ 
+ GITIGNOREFILES =				\
+diff --git a/libskk/libskk.pc.in b/libskk/libskk.pc.in
+index 20e6bef..2cb1ab1 100644
+--- a/libskk/libskk.pc.in
++++ b/libskk/libskk.pc.in
+@@ -24,6 +24,6 @@ includedir=@includedir@
+ Name: libskk
+ Description: a library to deal with Japanese kana-to-kanji conversion method
+ Version: @VERSION@
+-Requires: gobject-2.0 gio-2.0 gee-0.8
++Requires: gobject-2.0 gio-2.0 gee-0.8 json-glib-1.0 xkbcommon
+ Libs: -L${libdir} -lskk
+-Cflags: -I${includedir}/skk-@SKK_API_VERSION@
++Cflags: -I${includedir}/libskk

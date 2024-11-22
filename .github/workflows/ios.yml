@@ -1,0 +1,59 @@
+name: iOS build
+
+on:
+  workflow_call:
+
+jobs:
+  build:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - { os: macos-15, postfix: '', platform: os }
+          - { os: macos-15, postfix: -arm64, platform: simulator }
+          - { os: macos-13, postfix: -x86_64,  platform: simulator }
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Build
+        run: python scripts/build.py ios ${{ matrix.platform }}
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: artifact-ios${{ matrix.postfix }}
+          path: |
+            build/ios${{ matrix.postfix }}/*.tar.bz2
+
+      - name: Setup tmate session
+        if: ${{ failure() }}
+        uses: mxschmitt/action-tmate@v3
+
+  release:
+    needs: build
+    if: ${{ github.ref == 'refs/heads/master' }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download artifact
+        uses: actions/download-artifact@v4
+        with:
+          pattern: artifact-ios*
+          merge-multiple: true
+
+      - name: Release
+        uses: 'marvinpinto/action-automatic-releases@latest'
+        with:
+          repo_token: ${{ secrets.GITHUB_TOKEN }}
+          automatic_release_tag: ios
+          prerelease: true
+          title: "iOS Build"
+          files: |
+            *.tar.bz2

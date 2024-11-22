@@ -1,0 +1,69 @@
+name: macOS build
+
+on:
+  workflow_call:
+
+jobs:
+  build:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [macos-15, macos-13]
+        include:
+          - { os: macos-15, arch: arm64 }
+          - { os: macos-13, arch: x86_64 }
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install dependencies
+        env:
+          HOMEBREW_NO_INSTALLED_DEPENDENTS_CHECK: 1
+        run: |
+          brew install \
+            extra-cmake-modules \
+            autoconf automake libtool autoconf-archive \
+            byacc vala \
+            ninja meson || true # ignore brew link python error
+
+      - name: Build
+        run: python scripts/build.py macos
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: artifact-macos-${{ matrix.arch }}
+          path: |
+            build/macos-${{ matrix.arch }}/*.tar.bz2
+
+      - name: Setup tmate session
+        if: ${{ failure() }}
+        uses: mxschmitt/action-tmate@v3
+
+  release:
+    needs: build
+    if: ${{ github.ref == 'refs/heads/master' }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download artifact
+        uses: actions/download-artifact@v4
+        with:
+          pattern: artifact-macos*
+          merge-multiple: true
+
+      - name: Release
+        uses: 'marvinpinto/action-automatic-releases@latest'
+        with:
+          repo_token: ${{ secrets.GITHUB_TOKEN }}
+          automatic_release_tag: macos
+          prerelease: true
+          title: "macOS Build"
+          files: |
+            *.tar.bz2

@@ -17,10 +17,12 @@ jobs:
           python-version: '3.12'
 
       - name: Install dependencies
-        run: pip install ruff
+        run: pip install ruff pyright
 
       - name: Lint
-        run: ruff scripts
+        run: |
+          ruff check scripts
+          pyright scripts/*.py
 
   macos:
     needs: lint

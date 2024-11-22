@@ -52,7 +52,5 @@ class LuaBuilder(Builder):
             include_lua_dir
         ])
         ensure('cp', ['liblua.a', lib_dir])
-        ensure('cp', [f'{ROOT}/patches/lua.pc', lib_pkgconfig_dir])
-
 
 LuaBuilder('lua').exec()

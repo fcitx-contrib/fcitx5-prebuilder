@@ -1,5 +1,9 @@
 dag = {
+    'glib': ['pcre2'],
+    'json-glib': ['glib'],
+    'libgee': ['glib'],
     'librime': ['boost', 'glog', 'leveldb', 'lua', 'marisa', 'opencc', 'yaml-cpp'],
+    'libskk': ['json-glib', 'libgee', 'libxkbcommon'],
     'opencc': ['marisa'],
 }
 

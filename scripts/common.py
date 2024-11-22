@@ -41,7 +41,7 @@ def patch(project: str, src: str | None = None, dst: str | None = None):
         ])
     else:
         os.chdir(project)
-        if os.system(f'git diff --ignore-submodules --exit-code') == 0:
+        if os.system('git diff --ignore-submodules --exit-code') == 0:
             ensure('git', [
                 'apply',
                 f'{ROOT}/patches/{project}.patch'
@@ -126,7 +126,6 @@ class Builder:
 
 class CMakeBuilder(Builder):
     def configure(self):
-        os.environ['PKG_CONFIG_PATH'] = f'{ROOT}/build/{USR}/lib/pkgconfig'
         command = ['emcmake'] if PLATFORM == 'js' else []
         command += [
             'cmake',

@@ -1,5 +1,5 @@
 import os
-from common import CMakeBuilder, POSTFIX, ROOT, TARGET, cache, ensure
+from common import CMakeBuilder, cache, ensure
 
 version = '1.86.0'
 

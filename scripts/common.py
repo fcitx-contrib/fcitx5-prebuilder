@@ -203,7 +203,7 @@ class MakeBuilder(Builder):
         ])
 
     def build(self):
-        ensure('make', ['-j8'])
+        ensure('make', ['-j8', f'CFLAGS="{get_platform_cflags()}"'])
 
     def install(self):
         os.environ['DESTDIR'] = self.dest_dir

@@ -1,11 +1,6 @@
-import os
+from common import CMakeBuilder
 
-from common import MakeBuilder, ensure
-
-class Pcre2Builder(MakeBuilder):
-    def configure(self):
-        if not os.path.exists('configure'):
-            ensure('autoreconf', ['-i'])
-        super().configure()
-
-Pcre2Builder('pcre2').exec()
+CMakeBuilder('pcre2', [
+    '-DPCRE2_BUILD_PCRE2GREP=OFF',
+    '-DPCRE2_BUILD_TESTS=OFF'
+]).exec()

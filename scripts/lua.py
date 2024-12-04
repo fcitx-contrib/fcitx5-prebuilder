@@ -41,8 +41,7 @@ class LuaBuilder(Builder):
         usr = self.dest_dir + INSTALL_PREFIX
         include_lua_dir = usr + '/include/lua'
         lib_dir = usr + '/lib'
-        lib_pkgconfig_dir = lib_dir + '/pkgconfig'
-        ensure('mkdir', ['-p', include_lua_dir, lib_pkgconfig_dir])
+        ensure('mkdir', ['-p', include_lua_dir])
         ensure('cp', [
             'lua.h',
             'luaconf.h',

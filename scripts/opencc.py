@@ -1,22 +1,9 @@
-from common import CMakeBuilder, INSTALL_PREFIX, PLATFORM, ROOT, TARGET, USR, cache, ensure, patch
+from common import CMakeBuilder, PLATFORM, ROOT, USR, patch, steal
 
 project = 'opencc'
 
 if PLATFORM != 'macos':
-    # Steal data from native build.
-    prebuilt = 'opencc-arm64.tar.bz2'
-    url = f'https://github.com/fcitx-contrib/fcitx5-prebuilder/releases/download/macos/{prebuilt}'
-
-    cache(url)
-    directory = f'build/{TARGET}/opencc{INSTALL_PREFIX}'
-    ensure('mkdir', ['-p', directory])
-    ensure('tar', [
-        'xjvf',
-        f'cache/{prebuilt}',
-        '-C',
-        directory,
-        'share'
-    ])
+    steal(project)
 
 patch(project)
 

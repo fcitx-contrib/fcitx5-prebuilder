@@ -62,6 +62,23 @@ def cache(url: str):
     ])
 
 
+def steal(package: str):
+    # Steal data from native build.
+    prebuilt = f'{package}-arm64.tar.bz2'
+    url = f'https://github.com/fcitx-contrib/fcitx5-prebuilder/releases/download/macos/{prebuilt}'
+
+    cache(url)
+    directory = f'build/{TARGET}/{package}{INSTALL_PREFIX}'
+    ensure('mkdir', ['-p', directory])
+    ensure('tar', [
+        'xjvf',
+        f'cache/{prebuilt}',
+        '-C',
+        directory,
+        'share'
+    ])
+
+
 def get_platform_cflags() -> str:
     if PLATFORM == 'macos':
         return f'-mmacosx-version-min={MACOS_VERSION}'

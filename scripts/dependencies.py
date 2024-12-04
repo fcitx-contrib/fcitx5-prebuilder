@@ -55,6 +55,7 @@ ios = [
 ]
 
 js = [
+    'anthy-cmake',
     'boost',
     'ecm',
     'fmt',
@@ -63,7 +64,9 @@ js = [
     'json',
     'json-c',
     'leveldb',
+    'libchewing',
     'libexpat',
+    'libhangul',
     'librime',
     'libthai',
     'libxkbcommon',

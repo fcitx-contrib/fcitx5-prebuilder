@@ -1,8 +1,11 @@
-from common import CMakeBuilder, patch
+from common import CMakeBuilder, PLATFORM, patch, steal
 
 project = 'libchewing'
 
 patch(project)
+
+if PLATFORM != 'macos':
+    steal(project)
 
 CMakeBuilder(project, [
     '-DWITH_SQLITE3=OFF',

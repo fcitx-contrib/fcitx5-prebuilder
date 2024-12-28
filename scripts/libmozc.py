@@ -59,19 +59,8 @@ class MozcBuilder(CMakeBuilder):
         ])
 
         libabsl_a = f'{lib_dir}/libabsl.a'
-        all_libabsl_a = f'find {self.build_}/mozc/src/third_party/abseil-cpp -name "*.a"'
-        if native.startswith('linux'):
-            libs = subprocess.check_output(all_libabsl_a, shell=True, text=True).strip().split('\n')
-            absl_script = f'{self.build_}/absl_script'
-            with open(absl_script, 'w') as f:
-                f.write(f'''create {libabsl_a}
-{'\n'.join(f'addlib {lib}' for lib in libs)}
-save
-end
-''')
-            ensure('ar', ['-M', f'< {absl_script}'])
-        else:
-            ensure('libtool', ['-o', libabsl_a, f'$({all_libabsl_a})'])
+        all_libabsl_a = f'$(find {self.build_}/mozc/src/third_party/abseil-cpp -name "*.o")'
+        ensure('ar', ['rc', libabsl_a, all_libabsl_a])
 
 
 options = [no_addon]

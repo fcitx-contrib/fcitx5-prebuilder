@@ -24,6 +24,7 @@ macos = [
     'libgee',
     'libhangul',
     'libintl',
+    'libmozc',
     'librime',
     'libskk',
     'libthai',

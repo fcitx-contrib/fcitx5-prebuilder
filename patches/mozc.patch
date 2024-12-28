@@ -1,0 +1,47 @@
+diff --git a/src/base/thread.h b/src/base/thread.h
+index 60fd2b8..93276a2 100644
+--- a/src/base/thread.h
++++ b/src/base/thread.h
+@@ -67,7 +67,14 @@ class Thread {
+ 
+   template <class Function, class... Args>
+   explicit Thread(Function &&f, Args &&...args)
+-      : thread_(std::forward<Function>(f), std::forward<Args>(args)...) {}
++#ifndef __EMSCRIPTEN__
++      : thread_(std::forward<Function>(f), std::forward<Args>(args)...)
++#endif
++      {
++#ifdef __EMSCRIPTEN__
++      f(std::forward<Args>(args)...);
++#endif
++    }
+ 
+   ~Thread() = default;
+ 
+@@ -77,12 +84,24 @@ class Thread {
+   Thread(Thread &&) noexcept = default;
+   Thread &operator=(Thread &&) noexcept = default;
+ 
+-  bool Joinable() const noexcept { return thread_.joinable(); }
++  bool Joinable() const noexcept {
++#ifdef __EMSCRIPTEN__
++    return true;
++#else
++    return thread_.joinable();
++#endif
++  }
+ 
+-  void Join() { thread_.join(); }
++  void Join() {
++#ifndef __EMSCRIPTEN__
++    thread_.join();
++#endif
++  }
+ 
++#ifndef __EMSCRIPTEN__
+  private:
+   std::thread thread_;
++#endif
+ };
+ 
+ // Represents a value that will be available in the future. This class spawns

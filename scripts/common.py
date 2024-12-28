@@ -44,7 +44,7 @@ def patch(project: str, src: str | None = None, dst: str | None = None):
         if os.system('git diff --ignore-submodules --exit-code') == 0:
             ensure('git', [
                 'apply',
-                f'{ROOT}/patches/{project}.patch'
+                f'{ROOT}/patches/{project.split("/")[-1]}.patch'
             ])
         os.chdir(ROOT)
 

@@ -1,10 +1,10 @@
 import platform
-import subprocess
-from common import CMakeBuilder, INSTALL_PREFIX, PLATFORM, ROOT, ensure
+from common import CMakeBuilder, INSTALL_PREFIX, PLATFORM, ROOT, ensure, patch
 
 no_addon = '-DBUILD_MOZC_ADDON=OFF'
 
 if PLATFORM == 'js':
+    patch('libmozc/mozc')
     native = {
         'Linux': 'linux',
         'Darwin': 'macos'

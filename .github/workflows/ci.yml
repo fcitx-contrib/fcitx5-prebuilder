@@ -6,6 +6,9 @@ on:
       - master
   pull_request:
 
+env:
+  MOZC_SHA: ad0e97b8b8dcfd4c841a02c5d6a043fb5e741405
+
 jobs:
   lint:
     runs-on: ubuntu-latest
@@ -28,13 +31,19 @@ jobs:
     if: "!contains(github.event.head_commit.message, '!macos')"
     needs: lint
     uses: ./.github/workflows/macos.yml
+    with:
+      mozc_sha: ${{ env.MOZC_SHA }}
 
   ios:
     if: "!contains(github.event.head_commit.message, '!ios')"
     needs: lint
     uses: ./.github/workflows/ios.yml
+    with:
+      mozc_sha: ${{ env.MOZC_SHA }}
 
   js:
     if: "!contains(github.event.head_commit.message, '!js')"
     needs: lint
     uses: ./.github/workflows/js.yml
+    with:
+      mozc_sha: ${{ env.MOZC_SHA }}

@@ -7,12 +7,6 @@ options = [no_addon]
 
 
 class MozcBuilder(CMakeBuilder):
-    def build(self):
-        ios_release = ['--config', 'Release'] if PLATFORM == 'ios' else []
-        ensure('cmake', ['--build', self.build_, '--target', 'absl_flags_parse', *ios_release])
-        ensure('cmake', ['--build', self.build_, '--target', 'libprotobuf', *ios_release])
-        ensure('cmake', ['--build', self.build_, '--target', 'mozc-static', *ios_release])
-
     def install(self):
         if PLATFORM == 'ios':
             layer = 'Release-iphone' + ('simulator' if IOS_PLATFORM == 'SIMULATOR' else 'os') + '/'
@@ -44,13 +38,9 @@ class MozcBuilder(CMakeBuilder):
         ensure('cp', [
             f'{self.build_}/mozc/src/third_party/protobuf/third_party/utf8_range/{layer}libutf8_validity.a',
             f'{self.build_}/mozc/src/third_party/protobuf/{layer}libprotobuf.a',
+            f'{self.build_}/{layer}libmozc-static.a',
             lib_dir
         ])
-
-        if PLATFORM == 'ios': # Xcode doesn't support add_library OBJECT and generates many static libs.
-            ensure('ar', ['rc', f'{lib_dir}/libmozc-static.a', f'$(find {self.build_} -name "*.o" | grep build/mozc)'])
-        else:
-            ensure('cp', [f'{self.build_}/libmozc-static.a', lib_dir])
 
         libabsl_a = f'{lib_dir}/libabsl.a'
         if PLATFORM == 'ios':
@@ -63,8 +53,6 @@ class MozcBuilder(CMakeBuilder):
         if PLATFORM != 'macos':
             ensure('rm', ['-rf', f'{self.dest_dir}/usr/bin'])
 
-
-builder = MozcBuilder('libmozc', options)
 
 if PLATFORM == 'js':
     patch('libmozc/mozc')
@@ -83,9 +71,9 @@ if PLATFORM == 'js':
 
 if platform.system() == 'Darwin' and PLATFORM != 'macos':
     steal('libmozc', ('bin',)) # extracted to install dir so need to remove on prepack.
-    protoc_exe = f'{builder.dest_dir}/usr/bin/protoc'
+    protoc_exe = f'{MozcBuilder('libmozc').dest_dir}/usr/bin/protoc'
 
 if PLATFORM in ('ios', 'js'):
     options.append(f'-DPROTOC_EXECUTABLE={protoc_exe}')
 
-builder.exec()
+MozcBuilder('libmozc', options).exec()

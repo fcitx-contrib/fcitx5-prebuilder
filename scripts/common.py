@@ -44,7 +44,7 @@ def patch(project: str, src: str | None = None, dst: str | None = None):
         if os.system('git diff --ignore-submodules --exit-code') == 0:
             ensure('git', [
                 'apply',
-                f'{ROOT}/patches/{project}.patch'
+                f'{ROOT}/patches/{project.split("/")[-1]}.patch'
             ])
         os.chdir(ROOT)
 
@@ -62,20 +62,21 @@ def cache(url: str):
     ])
 
 
-def steal(package: str):
+def steal(package: str, directories: tuple[str, ...] = ('share',)):
     # Steal data from native build.
-    prebuilt = f'{package}-arm64.tar.bz2'
+    # Use same arch for bin, e.g. protoc built on macOS x86_64 to build for iOS simulator.
+    prebuilt = f'{package}-{platform.machine()}.tar.bz2'
     url = f'https://github.com/fcitx-contrib/fcitx5-prebuilder/releases/download/macos/{prebuilt}'
 
     cache(url)
     directory = f'build/{TARGET}/{package}{INSTALL_PREFIX}'
     ensure('mkdir', ['-p', directory])
     ensure('tar', [
-        'xjvf',
+        'xjf',
         f'cache/{prebuilt}',
         '-C',
         directory,
-        'share'
+        *directories
     ])
 
 

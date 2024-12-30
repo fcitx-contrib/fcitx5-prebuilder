@@ -4,3 +4,4 @@ __pycache__
 /boost*
 *.bz2
 *.xz
+mozc_data.inc

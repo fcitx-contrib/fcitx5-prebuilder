@@ -75,7 +75,7 @@ index c3a63621..4d08745c 100644
                                                FallbackOptions::All);
  }
 diff --git a/src/rime/gear/selector.cc b/src/rime/gear/selector.cc
-index 06874103..72af820f 100644
+index 06874103..b288eaf2 100644
 --- a/src/rime/gear/selector.cc
 +++ b/src/rime/gear/selector.cc
 @@ -14,6 +14,16 @@
@@ -194,6 +194,15 @@ index 06874103..72af820f 100644
    }
    comp.back().selected_index = index - 1;
    comp.back().tags.insert("paging");
+@@ -215,7 +261,7 @@ bool Selector::PreviousCandidate(Context* ctx) {
+ }
+ 
+ bool Selector::NextCandidate(Context* ctx) {
+-  if (is_linear_layout(ctx) && !caret_at_end_of_input(ctx)) {
++  if (f5m_is_linear_layout && !caret_at_end_of_input(ctx)) {
+     // let navigator handle the arrow key.
+     return false;
+   }
 diff --git a/src/rime/gear/selector.h b/src/rime/gear/selector.h
 index 5e4bfce0..e88aace0 100644
 --- a/src/rime/gear/selector.h

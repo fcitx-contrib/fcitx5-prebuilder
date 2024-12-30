@@ -64,7 +64,8 @@ def cache(url: str):
 
 def steal(package: str, directories: tuple[str, ...] = ('share',)):
     # Steal data from native build.
-    prebuilt = f'{package}-arm64.tar.bz2'
+    # Use same arch for bin, e.g. protoc built on macOS x86_64 to build for iOS simulator.
+    prebuilt = f'{package}-{platform.machine()}.tar.bz2'
     url = f'https://github.com/fcitx-contrib/fcitx5-prebuilder/releases/download/macos/{prebuilt}'
 
     cache(url)

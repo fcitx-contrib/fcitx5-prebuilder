@@ -4,7 +4,7 @@
 # linux -> js: build protoc first
 
 import platform
-from common import CMakeBuilder, INSTALL_PREFIX, PLATFORM, ROOT, ensure, patch, steal
+from common import CMakeBuilder, INSTALL_PREFIX, PLATFORM, ROOT, cache, ensure, patch, steal
 
 no_addon = '-DBUILD_MOZC_ADDON=OFF'
 protoc_exe = ''
@@ -12,6 +12,12 @@ options = [no_addon]
 
 
 class MozcBuilder(CMakeBuilder):
+    def configure(self):
+        super().configure()
+        oss_dir = f'{self.build_}/data_manager/oss'
+        ensure('mkdir', ['-p', oss_dir])
+        ensure('ln', ['-sf', f'{ROOT}/cache/mozc_data.inc', f'{oss_dir}/mozc_data.inc'])
+
     def install(self):
         super().install()
         # Combine all .o files of absl to libabsl.a
@@ -49,5 +55,7 @@ if platform.system() == 'Darwin' and PLATFORM != 'macos':
 
 if PLATFORM in ('ios', 'js'):
     options.append(f'-DPROTOC_EXECUTABLE={protoc_exe}')
+
+cache('https://github.com/fcitx-contrib/fcitx5-mozc/releases/download/latest/mozc_data.inc')
 
 MozcBuilder('libmozc', options).exec()

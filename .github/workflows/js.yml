@@ -25,9 +25,6 @@ jobs:
           path: libmozc/mozc
           ref: ${{ inputs.mozc_sha }}
 
-      - name: Patch protobuf to accelerate build
-        run: git apply --directory=libmozc/mozc/src/third_party/protobuf libmozc/patches/protobuf.patch
-
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'

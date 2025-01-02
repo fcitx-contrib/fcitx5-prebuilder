@@ -25,6 +25,7 @@ TARGET = f'{PLATFORM}{POSTFIX}'
 # macos-x86_64/usr, ios-arm64/usr, js/usr
 USR = f'{TARGET}{INSTALL_PREFIX}'
 
+DEBUG = os.environ.get('DEBUG') == '1'
 
 def ensure(program: str, args: list[str]):
     command = " ".join([program, *args])
@@ -163,7 +164,7 @@ class CMakeBuilder(Builder):
             ]
             command += self.ios
         else: # Ninja
-            command.append('-DCMAKE_BUILD_TYPE=Release')
+            command.append(f'-DCMAKE_BUILD_TYPE={"Debug" if DEBUG else "Release"}')
 
         if PLATFORM == 'js':
             # emscripten defaults to full-static libs but we want plugins based on these dependencies to be dynamic.

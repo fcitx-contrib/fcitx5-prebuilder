@@ -1,0 +1,68 @@
+name: macOS debug build
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [macos-15, macos-13]
+        include:
+          - { os: macos-15, arch: arm64 }
+          - { os: macos-13, arch: x86_64 }
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install dependencies
+        run: |
+          brew install ninja
+          mkdir -p build/macos-${{ matrix.arch }}/usr
+          for dep in boost glog leveldb lua marisa opencc yaml-cpp; do
+            file=${dep}-${{ matrix.arch }}.tar.bz2
+            wget -P cache https://github.com/fcitx-contrib/fcitx5-prebuilder/releases/download/macos/$file
+            tar xf cache/$file -C build/macos-${{ matrix.arch }}/usr
+          done
+
+      - name: Build
+        run: |
+          git submodule update --init librime librime-lua librime-octagram librime-predict
+          DEBUG=1 python scripts/librime.py macos
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: artifact-librime-${{ matrix.arch }}
+          path: |
+            build/macos-${{ matrix.arch }}/*.tar.bz2
+
+      - name: Setup tmate session
+        if: ${{ failure() }}
+        uses: mxschmitt/action-tmate@v3
+
+  release:
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download artifact
+        uses: actions/download-artifact@v4
+        with:
+          pattern: artifact-librime*
+          merge-multiple: true
+
+      - name: Release
+        uses: 'marvinpinto/action-automatic-releases@latest'
+        with:
+          repo_token: ${{ secrets.GITHUB_TOKEN }}
+          automatic_release_tag: debug
+          prerelease: true
+          title: "Debug Build"
+          files: |
+            *.tar.bz2

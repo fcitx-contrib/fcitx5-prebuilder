@@ -14,9 +14,10 @@ PLATFORM_VERSION = {
     'ios': IOS_VERSION
 }
 
-PLATFORM = cast(Literal['macos', 'ios', 'js'], sys.argv[1])
+PLATFORM = cast(Literal['macos', 'ios', 'harmony', 'js'], sys.argv[1])
 POSTFIX = '-' + platform.machine() if PLATFORM == 'macos' or 'simulator' in sys.argv[2:] else ''
 IOS_PLATFORM = 'SIMULATOR' if 'simulator' in sys.argv[2:] else 'OS'
+OHOS_ARCH = sys.argv[2] if PLATFORM == 'harmony' else ''
 ROOT = os.getcwd()
 
 INSTALL_PREFIX = '/usr'
@@ -155,6 +156,12 @@ class CMakeBuilder(Builder):
             f'-DCMAKE_INSTALL_PREFIX={INSTALL_PREFIX}',
             f'-DCMAKE_FIND_ROOT_PATH={ROOT}/build/{USR}'
         ]
+
+        if PLATFORM == 'harmony':
+            command += [
+                '-DCMAKE_TOOLCHAIN_FILE=/tmp/command-line-tools/sdk/default/openharmony/native/build/cmake/ohos.toolchain.cmake',
+                f'-DOHOS_ARCH={OHOS_ARCH}'
+            ]
 
         if PLATFORM == 'ios':
             # IOS_PLATFORM is recognized by ios.cmake.

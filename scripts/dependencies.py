@@ -56,6 +56,10 @@ ios = [
     'zstd'
 ]
 
+harmony = [
+    'fmt'
+]
+
 js = [
     'anthy-cmake',
     'boost',
@@ -84,5 +88,6 @@ js = [
 platform_projects = {
     'macos': macos,
     'ios': ios,
+    'harmony': harmony,
     'js': js
 }

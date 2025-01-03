@@ -32,7 +32,7 @@ index 07aa6b7d..7360e0b5 100644
  
  // implementations
 diff --git a/src/rime/engine.h b/src/rime/engine.h
-index 2e1c8b81..94a6b500 100644
+index 6b51a68e..c5b8f7e4 100644
 --- a/src/rime/engine.h
 +++ b/src/rime/engine.h
 @@ -16,6 +16,7 @@ namespace rime {
@@ -46,13 +46,13 @@ index 2e1c8b81..94a6b500 100644
 @@ -35,6 +36,7 @@ class Engine : public Messenger {
    void set_active_engine(Engine* engine = nullptr) { active_engine_ = engine; }
  
-   RIME_API static Engine* Create();
+   RIME_DLL static Engine* Create();
 +  an<Switcher> switcher_;
  
   protected:
    Engine();
 diff --git a/src/rime/gear/navigator.cc b/src/rime/gear/navigator.cc
-index c3a63621..4d08745c 100644
+index e3c3b40e..551716b2 100644
 --- a/src/rime/gear/navigator.cc
 +++ b/src/rime/gear/navigator.cc
 @@ -15,6 +15,9 @@
@@ -65,7 +65,7 @@ index c3a63621..4d08745c 100644
  namespace rime {
  
  static Navigator::ActionDef navigation_actions[] = {
-@@ -72,7 +75,7 @@ ProcessResult Navigator::ProcessKeyEvent(const KeyEvent& key_event) {
+@@ -76,7 +79,7 @@ ProcessResult Navigator::ProcessKeyEvent(const KeyEvent& key_event) {
    if (!ctx->IsComposing())
      return kNoop;
    TextOrientation text_orientation =
@@ -223,7 +223,7 @@ index 5e4bfce0..e88aace0 100644
    enum CandidateListLayout {
      Stacked = 0,
 diff --git a/src/rime/service.h b/src/rime/service.h
-index 2b3111af..95ca87dc 100644
+index a69ae741..9b3d4b16 100644
 --- a/src/rime/service.h
 +++ b/src/rime/service.h
 @@ -44,11 +44,11 @@ class Session {
@@ -240,17 +240,17 @@ index 2b3111af..95ca87dc 100644
    string commit_text_;
  };
 diff --git a/src/rime_api_impl.h b/src/rime_api_impl.h
-index 7749ce98..b0200a67 100644
+index 6e906cfe..f4dae0a3 100644
 --- a/src/rime_api_impl.h
 +++ b/src/rime_api_impl.h
-@@ -15,6 +15,8 @@
+@@ -17,6 +17,8 @@
  #include <rime/setup.h>
  #include <rime/signature.h>
  #include <rime/switches.h>
 +#include <rime/engine.h>
 +#include <rime/switcher.h>
  
- #include "rime_api.h"
+ using namespace rime;
  
 @@ -426,6 +428,13 @@ RIME_DEPRECATED void RimeSetOption(RimeSessionId session_id,
    if (!ctx)

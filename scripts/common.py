@@ -15,13 +15,20 @@ PLATFORM_VERSION = {
 }
 
 PLATFORM = cast(Literal['macos', 'ios', 'harmony', 'js'], sys.argv[1])
-POSTFIX = '-' + platform.machine() if PLATFORM == 'macos' or 'simulator' in sys.argv[2:] else ''
 IOS_PLATFORM = 'SIMULATOR' if 'simulator' in sys.argv[2:] else 'OS'
 OHOS_ARCH = sys.argv[2] if PLATFORM == 'harmony' else ''
+
+if PLATFORM == 'macos' or IOS_PLATFORM == 'SIMULATOR':
+    POSTFIX = '-' + platform.machine()
+elif PLATFORM == 'harmony':
+    POSTFIX = '-' + OHOS_ARCH
+else: # iOS real device or JS
+    POSTFIX = ''
+
 ROOT = os.getcwd()
 
 INSTALL_PREFIX = '/usr'
-# macos-x86_64, ios-arm64, js
+# macos-x86_64, ios-arm64, js, harmony-arm64-v8a
 TARGET = f'{PLATFORM}{POSTFIX}'
 # macos-x86_64/usr, ios-arm64/usr, js/usr
 USR = f'{TARGET}{INSTALL_PREFIX}'

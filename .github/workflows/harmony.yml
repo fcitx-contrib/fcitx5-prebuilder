@@ -1,0 +1,69 @@
+name: HarmonyOS build
+
+on:
+  workflow_call:
+
+jobs:
+  build:
+    runs-on: ubuntu-24.04
+    env:
+      SDK_VERSION_MAJOR: 5.0.5
+      SDK_VERSION_MINOR: 310
+    strategy:
+      fail-fast: false
+      matrix:
+        arch: [arm64-v8a, x86_64]
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install dependencies
+        run: |
+          sudo apt install -y ninja-build
+
+      - name: Install OpenHarmony SDK
+        uses: fcitx-contrib/ohpm-cli-tools@master
+        with:
+          major: ${{ env.SDK_VERSION_MAJOR }}
+          minor: ${{ env.SDK_VERSION_MINOR }}
+
+      - name: Build
+        run: python scripts/build.py harmony ${{ matrix.arch }}
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: artifact-harmony-${{ matrix.arch }}
+          path: |
+            build/harmony-${{ matrix.arch }}/*.tar.bz2
+
+      - name: Setup tmate session
+        if: ${{ failure() }}
+        uses: mxschmitt/action-tmate@v3
+
+  release:
+    needs: build
+    if: ${{ github.ref == 'refs/heads/master' }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download artifact
+        uses: actions/download-artifact@v4
+        with:
+          pattern: artifact-harmony*
+          merge-multiple: true
+
+      - name: Release
+        uses: 'marvinpinto/action-automatic-releases@latest'
+        with:
+          repo_token: ${{ secrets.GITHUB_TOKEN }}
+          automatic_release_tag: harmony
+          prerelease: true
+          title: "Harmony Build"
+          files: |
+            *.tar.bz2

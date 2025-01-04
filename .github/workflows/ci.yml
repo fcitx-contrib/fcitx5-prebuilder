@@ -43,6 +43,11 @@ jobs:
     with:
       mozc_sha: ${{ needs.lint.outputs.MOZC_SHA }}
 
+  harmony:
+    if: "!contains(github.event.head_commit.message, '!harmony')"
+    needs: lint
+    uses: ./.github/workflows/harmony.yml
+
   js:
     if: "!contains(github.event.head_commit.message, '!js')"
     needs: lint

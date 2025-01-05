@@ -57,7 +57,9 @@ ios = [
 ]
 
 harmony = [
-    'fmt'
+    'ecm',
+    'fmt',
+    'libintl'
 ]
 
 js = [

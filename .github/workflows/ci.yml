@@ -14,6 +14,8 @@ jobs:
     runs-on: ubuntu-latest
     outputs:
       MOZC_SHA: ${{ env.MOZC_SHA }}
+      message: ${{ steps.commit-message.outputs.message }}
+
     steps:
       - uses: actions/checkout@v4
 
@@ -29,27 +31,36 @@ jobs:
           ruff check scripts
           pyright scripts/*.py
 
+      - name: Pass commit message
+        id: commit-message
+        run: |
+          if [[ "${{ github.ref }}" == 'refs/heads/master' ]]; then
+            echo "message=${{ github.event.head_commit.message }}" >> "$GITHUB_OUTPUT"
+          else
+            echo "message=${{ github.event.pull_request.title }}" >> "$GITHUB_OUTPUT"
+          fi
+
   macos:
-    if: "!contains(github.event.head_commit.message, '!macos')"
+    if: "!contains(needs.lint.outputs.message, '!macos')"
     needs: lint
     uses: ./.github/workflows/macos.yml
     with:
       mozc_sha: ${{ needs.lint.outputs.MOZC_SHA }}
 
   ios:
-    if: "!contains(github.event.head_commit.message, '!ios')"
+    if: "!contains(needs.lint.outputs.message, '!ios')"
     needs: lint
     uses: ./.github/workflows/ios.yml
     with:
       mozc_sha: ${{ needs.lint.outputs.MOZC_SHA }}
 
   harmony:
-    if: "!contains(github.event.head_commit.message, '!harmony')"
+    if: "!contains(needs.lint.outputs.message, '!harmony')"
     needs: lint
     uses: ./.github/workflows/harmony.yml
 
   js:
-    if: "!contains(github.event.head_commit.message, '!js')"
+    if: "!contains(needs.lint.outputs.message, '!js')"
     needs: lint
     uses: ./.github/workflows/js.yml
     with:

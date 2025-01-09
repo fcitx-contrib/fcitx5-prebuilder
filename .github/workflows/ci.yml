@@ -35,9 +35,9 @@ jobs:
         id: commit-message
         run: |
           if [[ "${{ github.ref }}" == 'refs/heads/master' ]]; then
-            echo "message=${{ github.event.pull_request.title }}" >> "$GITHUB_OUTPUT"
-          else
             echo "message=${{ github.event.head_commit.message }}" >> "$GITHUB_OUTPUT"
+          else
+            echo "message=${{ github.event.pull_request.title }}" >> "$GITHUB_OUTPUT"
           fi
 
   macos:

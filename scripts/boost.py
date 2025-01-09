@@ -34,6 +34,14 @@ ensure('sed', [
     file
 ])
 ensure('rm ', ['-f', file + '.bak'])
+# For harmony. TODO: remove when 1.88 is released.
+file = 'boost/libs/core/include/boost/core/detail/sp_thread_sleep.hpp'
+ensure('sed', [
+    '-i.bak',
+    '"s/__ANDROID__/__OHOS__/"',
+    file
+])
+ensure('rm ', ['-f', file + '.bak'])
 
 libs = "algorithm;bimap;container;crc;interprocess;iostreams;multi_index;ptr_container;scope_exit;signals2;uuid"
 

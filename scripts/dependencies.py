@@ -57,9 +57,13 @@ ios = [
 ]
 
 harmony = [
+    'boost',
     'ecm',
     'fmt',
-    'libintl'
+    'libintl',
+    'marisa',
+    'opencc',
+    'zstd'
 ]
 
 js = [

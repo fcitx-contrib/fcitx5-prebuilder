@@ -107,7 +107,7 @@ def get_platform_cflags() -> str:
 
 class Builder:
     def __init__(self, name: str, options: list[str] | None=None, js: list[str] | None=None,
-                 ios: list[str] | None=None, src='.'):
+                 ios: list[str] | None=None, harmony: list[str] | None=None, src='.'):
         self.name = name
         # /path/to/build/ios-arm64/librime
         self.dest_dir = f'{ROOT}/build/{TARGET}/{self.name}'
@@ -117,6 +117,7 @@ class Builder:
         self.needs_extract = any(name in deps for deps in dag.values())
         self.js = js or []
         self.ios = ios or []
+        self.harmony = harmony or []
 
     def configure(self):
         pass
@@ -169,6 +170,7 @@ class CMakeBuilder(Builder):
                 '-DCMAKE_TOOLCHAIN_FILE=/tmp/command-line-tools/sdk/default/openharmony/native/build/cmake/ohos.toolchain.cmake',
                 f'-DOHOS_ARCH={OHOS_ARCH}'
             ]
+            command += self.harmony
 
         if PLATFORM == 'ios':
             # IOS_PLATFORM is recognized by ios.cmake.

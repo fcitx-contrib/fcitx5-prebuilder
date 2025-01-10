@@ -20,4 +20,6 @@ CMakeBuilder(project, [
     '-DENABLE_EXTERNAL_PLUGINS=OFF',
     f'-DLUA_INCLUDE_DIR={ROOT}/build/{USR}/include/lua',
     f'-DLUA_TARGET={ROOT}/build/{USR}/lib/liblua.a'
-], js=['-DENABLE_THREADING=OFF']).exec()
+], js=['-DENABLE_THREADING=OFF'],
+definitions=['BOOST_DISABLE_CURRENT_LOCATION']
+).exec()

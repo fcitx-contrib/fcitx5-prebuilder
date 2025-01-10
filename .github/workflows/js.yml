@@ -32,8 +32,8 @@ jobs:
       - name: Install dependencies
         run: |
           sudo apt install -y ninja-build \
-            gettext \
-            meson
+            gettext
+          pip install meson==1.6.1
 
       - name: Install emsdk
         run: |
@@ -42,13 +42,20 @@ jobs:
           ./emsdk install ${{ env.EMSCRIPTEN_VERSION }}
           ./emsdk activate ${{ env.EMSCRIPTEN_VERSION }}
 
+      - name: Version info
+        run: |
+          bison --version
+
       - name: Build
         run: |
           . emsdk/emsdk_env.sh
           python scripts/build.py js
 
+      - name: Check absolute path
+        run: ./scripts/check-absolute-path.sh
+
       - name: Release
-        if: ${{ github.ref == 'refs/heads/master' }}
+        # if: ${{ github.ref == 'refs/heads/master' }}
         uses: 'marvinpinto/action-automatic-releases@latest'
         with:
           repo_token: ${{ secrets.GITHUB_TOKEN }}

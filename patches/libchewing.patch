@@ -1,5 +1,5 @@
 diff --git a/CMakeLists.txt b/CMakeLists.txt
-index a6cd67b..a4153af 100644
+index a6cd67b..cdb87d0 100644
 --- a/CMakeLists.txt
 +++ b/CMakeLists.txt
 @@ -216,8 +216,9 @@ if(WITH_RUST)
@@ -13,13 +13,9 @@ index a6cd67b..a4153af 100644
  if(BUILD_TESTING)
      add_subdirectory(tests)
  endif()
-@@ -228,14 +229,20 @@ add_library(common OBJECT
- 
+@@ -229,13 +230,13 @@ add_library(common OBJECT
      src/porting_layer/src/asprintf.c
  )
-+target_compile_options(common PRIVATE
-+    "-ffile-prefix-map=${CMAKE_SOURCE_DIR}=."
-+)
  target_compile_definitions(common PRIVATE
 -    CHEWING_DATADIR=\"${CMAKE_INSTALL_FULL_DATADIR}/libchewing\"
 +    CHEWING_DATADIR=\"./libchewing\"
@@ -27,22 +23,9 @@ index a6cd67b..a4153af 100644
  
  add_library(libchewing ${ALL_INC} src/chewing.c)
  set_target_properties(libchewing PROPERTIES LINKER_LANGUAGE C)
-+target_compile_options(libchewing PRIVATE
-+    "-ffile-prefix-map=${CMAKE_SOURCE_DIR}=."
-+)
  target_compile_definitions(libchewing PRIVATE
 -    CHEWING_DATADIR=\"${CMAKE_INSTALL_FULL_DATADIR}/libchewing\"
 +    CHEWING_DATADIR=\"./libchewing\"
  )
  if(NOT WITH_RUST)
      target_sources(common PRIVATE
-@@ -288,6 +295,9 @@ if(NOT WITH_RUST)
-             ${SRC_DIR}/userphrase-hash.c
-         )
-     endif()
-+    target_compile_options(userphrase PRIVATE
-+        "-ffile-prefix-map=${CMAKE_SOURCE_DIR}=."
-+    )
-     target_link_libraries(libchewing
-         PRIVATE common
-         PRIVATE userphrase)

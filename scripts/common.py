@@ -35,6 +35,8 @@ USR = f'{TARGET}{INSTALL_PREFIX}'
 
 DEBUG = os.environ.get('DEBUG') == '1'
 
+HARMONY_NATIVE = '/tmp/command-line-tools/sdk/default/openharmony/native'
+
 def ensure(program: str, args: list[str]):
     command = " ".join([program, *args])
     print(command)
@@ -107,7 +109,7 @@ def get_platform_cflags() -> str:
 
 class Builder:
     def __init__(self, name: str, options: list[str] | None=None, js: list[str] | None=None,
-                 ios: list[str] | None=None, harmony: list[str] | None=None, src='.'):
+                 ios: list[str] | None=None, harmony: list[str] | None=None, src='.', definitions: list[str] | None=None):
         self.name = name
         # /path/to/build/ios-arm64/librime
         self.dest_dir = f'{ROOT}/build/{TARGET}/{self.name}'
@@ -118,6 +120,7 @@ class Builder:
         self.js = js or []
         self.ios = ios or []
         self.harmony = harmony or []
+        self.definitions = definitions or []
 
     def configure(self):
         pass
@@ -128,12 +131,23 @@ class Builder:
     def install(self):
         pass
 
+    def strip(self):
+        lib_dir = f'{self.dest_dir}{INSTALL_PREFIX}/lib'
+        if not os.path.exists(lib_dir):
+            return
+        all_a = [f'{lib_dir}/*.a']
+        if PLATFORM == 'harmony':
+            ensure(f'{HARMONY_NATIVE}/llvm/bin/llvm-strip', all_a)
+        elif PLATFORM == 'js':
+            ensure('emstrip', all_a)
+
     def pre_package(self):
         pass
 
     def package(self):
         os.chdir(f'{self.dest_dir}{INSTALL_PREFIX}')
-        ensure('tar', ['cjf', f'{self.dest_dir}{POSTFIX}.tar.bz2', '*'])
+        ensure('find', ['.', '-exec', 'touch', '-t', '197001010000', '{}', '+'])
+        ensure('tar', ['cj', '--numeric-owner', '-f', f'{self.dest_dir}{POSTFIX}.tar.bz2', '*'])
 
     def extract(self):
         directory = f'build/{USR}'
@@ -146,6 +160,7 @@ class Builder:
         self.configure()
         self.build()
         self.install()
+        self.strip()
         self.pre_package()
         self.package()
         if self.needs_extract:
@@ -167,7 +182,7 @@ class CMakeBuilder(Builder):
 
         if PLATFORM == 'harmony':
             command += [
-                '-DCMAKE_TOOLCHAIN_FILE=/tmp/command-line-tools/sdk/default/openharmony/native/build/cmake/ohos.toolchain.cmake',
+                f'-DCMAKE_TOOLCHAIN_FILE={HARMONY_NATIVE}/build/cmake/ohos.toolchain.cmake',
                 f'-DOHOS_ARCH={OHOS_ARCH}'
             ]
             command += self.harmony
@@ -182,16 +197,22 @@ class CMakeBuilder(Builder):
         else: # Ninja
             command.append(f'-DCMAKE_BUILD_TYPE={"Debug" if DEBUG else "Release"}')
 
+        c_cxx_flags = f'-ffile-prefix-map={os.path.abspath(self.src)}=.' # Reproducible: __FILE__
+        if self.definitions:
+            c_cxx_flags += ' ' + ' '.join(f'-D{definition}' for definition in self.definitions)
+
         if PLATFORM == 'js':
             # emscripten defaults to full-static libs but we want plugins based on these dependencies to be dynamic.
-            command += [
-                '-DCMAKE_C_FLAGS=-fPIC',
-                '-DCMAKE_CXX_FLAGS=-fPIC'
-            ]
+            c_cxx_flags += ' -fPIC'
             command += self.js
 
         if PLATFORM in ('macos', 'ios'):
             command.append(f'-DCMAKE_OSX_DEPLOYMENT_TARGET={PLATFORM_VERSION[PLATFORM]}')
+
+        command += [
+            f'-DCMAKE_C_FLAGS="{c_cxx_flags}"',
+            f'-DCMAKE_CXX_FLAGS="{c_cxx_flags}"'
+        ]
 
         ensure(command[0], [
             *command[1:],

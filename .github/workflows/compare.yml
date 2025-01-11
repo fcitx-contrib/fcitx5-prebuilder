@@ -29,13 +29,13 @@ jobs:
             echo "## $file" >> summary.md
             if wget -P release https://github.com/fcitx-contrib/fcitx5-prebuilder/releases/download/${{ inputs.platform }}/$file; then
               if diff release/$file $file; then
+                echo "Same." >> summary.md
+              else
                 mkdir old new
                 tar xf release/$file -C old
                 tar xf $file -C new
                 diff -r old new >> summary.md
                 rm -r old new
-              else
-                echo "Same." >> summary.md
               fi
             else
               echo "New." >> summary.md

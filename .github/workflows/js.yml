@@ -51,6 +51,13 @@ jobs:
           . emsdk/emsdk_env.sh
           python scripts/build.py js
 
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: artifact-js
+          path: |
+            build/js/*.tar.bz2
+
       - name: Check absolute path
         run: ./scripts/check-absolute-path.sh
 
@@ -68,3 +75,10 @@ jobs:
       - name: Setup tmate session
         if: ${{ failure() }}
         uses: mxschmitt/action-tmate@v3
+
+  compare:
+    needs: build
+    if: ${{ github.ref != 'refs/heads/master' }}
+    uses: ./.github/workflows/compare.yml
+    with:
+      platform: js

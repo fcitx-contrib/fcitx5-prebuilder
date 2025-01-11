@@ -37,6 +37,8 @@ DEBUG = os.environ.get('DEBUG') == '1'
 
 HARMONY_NATIVE = '/tmp/command-line-tools/sdk/default/openharmony/native'
 
+tar = 'tar' if platform.system() == 'Linux' else 'gtar'
+
 def ensure(program: str, args: list[str]):
     command = " ".join([program, *args])
     print(command)
@@ -82,7 +84,7 @@ def steal(package: str, directories: tuple[str, ...] = ('share',)):
     cache(url)
     directory = f'build/{TARGET}/{package}{INSTALL_PREFIX}'
     ensure('mkdir', ['-p', directory])
-    ensure('tar', [
+    ensure(tar, [
         'xjf',
         f'cache/{prebuilt}',
         '-C',
@@ -146,14 +148,18 @@ class Builder:
 
     def package(self):
         os.chdir(f'{self.dest_dir}{INSTALL_PREFIX}')
-        ensure('find', ['.', '-exec', 'touch', '-t', '197001010000', '{}', '+'])
-        ensure('tar', ['cj', '--numeric-owner', '-f', f'{self.dest_dir}{POSTFIX}.tar.bz2', '*'])
+        os.environ['LC_ALL'] = 'C'
+        ensure(tar, ['cj',
+            '--sort=name', '--mtime=@0',
+            '--numeric-owner', '--owner=0', '--group=0', '--mode=go+u,go-w',
+            '-f', f'{self.dest_dir}{POSTFIX}.tar.bz2', '*'
+        ])
 
     def extract(self):
         directory = f'build/{USR}'
         os.chdir(ROOT)
         ensure('mkdir', ['-p', directory])
-        ensure('tar', ['xjf', f'{self.dest_dir}{POSTFIX}.tar.bz2', '-C', directory])
+        ensure(tar, ['xf', f'{self.dest_dir}{POSTFIX}.tar.bz2', '-C', directory])
 
     def exec(self):
         os.chdir(f'{ROOT}/{self.name}')

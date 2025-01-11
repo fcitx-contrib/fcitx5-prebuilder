@@ -25,6 +25,9 @@ elif PLATFORM == 'harmony':
 else: # iOS real device or JS
     POSTFIX = ''
 
+if PLATFORM == 'ios':
+    os.environ['ZERO_AR_DATE'] = '1' # Reproducible: timestamp of __.SYMDEF SORTED in .a
+
 ROOT = os.getcwd()
 
 INSTALL_PREFIX = '/usr'
@@ -111,7 +114,8 @@ def get_platform_cflags() -> str:
 
 class Builder:
     def __init__(self, name: str, options: list[str] | None=None, js: list[str] | None=None,
-                 ios: list[str] | None=None, harmony: list[str] | None=None, src='.', definitions: list[str] | None=None):
+                 ios: list[str] | None=None, harmony: list[str] | None=None, src='.',
+                 definitions: list[str] | None=None, includes: list[str] | None=None):
         self.name = name
         # /path/to/build/ios-arm64/librime
         self.dest_dir = f'{ROOT}/build/{TARGET}/{self.name}'
@@ -123,6 +127,7 @@ class Builder:
         self.ios = ios or []
         self.harmony = harmony or []
         self.definitions = definitions or []
+        self.includes = includes or []
 
     def configure(self):
         pass
@@ -137,11 +142,13 @@ class Builder:
         lib_dir = f'{self.dest_dir}{INSTALL_PREFIX}/lib'
         if not os.path.exists(lib_dir):
             return
-        commands = ['--strip-unneeded', f'{lib_dir}/*.a']
+        all_a = f'{lib_dir}/*.a'
         if PLATFORM == 'harmony':
-            ensure(f'{HARMONY_NATIVE}/llvm/bin/llvm-strip', commands)
+            ensure(f'{HARMONY_NATIVE}/llvm/bin/llvm-strip', ['--strip-unneeded', all_a])
         elif PLATFORM == 'js':
-            ensure('emstrip', commands)
+            ensure('emstrip', ['--strip-unneeded', all_a])
+        else:
+            ensure('strip', ['-x', all_a])
 
     def pre_package(self):
         pass
@@ -206,6 +213,8 @@ class CMakeBuilder(Builder):
         c_cxx_flags = f'-ffile-prefix-map={os.path.abspath(self.src)}=.' # Reproducible: __FILE__
         if self.definitions:
             c_cxx_flags += ' ' + ' '.join(f'-D{definition}' for definition in self.definitions)
+        if self.includes:
+            c_cxx_flags += ' ' + ' '.join(f'-I{include}' for include in self.includes)
 
         if PLATFORM == 'js':
             # emscripten defaults to full-static libs but we want plugins based on these dependencies to be dynamic.

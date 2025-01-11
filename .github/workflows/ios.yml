@@ -35,6 +35,11 @@ jobs:
         with:
           python-version: '3.12'
 
+      - name: Version info
+        run: |
+          clang --version
+          cmake --version
+
       - name: Build
         run: python scripts/build.py ios ${{ matrix.platform }}
 

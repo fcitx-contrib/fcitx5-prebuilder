@@ -8,7 +8,6 @@ if PLATFORM != 'macos':
 patch(project)
 
 CMakeBuilder(project, [
-    f'-DCMAKE_CXX_FLAGS=-I{ROOT}/build/{USR}/include',
     '-DUSE_SYSTEM_MARISA=ON',
     '-DENABLE_DARTS=OFF'
-]).exec()
+], includes=[f'{ROOT}/build/{USR}/include']).exec()

@@ -43,7 +43,15 @@ jobs:
             extra-cmake-modules \
             autoconf automake libtool autoconf-archive \
             byacc vala \
-            ninja meson || true # ignore brew link python error
+            ninja || true # ignore brew link python error
+          pip install meson==1.6.1
+
+      - name: Version info
+        run: |
+          bison --version
+          clang --version
+          cmake --version
+          valac --version
 
       - name: Build
         run: python scripts/build.py macos

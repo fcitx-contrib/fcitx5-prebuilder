@@ -137,11 +137,11 @@ class Builder:
         lib_dir = f'{self.dest_dir}{INSTALL_PREFIX}/lib'
         if not os.path.exists(lib_dir):
             return
-        all_a = [f'{lib_dir}/*.a']
+        commands = ['--strip-unneeded', f'{lib_dir}/*.a']
         if PLATFORM == 'harmony':
-            ensure(f'{HARMONY_NATIVE}/llvm/bin/llvm-strip', all_a)
+            ensure(f'{HARMONY_NATIVE}/llvm/bin/llvm-strip', commands)
         elif PLATFORM == 'js':
-            ensure('emstrip', all_a)
+            ensure('emstrip', commands)
 
     def pre_package(self):
         pass

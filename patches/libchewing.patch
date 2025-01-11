@@ -1,8 +1,16 @@
 diff --git a/CMakeLists.txt b/CMakeLists.txt
-index a6cd67b..cdb87d0 100644
+index a6cd67b..4c05c90 100644
 --- a/CMakeLists.txt
 +++ b/CMakeLists.txt
-@@ -216,8 +216,9 @@ if(WITH_RUST)
+@@ -11,7 +11,6 @@ include(CTest)
+ set(CTEST_PARALLEL_LEVEL 1)
+ 
+ if(UNIX)
+-    set(CMAKE_C_FLAGS "-g -O2 -Wall -fPIC ${CMAKE_C_FLAGS}")
+     add_compile_definitions(UNDER_POSIX PIC)
+ endif()
+ 
+@@ -216,8 +215,9 @@ if(WITH_RUST)
      list(APPEND ALL_INC ${INC_DIR}/chewing_rs.h)
  endif()
  
@@ -13,7 +21,7 @@ index a6cd67b..cdb87d0 100644
  if(BUILD_TESTING)
      add_subdirectory(tests)
  endif()
-@@ -229,13 +230,13 @@ add_library(common OBJECT
+@@ -229,13 +229,13 @@ add_library(common OBJECT
      src/porting_layer/src/asprintf.c
  )
  target_compile_definitions(common PRIVATE

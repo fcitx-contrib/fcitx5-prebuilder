@@ -23,10 +23,7 @@ class MozcBuilder(CMakeBuilder):
         # Combine all .o files of absl to libabsl.a
         lib_dir = f'{self.dest_dir}{INSTALL_PREFIX}/lib'
         libabsl_a = f'{lib_dir}/libabsl.a'
-        if PLATFORM == 'ios': # Xcode
-            all_libabsl_o = f'$(find {self.build_} -name "*.o" | grep build/absl)'
-        else: # Ninja
-            all_libabsl_o = f'$(find {self.build_}/mozc/src/third_party/abseil-cpp -name "*.o")'
+        all_libabsl_o = f'$(find {self.build_}/mozc/src/third_party/abseil-cpp -name "*.o")'
         ensure('ar', ['rc', libabsl_a, all_libabsl_o])
 
     def pre_package(self):

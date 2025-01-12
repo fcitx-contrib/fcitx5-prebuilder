@@ -15,13 +15,16 @@ PLATFORM_VERSION = {
 }
 
 PLATFORM = cast(Literal['macos', 'ios', 'harmony', 'js'], sys.argv[1])
-IOS_PLATFORM = 'SIMULATOR' if 'simulator' in sys.argv[2:] else 'OS'
+IOS_PLATFORM = cast(Literal['OS64', 'SIMULATOR64', 'SIMULATORARM64'], sys.argv[2]) if PLATFORM == 'ios' else ''
+IOS_ARCH = 'x86_64' if IOS_PLATFORM == 'SIMULATOR64' else 'arm64'
 OHOS_ARCH = sys.argv[2] if PLATFORM == 'harmony' else ''
 
-if PLATFORM == 'macos' or IOS_PLATFORM == 'SIMULATOR':
+if PLATFORM == 'macos':
     POSTFIX = '-' + platform.machine()
 elif PLATFORM == 'harmony':
     POSTFIX = '-' + OHOS_ARCH
+elif PLATFORM == 'ios' and IOS_PLATFORM != 'OS64':
+    POSTFIX = '-' + IOS_ARCH
 else: # iOS real device or JS
     POSTFIX = ''
 
@@ -93,14 +96,13 @@ def get_platform_cflags() -> str:
     if PLATFORM == 'macos':
         return f'-mmacosx-version-min={MACOS_VERSION}'
     if PLATFORM == 'ios':
-        if IOS_PLATFORM == 'SIMULATOR':
-            arch = f'-arch {platform.machine()}'
-            sdk = f'-isysroot {subprocess.check_output("xcrun --sdk iphonesimulator --show-sdk-path", shell=True, text=True).strip()}'
-            version = f'-mios-simulator-version-min={IOS_VERSION}'
-        else:
-            arch = '-arch arm64'
+        arch = f'-arch {IOS_ARCH}'
+        if IOS_PLATFORM == 'OS64':
             sdk = f'-isysroot {subprocess.check_output("xcrun --sdk iphoneos --show-sdk-path", shell=True, text=True).strip()}'
             version = f'-miphoneos-version-min={IOS_VERSION}'
+        else:
+            sdk = f'-isysroot {subprocess.check_output("xcrun --sdk iphonesimulator --show-sdk-path", shell=True, text=True).strip()}'
+            version = f'-mios-simulator-version-min={IOS_VERSION}'
         return ' '.join((arch, sdk, version))
     return ''
 
@@ -158,9 +160,10 @@ class CMakeBuilder(Builder):
         command += [
             'cmake',
             '-B', self.build_,
-            '-G', 'Xcode' if PLATFORM == 'ios' else 'Ninja',
+            '-G', 'Ninja',
             '-S', self.src,
             '-DBUILD_SHARED_LIBS=OFF',
+            f'-DCMAKE_BUILD_TYPE={"Debug" if DEBUG else "Release"}',
             f'-DCMAKE_INSTALL_PREFIX={INSTALL_PREFIX}',
             f'-DCMAKE_FIND_ROOT_PATH={ROOT}/build/{USR}'
         ]
@@ -173,14 +176,13 @@ class CMakeBuilder(Builder):
             command += self.harmony
 
         if PLATFORM == 'ios':
-            # IOS_PLATFORM is recognized by ios.cmake.
+            # PLATFORM is recognized by ios.toolchain.cmake.
             command += [
-                f'-DCMAKE_TOOLCHAIN_FILE={ROOT}/ios.cmake',
-                f'-DIOS_PLATFORM={IOS_PLATFORM}'
+                f'-DCMAKE_TOOLCHAIN_FILE={ROOT}/ios-cmake/ios.toolchain.cmake',
+                '-DENABLE_STRICT_TRY_COMPILE=ON', # leveldb: https://github.com/leetal/ios-cmake/issues/47, https://gitlab.kitware.com/cmake/cmake/-/issues/18121
+                f'-DPLATFORM={IOS_PLATFORM}'
             ]
             command += self.ios
-        else: # Ninja
-            command.append(f'-DCMAKE_BUILD_TYPE={"Debug" if DEBUG else "Release"}')
 
         if PLATFORM == 'js':
             # emscripten defaults to full-static libs but we want plugins based on these dependencies to be dynamic.
@@ -199,10 +201,7 @@ class CMakeBuilder(Builder):
         ])
 
     def build(self):
-        command = ['--build', self.build_]
-        if PLATFORM == 'ios':
-            command += ['--config', 'Release']
-        ensure('cmake', command)
+        ensure('cmake', ['--build', self.build_])
 
     def install(self):
         os.environ['DESTDIR'] = self.dest_dir

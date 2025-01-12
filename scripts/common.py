@@ -179,7 +179,7 @@ class CMakeBuilder(Builder):
             # PLATFORM is recognized by ios.toolchain.cmake.
             command += [
                 f'-DCMAKE_TOOLCHAIN_FILE={ROOT}/ios-cmake/ios.toolchain.cmake',
-                f'-DENABLE_STRICT_TRY_COMPILE=ON', # leveldb: https://github.com/leetal/ios-cmake/issues/47, https://gitlab.kitware.com/cmake/cmake/-/issues/18121
+                '-DENABLE_STRICT_TRY_COMPILE=ON', # leveldb: https://github.com/leetal/ios-cmake/issues/47, https://gitlab.kitware.com/cmake/cmake/-/issues/18121
                 f'-DPLATFORM={IOS_PLATFORM}'
             ]
             command += self.ios

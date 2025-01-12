@@ -63,6 +63,9 @@ jobs:
           path: |
             build/macos-${{ matrix.arch }}/*.tar.bz2
 
+      - name: Check absolute path
+        run: ./scripts/check-absolute-path.sh
+
       - name: Setup tmate session
         if: ${{ failure() }}
         uses: mxschmitt/action-tmate@v3

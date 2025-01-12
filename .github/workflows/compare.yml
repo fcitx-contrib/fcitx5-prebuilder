@@ -1,0 +1,63 @@
+name: Compare
+
+on:
+  workflow_call:
+    inputs:
+      platform:
+        required: true
+        type: string
+
+jobs:
+  compare:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download artifact
+        uses: actions/download-artifact@v4
+        with:
+          pattern: artifact-${{ inputs.platform }}*
+          merge-multiple: true
+
+      - name: Compare content
+        run: |
+          # Must be first step so cwd is empty.
+          for file in $(ls); do
+            echo $file >> manifest
+          done
+          echo "# ${{ inputs.platform }} comparison" > summary.md
+          mkdir release
+          while read file; do
+            echo "## $file" >> summary.md
+            if wget -P release https://github.com/fcitx-contrib/fcitx5-prebuilder/releases/download/${{ inputs.platform }}/$file; then
+              if diff release/$file $file; then
+                echo "Same." >> summary.md
+              else
+                mkdir old new
+                tar xf release/$file -C old
+                tar xf $file -C new
+                diff -r old new >> summary.md || true
+                rm -r old new
+              fi
+            else
+              echo "New." >> summary.md
+            fi
+          done <manifest
+
+      - name: Find comment
+        uses: peter-evans/find-comment@v3
+        id: fc
+        with:
+          issue-number: ${{ github.event.pull_request.number }}
+          comment-author: 'github-actions[bot]'
+          body-includes: "${{ inputs.platform }} comparison"
+
+      - name: Create or update comment
+        uses: peter-evans/create-or-update-comment@v4
+        with:
+          issue-number: ${{ github.event.pull_request.number }}
+          comment-id: ${{ steps.fc.outputs.comment-id }}
+          body-path: summary.md
+          edit-mode: replace
+
+      - name: Setup tmate session
+        if: ${{ failure() }}
+        uses: mxschmitt/action-tmate@v3

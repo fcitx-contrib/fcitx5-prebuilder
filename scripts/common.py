@@ -28,6 +28,9 @@ elif PLATFORM == 'ios' and IOS_PLATFORM != 'OS64':
 else: # iOS real device or JS
     POSTFIX = ''
 
+if PLATFORM in ('macos', 'ios'):
+    os.environ['ZERO_AR_DATE'] = '1' # Reproducible: timestamp of __.SYMDEF SORTED and .o in .a
+
 ROOT = os.getcwd()
 
 INSTALL_PREFIX = '/usr'
@@ -37,6 +40,10 @@ TARGET = f'{PLATFORM}{POSTFIX}'
 USR = f'{TARGET}{INSTALL_PREFIX}'
 
 DEBUG = os.environ.get('DEBUG') == '1'
+
+HARMONY_NATIVE = '/tmp/command-line-tools/sdk/default/openharmony/native'
+
+tar = 'tar' if platform.system() == 'Linux' else 'gtar'
 
 def ensure(program: str, args: list[str]):
     command = " ".join([program, *args])
@@ -76,14 +83,13 @@ def cache(url: str):
 
 def steal(package: str, directories: tuple[str, ...] = ('share',)):
     # Steal data from native build.
-    # Use same arch for bin, e.g. protoc built on macOS x86_64 to build for iOS simulator.
     prebuilt = f'{package}-{platform.machine()}.tar.bz2'
     url = f'https://github.com/fcitx-contrib/fcitx5-prebuilder/releases/download/macos/{prebuilt}'
 
     cache(url)
     directory = f'build/{TARGET}/{package}{INSTALL_PREFIX}'
     ensure('mkdir', ['-p', directory])
-    ensure('tar', [
+    ensure(tar, [
         'xjf',
         f'cache/{prebuilt}',
         '-C',
@@ -109,7 +115,8 @@ def get_platform_cflags() -> str:
 
 class Builder:
     def __init__(self, name: str, options: list[str] | None=None, js: list[str] | None=None,
-                 ios: list[str] | None=None, harmony: list[str] | None=None, src='.'):
+                 ios: list[str] | None=None, harmony: list[str] | None=None, src='.',
+                 definitions: list[str] | None=None, includes: list[str] | None=None):
         self.name = name
         # /path/to/build/ios-arm64/librime
         self.dest_dir = f'{ROOT}/build/{TARGET}/{self.name}'
@@ -120,6 +127,8 @@ class Builder:
         self.js = js or []
         self.ios = ios or []
         self.harmony = harmony or []
+        self.definitions = definitions or []
+        self.includes = includes or []
 
     def configure(self):
         pass
@@ -130,24 +139,43 @@ class Builder:
     def install(self):
         pass
 
+    def strip(self):
+        lib_dir = f'{self.dest_dir}{INSTALL_PREFIX}/lib'
+        if not os.path.exists(lib_dir):
+            return
+        all_a = f'{lib_dir}/*.a'
+        if PLATFORM == 'harmony':
+            ensure(f'{HARMONY_NATIVE}/llvm/bin/llvm-strip', ['--strip-unneeded', all_a])
+        elif PLATFORM == 'js':
+            ensure('emstrip', ['--strip-unneeded', all_a])
+        else:
+            ensure('strip', ['-x', all_a])
+
     def pre_package(self):
         pass
 
     def package(self):
         os.chdir(f'{self.dest_dir}{INSTALL_PREFIX}')
-        ensure('tar', ['cjf', f'{self.dest_dir}{POSTFIX}.tar.bz2', '*'])
+        os.environ['LC_ALL'] = 'C'
+        ensure(tar, ['cj',
+            '--sort=name', '--mtime=@0',
+            '--numeric-owner', '--owner=0', '--group=0', '--mode=go+u,go-w',
+            '-f', f'{self.dest_dir}{POSTFIX}.tar.bz2', '*'
+        ])
 
     def extract(self):
         directory = f'build/{USR}'
         os.chdir(ROOT)
         ensure('mkdir', ['-p', directory])
-        ensure('tar', ['xjf', f'{self.dest_dir}{POSTFIX}.tar.bz2', '-C', directory])
+        ensure(tar, ['xf', f'{self.dest_dir}{POSTFIX}.tar.bz2', '-C', directory])
 
     def exec(self):
         os.chdir(f'{ROOT}/{self.name}')
         self.configure()
         self.build()
         self.install()
+        if not DEBUG:
+            self.strip()
         self.pre_package()
         self.package()
         if self.needs_extract:
@@ -170,7 +198,7 @@ class CMakeBuilder(Builder):
 
         if PLATFORM == 'harmony':
             command += [
-                '-DCMAKE_TOOLCHAIN_FILE=/tmp/command-line-tools/sdk/default/openharmony/native/build/cmake/ohos.toolchain.cmake',
+                f'-DCMAKE_TOOLCHAIN_FILE={HARMONY_NATIVE}/build/cmake/ohos.toolchain.cmake',
                 f'-DOHOS_ARCH={OHOS_ARCH}'
             ]
             command += self.harmony
@@ -184,16 +212,26 @@ class CMakeBuilder(Builder):
             ]
             command += self.ios
 
+        c_cxx_flags = f'-ffile-prefix-map={os.path.abspath(self.src)}=.' # Reproducible: __FILE__
+        if self.definitions:
+            c_cxx_flags += ' ' + ' '.join(f'-D{definition}' for definition in self.definitions)
+        if self.includes:
+            c_cxx_flags += ' ' + ' '.join(f'-I{include}' for include in self.includes)
+
         if PLATFORM == 'js':
             # emscripten defaults to full-static libs but we want plugins based on these dependencies to be dynamic.
-            command += [
-                '-DCMAKE_C_FLAGS=-fPIC',
-                '-DCMAKE_CXX_FLAGS=-fPIC'
-            ]
+            c_cxx_flags += ' -fPIC'
             command += self.js
 
-        if PLATFORM in ('macos', 'ios'):
+        if PLATFORM == 'macos':
             command.append(f'-DCMAKE_OSX_DEPLOYMENT_TARGET={PLATFORM_VERSION[PLATFORM]}')
+        elif PLATFORM == 'ios':
+            command.append(f'-DDEPLOYMENT_TARGET={PLATFORM_VERSION[PLATFORM]}') # ios.toolchain.cmake overrides CMAKE_OSX_DEPLOYMENT_TARGET anyway.
+
+        command += [
+            f'-DCMAKE_C_FLAGS="{c_cxx_flags}"',
+            f'-DCMAKE_CXX_FLAGS="{c_cxx_flags}"'
+        ]
 
         ensure(command[0], [
             *command[1:],

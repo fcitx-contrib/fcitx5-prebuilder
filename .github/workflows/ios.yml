@@ -10,14 +10,14 @@ on:
 
 jobs:
   build:
-    runs-on: ${{ matrix.os }}
+    runs-on: macos-15
     strategy:
       fail-fast: false
       matrix:
         include:
-          - { os: macos-15, postfix: '', platform: OS64 }
-          - { os: macos-15, postfix: -arm64, platform: SIMULATORARM64 }
-          - { os: macos-13, postfix: -x86_64,  platform: SIMULATOR64 }
+          - { platform: OS64, postfix: '' }
+          - { platform: SIMULATORARM64, postfix: -arm64 }
+          - { platform: SIMULATOR64, postfix: -x86_64 }
 
     steps:
       - uses: actions/checkout@v4
@@ -35,6 +35,11 @@ jobs:
         with:
           python-version: '3.12'
 
+      - name: Version info
+        run: |
+          clang --version
+          cmake --version
+
       - name: Install dependencies
         env:
           HOMEBREW_NO_INSTALLED_DEPENDENTS_CHECK: 1
@@ -51,9 +56,19 @@ jobs:
           path: |
             build/ios${{ matrix.postfix }}/*.tar.bz2
 
+      - name: Check absolute path
+        run: ./scripts/check-absolute-path.sh
+
       - name: Setup tmate session
         if: ${{ failure() }}
         uses: mxschmitt/action-tmate@v3
+
+  compare:
+    needs: build
+    if: ${{ github.ref != 'refs/heads/master' }}
+    uses: ./.github/workflows/compare.yml
+    with:
+      platform: ios
 
   release:
     needs: build

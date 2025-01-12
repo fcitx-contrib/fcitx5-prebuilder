@@ -33,6 +33,10 @@ jobs:
           major: ${{ env.SDK_VERSION_MAJOR }}
           minor: ${{ env.SDK_VERSION_MINOR }}
 
+      - name: Version info
+        run: |
+          cmake --version
+
       - name: Build
         run: python scripts/build.py harmony ${{ matrix.arch }}
 
@@ -43,9 +47,19 @@ jobs:
           path: |
             build/harmony-${{ matrix.arch }}/*.tar.bz2
 
+      - name: Check absolute path
+        run: ./scripts/check-absolute-path.sh
+
       - name: Setup tmate session
         if: ${{ failure() }}
         uses: mxschmitt/action-tmate@v3
+
+  compare:
+    needs: build
+    if: ${{ github.ref != 'refs/heads/master' }}
+    uses: ./.github/workflows/compare.yml
+    with:
+      platform: harmony
 
   release:
     needs: build

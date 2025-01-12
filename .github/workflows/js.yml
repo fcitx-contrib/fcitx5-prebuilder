@@ -32,8 +32,8 @@ jobs:
       - name: Install dependencies
         run: |
           sudo apt install -y ninja-build \
-            gettext \
-            meson
+            gettext
+          pip install meson==1.6.1
 
       - name: Install emsdk
         run: |
@@ -42,10 +42,25 @@ jobs:
           ./emsdk install ${{ env.EMSCRIPTEN_VERSION }}
           ./emsdk activate ${{ env.EMSCRIPTEN_VERSION }}
 
+      - name: Version info
+        run: |
+          bison --version
+          cmake --version
+
       - name: Build
         run: |
           . emsdk/emsdk_env.sh
           python scripts/build.py js
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: artifact-js
+          path: |
+            build/js/*.tar.bz2
+
+      - name: Check absolute path
+        run: ./scripts/check-absolute-path.sh
 
       - name: Release
         if: ${{ github.ref == 'refs/heads/master' }}
@@ -61,3 +76,10 @@ jobs:
       - name: Setup tmate session
         if: ${{ failure() }}
         uses: mxschmitt/action-tmate@v3
+
+  compare:
+    needs: build
+    if: ${{ github.ref != 'refs/heads/master' }}
+    uses: ./.github/workflows/compare.yml
+    with:
+      platform: js

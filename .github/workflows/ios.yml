@@ -15,9 +15,9 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - { os: macos-15, postfix: '', platform: os }
-          - { os: macos-15, postfix: -arm64, platform: simulator }
-          - { os: macos-13, postfix: -x86_64,  platform: simulator }
+          - { os: macos-15, postfix: '', platform: OS64 }
+          - { os: macos-15, postfix: -arm64, platform: SIMULATORARM64 }
+          - { os: macos-13, postfix: -x86_64,  platform: SIMULATOR64 }
 
     steps:
       - uses: actions/checkout@v4
@@ -39,6 +39,12 @@ jobs:
         run: |
           clang --version
           cmake --version
+
+      - name: Install dependencies
+        env:
+          HOMEBREW_NO_INSTALLED_DEPENDENTS_CHECK: 1
+        run: |
+          brew install ninja
 
       - name: Build
         run: python scripts/build.py ios ${{ matrix.platform }}

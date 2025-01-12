@@ -94,3 +94,6 @@
 [submodule "zstd"]
 	path = zstd
 	url = https://github.com/facebook/zstd
+[submodule "ios-cmake"]
+	path = ios-cmake
+	url = https://github.com/leetal/ios-cmake

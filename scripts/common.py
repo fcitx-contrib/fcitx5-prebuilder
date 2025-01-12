@@ -28,8 +28,8 @@ elif PLATFORM == 'ios' and IOS_PLATFORM != 'OS64':
 else: # iOS real device or JS
     POSTFIX = ''
 
-if PLATFORM == 'ios':
-    os.environ['ZERO_AR_DATE'] = '1' # Reproducible: timestamp of __.SYMDEF SORTED in .a
+if PLATFORM in ('macos', 'ios'):
+    os.environ['ZERO_AR_DATE'] = '1' # Reproducible: timestamp of __.SYMDEF SORTED and .o in .a
 
 ROOT = os.getcwd()
 

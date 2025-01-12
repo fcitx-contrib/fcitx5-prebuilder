@@ -83,7 +83,6 @@ def cache(url: str):
 
 def steal(package: str, directories: tuple[str, ...] = ('share',)):
     # Steal data from native build.
-    # Use same arch for bin, e.g. protoc built on macOS x86_64 to build for iOS simulator.
     prebuilt = f'{package}-{platform.machine()}.tar.bz2'
     url = f'https://github.com/fcitx-contrib/fcitx5-prebuilder/releases/download/macos/{prebuilt}'
 
@@ -223,8 +222,10 @@ class CMakeBuilder(Builder):
             c_cxx_flags += ' -fPIC'
             command += self.js
 
-        if PLATFORM in ('macos', 'ios'):
+        if PLATFORM == 'macos':
             command.append(f'-DCMAKE_OSX_DEPLOYMENT_TARGET={PLATFORM_VERSION[PLATFORM]}')
+        elif PLATFORM == 'ios':
+            command.append(f'-DDEPLOYMENT_TARGET={PLATFORM_VERSION[PLATFORM]}') # ios.toolchain.cmake overrides CMAKE_OSX_DEPLOYMENT_TARGET anyway.
 
         command += [
             f'-DCMAKE_C_FLAGS="{c_cxx_flags}"',

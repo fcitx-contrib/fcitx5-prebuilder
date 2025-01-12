@@ -174,7 +174,8 @@ class Builder:
         self.configure()
         self.build()
         self.install()
-        self.strip()
+        if not DEBUG:
+            self.strip()
         self.pre_package()
         self.package()
         if self.needs_extract:

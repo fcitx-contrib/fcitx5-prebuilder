@@ -61,6 +61,7 @@ harmony = [
     'ecm',
     'fmt',
     'libintl',
+    'lua',
     'marisa',
     'opencc',
     'zstd'

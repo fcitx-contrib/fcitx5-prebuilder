@@ -43,6 +43,7 @@ jobs:
           done <manifest
 
       - name: Find comment
+        if: ${{ github.event.pull_request.head.repo.fork == false }}
         uses: peter-evans/find-comment@v3
         id: fc
         with:
@@ -51,12 +52,17 @@ jobs:
           body-includes: "${{ inputs.platform }} comparison"
 
       - name: Create or update comment
+        if: ${{ github.event.pull_request.head.repo.fork == false }}
         uses: peter-evans/create-or-update-comment@v4
         with:
           issue-number: ${{ github.event.pull_request.number }}
           comment-id: ${{ steps.fc.outputs.comment-id }}
           body-path: summary.md
           edit-mode: replace
+
+      - name: Output on fork
+        if: ${{ github.event.pull_request.head.repo.fork == true }}
+        run: cat summary.md
 
       - name: Setup tmate session
         if: ${{ failure() }}

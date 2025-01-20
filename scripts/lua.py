@@ -1,4 +1,4 @@
-from common import Builder, INSTALL_PREFIX, PLATFORM, ROOT, ensure, get_platform_cflags, patch
+from common import Builder, INSTALL_PREFIX, PLATFORM, ROOT, HARMONY_NATIVE, OHOS_ARCH, ensure, get_platform_cflags, patch
 
 project = 'lua'
 
@@ -18,6 +18,8 @@ class LuaBuilder(Builder):
             cflags += ' -DLUA_USE_MACOSX'
         elif PLATFORM == 'ios':
             cflags += ' -DLUA_USE_IOS'
+        elif PLATFORM == 'harmony':
+            cflags += f' -fPIC --target={'aarch64' if OHOS_ARCH == 'arm64-v8a' else 'x86_64'}-linux-ohos'
         elif PLATFORM == 'js':
             cflags += ' -fPIC'
 
@@ -33,6 +35,12 @@ class LuaBuilder(Builder):
                 'CC=emcc',
                 'AR="emar q"',
                 'RANLIB=emranlib'
+            ]
+        elif PLATFORM == 'harmony':
+            command += [
+                f'CC={HARMONY_NATIVE}/llvm/bin/clang',
+                f'AR="{HARMONY_NATIVE}/llvm/bin/llvm-ar rc"',
+                f'RANLIB={HARMONY_NATIVE}/llvm/bin/llvm-ranlib'
             ]
 
         ensure(command[0], command[1:])

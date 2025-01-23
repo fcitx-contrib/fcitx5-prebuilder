@@ -1,7 +1,7 @@
 import os
 from common import CMakeBuilder, PLATFORM, cache, ensure
 
-version = '1.86.0'
+version = '1.87.0'
 
 boost_dir = f'boost-{version}'
 boost_tar = f'{boost_dir}-cmake.tar.xz'

@@ -34,7 +34,7 @@ jobs:
                 mkdir old new
                 tar xf release/$file -C old
                 tar xf $file -C new
-                diff -r old new >> summary.md || true
+                diff -rq old new | grep -v '\.hpp differ' >> summary.md || true
                 rm -r old new
               fi
             else

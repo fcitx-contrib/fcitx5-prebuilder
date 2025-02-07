@@ -1,0 +1,52 @@
+name: Windows build
+
+on:
+  workflow_call:
+
+jobs:
+  build:
+    runs-on: windows-2025
+    strategy:
+      fail-fast: false
+      matrix:
+        platform: [x86_64]
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Checkout submodules
+        run: |
+          git submodule update --init --depth=0 json libuv
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Version info
+        run: |
+          clang --version
+          cmake --version
+
+      - name: Build
+        run: python scripts/build.py windows ${{ matrix.platform }}
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: artifact-windows-${{ matrix.platform }}
+          path: |
+            build/windows-${{ matrix.platform }}/*.tar.bz2
+
+      - name: Check absolute path
+        run: ./scripts/check-absolute-path.sh
+
+      - name: Setup tmate session
+        if: ${{ failure() }}
+        uses: mxschmitt/action-tmate@v3
+
+  compare:
+    needs: build
+    if: ${{ github.ref != 'refs/heads/master' }}
+    uses: ./.github/workflows/compare.yml
+    with:
+      platform: windows

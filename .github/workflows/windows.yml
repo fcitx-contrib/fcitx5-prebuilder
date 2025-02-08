@@ -41,6 +41,7 @@ jobs:
             build/windows-${{ matrix.platform }}/*.tar.bz2
 
       - name: Check absolute path
+        shell: bash
         run: ./scripts/check-absolute-path.sh
 
       - name: Setup tmate session

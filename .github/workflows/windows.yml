@@ -54,3 +54,24 @@ jobs:
     uses: ./.github/workflows/compare.yml
     with:
       platform: windows
+
+  release:
+    needs: build
+    if: ${{ github.ref == 'refs/heads/master' }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download artifact
+        uses: actions/download-artifact@v4
+        with:
+          pattern: artifact-windows*
+          merge-multiple: true
+
+      - name: Release
+        uses: 'marvinpinto/action-automatic-releases@latest'
+        with:
+          repo_token: ${{ secrets.GITHUB_TOKEN }}
+          automatic_release_tag: windows
+          prerelease: true
+          title: "Windows Build"
+          files: |
+            *.tar.bz2

@@ -13,6 +13,7 @@ class OpenSSLBuilder(Builder):
             f'--prefix={INSTALL_PREFIX}',
             '--libdir=lib',
             '-static',
+            'no-apps',
             'no-docs',
             'no-tests',
             *self.options
@@ -43,5 +44,11 @@ class OpenSSLBuilder(Builder):
 
     def install(self):
         ensure('make', ['install', f'DESTDIR={self.dest_dir}'])
+
+    def pre_package(self):
+        ensure('rm', ['-rf',
+            f'{self.dest_dir}{INSTALL_PREFIX}/bin',
+            f'{self.dest_dir}{INSTALL_PREFIX}/ssl'
+        ])
 
 OpenSSLBuilder(project).exec()

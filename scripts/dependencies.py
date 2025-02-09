@@ -39,6 +39,11 @@ macos = [
     'zstd'
 ]
 
+windows = [
+    'json',
+    'libuv'
+]
+
 ios = [
     'boost',
     'fmt',
@@ -94,6 +99,7 @@ js = [
 
 platform_projects = {
     'macos': macos,
+    'windows': windows,
     'ios': ios,
     'harmony': harmony,
     'js': js

@@ -14,13 +14,16 @@ PLATFORM_VERSION = {
     'ios': IOS_VERSION
 }
 
-PLATFORM = cast(Literal['macos', 'ios', 'harmony', 'js'], sys.argv[1])
+PLATFORM = cast(Literal['macos', 'windows', 'ios', 'harmony', 'js'], sys.argv[1])
+WINDOWS_ARCH = sys.argv[2] if PLATFORM == 'windows' else ''
 IOS_PLATFORM = cast(Literal['OS64', 'SIMULATOR64', 'SIMULATORARM64'], sys.argv[2]) if PLATFORM == 'ios' else ''
 IOS_ARCH = 'x86_64' if IOS_PLATFORM == 'SIMULATOR64' else 'arm64'
 OHOS_ARCH = sys.argv[2] if PLATFORM == 'harmony' else ''
 
 if PLATFORM == 'macos':
     POSTFIX = '-' + platform.machine()
+elif PLATFORM == 'windows':
+    POSTFIX = '-' + WINDOWS_ARCH
 elif PLATFORM == 'harmony':
     POSTFIX = '-' + OHOS_ARCH
 elif PLATFORM == 'ios' and IOS_PLATFORM != 'OS64':
@@ -43,7 +46,10 @@ DEBUG = os.environ.get('DEBUG') == '1'
 
 HARMONY_NATIVE = '/tmp/command-line-tools/sdk/default/openharmony/native'
 
-tar = 'tar' if platform.system() == 'Linux' else 'gtar'
+tar = {
+    'Linux': 'tar',
+    'Windows': 'C:/msys64/usr/bin/tar.exe',
+}.get(platform.system(), 'gtar')
 
 def ensure(program: str, args: list[str]):
     command = " ".join([program, *args])
@@ -148,6 +154,9 @@ class Builder:
             ensure(f'{HARMONY_NATIVE}/llvm/bin/llvm-strip', ['--strip-unneeded', all_a])
         elif PLATFORM == 'js':
             ensure('emstrip', ['--strip-unneeded', all_a])
+        elif PLATFORM == 'windows':
+            all_lib = f'{lib_dir}/*.lib'
+            ensure('llvm-strip', ['--strip-unneeded', all_lib])
         else:
             ensure('strip', ['-x', all_a])
 
@@ -160,6 +169,7 @@ class Builder:
         ensure(tar, ['cj',
             '--sort=name', '--mtime=@0',
             '--numeric-owner', '--owner=0', '--group=0', '--mode=go+u,go-w',
+            '--force-local', # Don't interpret C: as remote address.
             '-f', f'{self.dest_dir}{POSTFIX}.tar.bz2', '*'
         ])
 

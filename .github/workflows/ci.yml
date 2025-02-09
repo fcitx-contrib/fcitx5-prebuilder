@@ -47,6 +47,11 @@ jobs:
     with:
       mozc_sha: ${{ needs.lint.outputs.MOZC_SHA }}
 
+  windows:
+    if: "!contains(needs.lint.outputs.message, '!windows')"
+    needs: lint
+    uses: ./.github/workflows/windows.yml
+
   ios:
     if: "!contains(needs.lint.outputs.message, '!ios')"
     needs: lint

@@ -18,12 +18,11 @@ class OpenSSLBuilder(Builder):
             *self.options
         ])
 
-        
     def build(self):
         ensure('make', ['clean'])
         command = []
 
-        cflags = ['-O3']
+        cflags = ['-O3', '-fPIC']
         if PLATFORM == 'harmony':
             cflags += [f'--target={OHOS_TARGET}']
 
@@ -45,4 +44,4 @@ class OpenSSLBuilder(Builder):
     def install(self):
         ensure('make', ['install', f'DESTDIR={self.dest_dir}'])
 
-OpenSSLBuilder('openssl').exec()
+OpenSSLBuilder(project).exec()

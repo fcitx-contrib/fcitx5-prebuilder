@@ -1,6 +1,9 @@
 [submodule "anthy-cmake"]
 	path = anthy-cmake
 	url = https://github.com/fcitx5-android/anthy-cmake
+[submodule "curl"]
+	path = curl
+	url = https://github.com/curl/curl
 [submodule "default-icon-theme"]
 	path = default-icon-theme
 	url = https://gitlab.freedesktop.org/xdg/default-icon-theme.git
@@ -82,6 +85,9 @@
 [submodule "opencc"]
 	path = opencc
 	url = https://github.com/BYVoid/OpenCC
+[submodule "openssl"]
+	path = openssl
+	url = https://github.com/openssl/openssl
 [submodule "pcre2"]
 	path = pcre2
 	url = https://github.com/PCRE2Project/pcre2
@@ -97,9 +103,3 @@
 [submodule "ios-cmake"]
 	path = ios-cmake
 	url = https://github.com/leetal/ios-cmake
-[submodule "openssl"]
-	path = openssl
-	url = https://github.com/openssl/openssl.git
-[submodule "curl"]
-	path = curl
-	url = https://github.com/curl/curl.git

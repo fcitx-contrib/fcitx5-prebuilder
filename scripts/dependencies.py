@@ -64,6 +64,7 @@ harmony = [
     'lua',
     'marisa',
     'opencc',
+    'openssl',
     'zstd'
 ]
 

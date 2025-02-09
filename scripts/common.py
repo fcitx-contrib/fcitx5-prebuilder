@@ -19,6 +19,7 @@ WINDOWS_ARCH = sys.argv[2] if PLATFORM == 'windows' else ''
 IOS_PLATFORM = cast(Literal['OS64', 'SIMULATOR64', 'SIMULATORARM64'], sys.argv[2]) if PLATFORM == 'ios' else ''
 IOS_ARCH = 'x86_64' if IOS_PLATFORM == 'SIMULATOR64' else 'arm64'
 OHOS_ARCH = sys.argv[2] if PLATFORM == 'harmony' else ''
+OHOS_TARGET = f'{'aarch64' if OHOS_ARCH == 'arm64-v8a' else 'x86_64'}-linux-ohos'
 
 if PLATFORM == 'macos':
     POSTFIX = '-' + platform.machine()

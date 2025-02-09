@@ -1,4 +1,5 @@
 dag = {
+    'curl': ['openssl'],
     'glib': ['pcre2'],
     'json-glib': ['glib'],
     'libgee': ['glib'],
@@ -63,12 +64,14 @@ ios = [
 
 harmony = [
     'boost',
+    'curl',
     'ecm',
     'fmt',
     'libintl',
     'lua',
     'marisa',
     'opencc',
+    'openssl',
     'zstd'
 ]
 

@@ -229,6 +229,9 @@ class CMakeBuilder(Builder):
         if self.includes:
             c_cxx_flags += ' ' + ' '.join(f'-I{include}' for include in self.includes)
 
+        if PLATFORM == 'windows':
+            c_cxx_flags += ' -mno-incremental-linker-compatible' # Reproducible: TimeDateStamp in llvm: WinCOFFObjectWriter.cpp
+
         if PLATFORM == 'js':
             # emscripten defaults to full-static libs but we want plugins based on these dependencies to be dynamic.
             c_cxx_flags += ' -fPIC'

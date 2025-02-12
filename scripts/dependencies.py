@@ -47,6 +47,7 @@ windows = [
 
 ios = [
     'boost',
+    'curl',
     'fmt',
     'glog',
     'json-c',

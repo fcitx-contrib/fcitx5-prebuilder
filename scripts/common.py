@@ -82,6 +82,7 @@ def cache(url: str):
         print(f'Using cached {file}')
         return
     ensure('wget', [
+        '-nv', # boost progress bar produces too many lines.
         '-P',
         'cache',
         url
@@ -257,7 +258,7 @@ class CMakeBuilder(Builder):
 
     def install(self):
         os.environ['DESTDIR'] = self.dest_dir
-        ensure('cmake', ['--install', self.build_])
+        ensure('cmake', ['--install', self.build_, *(['> /dev/null'] if self.name == 'boost' else [])])
 
 
 class MesonBuilder(Builder):

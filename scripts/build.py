@@ -6,13 +6,16 @@ from dependencies import platform_projects, dag
 
 
 def sort_projects(projects: list[str]) -> list[str]:
-    in_degree = {project: len(dag.get(project, [])) for project in projects}
+    in_degree = {project: len([dep for dep in dag.get(project, []) if dep in projects]) for project in projects}
     adjacency_list = defaultdict(list)
 
     for project, deps in dag.items():
         if project not in projects:
             continue
         for dep in deps:
+            # openssl is not needed for curl on iOS.
+            if dep not in projects:
+                continue
             adjacency_list[dep].append(project)
 
     zero_in_degree = deque(sorted([p for p in projects if in_degree[p] == 0]))

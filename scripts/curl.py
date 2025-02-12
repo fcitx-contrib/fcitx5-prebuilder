@@ -9,8 +9,7 @@ CMakeBuilder(project, [
     '-DBUILD_LIBCURL_DOCS=OFF',
     '-DBUILD_MISC_DOCS=OFF',
     '-DBUILD_TESTING=OFF',
-    '-DCURL_CA_BUNDLE="/etc/ssl/certs/cacert.pem"',
-    '-DCURL_CA_PATH="/etc/ssl/certs/"',
+    '-DCURL_BROTLI=OFF',
     '-DCURL_DISABLE_ALTSVC=ON',
     '-DCURL_DISABLE_AWS=ON',
     '-DCURL_DISABLE_BASIC_AUTH=ON',
@@ -45,4 +44,8 @@ CMakeBuilder(project, [
     '-DHTTP_ONLY=ON',
     '-DUSE_LIBIDN2=OFF',
     '-DUSE_NGHTTP2=OFF',
+], ios=['-DCURL_USE_SECTRANSP=ON'],
+harmony=[
+    '-DCURL_CA_BUNDLE="/etc/ssl/certs/cacert.pem"',
+    '-DCURL_CA_PATH="/etc/ssl/certs/"'
 ]).exec()

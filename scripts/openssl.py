@@ -1,9 +1,11 @@
-
+import os
 from common import HARMONY_NATIVE, INSTALL_PREFIX, OHOS_ARCH, OHOS_TARGET, PLATFORM, Builder, ensure, patch
 
 project = 'openssl'
 
 patch(project)
+
+os.environ['SOURCE_DATE_EPOCH'] = '0' # Reproducible: crypto/buildinf.h
 
 class OpenSSLBuilder(Builder):
     def configure(self):

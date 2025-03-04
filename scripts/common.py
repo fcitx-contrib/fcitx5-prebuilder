@@ -6,7 +6,7 @@ from typing import Literal, cast
 
 from dependencies import dag
 
-MACOS_VERSION = 13 # Also need to update meson-macos.ini
+MACOS_VERSION = 13.3 # Also need to update meson-macos-*.ini
 IOS_VERSION = 15
 
 PLATFORM_VERSION = {
@@ -15,6 +15,7 @@ PLATFORM_VERSION = {
 }
 
 PLATFORM = cast(Literal['macos', 'windows', 'ios', 'harmony', 'js'], sys.argv[1])
+MACOS_ARCH = sys.argv[2] if PLATFORM == 'macos' else ''
 WINDOWS_ARCH = sys.argv[2] if PLATFORM == 'windows' else ''
 IOS_PLATFORM = cast(Literal['OS64', 'SIMULATOR64', 'SIMULATORARM64'], sys.argv[2]) if PLATFORM == 'ios' else ''
 IOS_ARCH = 'x86_64' if IOS_PLATFORM == 'SIMULATOR64' else 'arm64'
@@ -22,7 +23,7 @@ OHOS_ARCH = sys.argv[2] if PLATFORM == 'harmony' else ''
 OHOS_TARGET = f'{'aarch64' if OHOS_ARCH == 'arm64-v8a' else 'x86_64'}-linux-ohos'
 
 if PLATFORM == 'macos':
-    POSTFIX = '-' + platform.machine()
+    POSTFIX = '-' + MACOS_ARCH
 elif PLATFORM == 'windows':
     POSTFIX = '-' + WINDOWS_ARCH
 elif PLATFORM == 'harmony':
@@ -108,7 +109,7 @@ def steal(package: str, directories: tuple[str, ...] = ('share',)):
 
 def get_platform_cflags() -> str:
     if PLATFORM == 'macos':
-        return f'-mmacosx-version-min={MACOS_VERSION}'
+        return f'-arch {MACOS_ARCH} -mmacosx-version-min={MACOS_VERSION}'
     if PLATFORM == 'ios':
         arch = f'-arch {IOS_ARCH}'
         if IOS_PLATFORM == 'OS64':
@@ -123,6 +124,7 @@ def get_platform_cflags() -> str:
 
 class Builder:
     def __init__(self, name: str, options: list[str] | None=None, js: list[str] | None=None,
+                 macos: list[str] | None=None,
                  ios: list[str] | None=None, harmony: list[str] | None=None, src='.',
                  definitions: list[str] | None=None, includes: list[str] | None=None):
         self.name = name
@@ -132,6 +134,7 @@ class Builder:
         self.src = src
         self.build_ = f'build/{TARGET}'
         self.needs_extract = any(name in deps for deps in dag.values())
+        self.macos = macos or []
         self.js = js or []
         self.ios = ios or []
         self.harmony = harmony or []
@@ -239,7 +242,11 @@ class CMakeBuilder(Builder):
             command += self.js
 
         if PLATFORM == 'macos':
-            command.append(f'-DCMAKE_OSX_DEPLOYMENT_TARGET={PLATFORM_VERSION[PLATFORM]}')
+            command += [
+                f'-DCMAKE_OSX_DEPLOYMENT_TARGET={PLATFORM_VERSION[PLATFORM]}',
+                f'-DCMAKE_OSX_ARCHITECTURES={MACOS_ARCH}'
+            ]
+            command += self.macos
         elif PLATFORM == 'ios':
             command.append(f'-DDEPLOYMENT_TARGET={PLATFORM_VERSION[PLATFORM]}') # ios.toolchain.cmake overrides CMAKE_OSX_DEPLOYMENT_TARGET anyway.
 
@@ -263,10 +270,12 @@ class CMakeBuilder(Builder):
 
 class MesonBuilder(Builder):
     def configure(self):
+        os.environ['PKG_CONFIG_SYSROOT_DIR'] = f'{ROOT}/build/{TARGET}'
+        os.environ['PKG_CONFIG_LIBDIR'] = f'{ROOT}/build/{USR}/lib/pkgconfig'
         ensure('meson', [
             'setup',
             self.build_,
-            f'--cross-file={ROOT}/scripts/meson-cross-js.ini' if PLATFORM == 'js' else f'--native-file={ROOT}/scripts/meson-macos.ini',
+            f'--cross-file={ROOT}/scripts/meson-cross-js.ini' if PLATFORM == 'js' else f'--cross-file={ROOT}/scripts/meson-macos-{MACOS_ARCH}.ini',
             '--buildtype=release',
             f'--prefix={INSTALL_PREFIX}',
             '--default-library=static',

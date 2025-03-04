@@ -33,7 +33,7 @@ jobs:
         run: |
           sudo apt install -y ninja-build \
             gettext
-          pip install meson==1.6.1
+          pip install meson==1.7.0
 
       - name: Install emsdk
         run: |

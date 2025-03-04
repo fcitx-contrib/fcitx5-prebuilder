@@ -10,14 +10,11 @@ on:
 
 jobs:
   build:
-    runs-on: ${{ matrix.os }}
+    runs-on: macos-15
     strategy:
       fail-fast: false
       matrix:
-        os: [macos-15, macos-13]
-        include:
-          - { os: macos-15, arch: arm64 }
-          - { os: macos-13, arch: x86_64 }
+        arch: [arm64, x86_64]
 
     steps:
       - uses: actions/checkout@v4
@@ -44,7 +41,7 @@ jobs:
             autoconf automake libtool autoconf-archive \
             byacc vala \
             ninja || true # ignore brew link python error
-          pip install meson==1.6.1
+          pip install meson==1.7.0
 
       - name: Version info
         run: |
@@ -54,7 +51,7 @@ jobs:
           valac --version
 
       - name: Build
-        run: python scripts/build.py macos
+        run: python scripts/build.py macos ${{ matrix.arch }}
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4

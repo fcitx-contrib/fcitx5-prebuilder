@@ -49,6 +49,9 @@
 [submodule "libintl"]
 	path = libintl
 	url = https://github.com/j-jorge/libintl-lite
+[submodule "libmozc"]
+	path = libmozc
+	url = https://github.com/fcitx-contrib/fcitx5-mozc
 [submodule "librime"]
 	path = librime
 	url = https://github.com/rime/librime
@@ -79,9 +82,6 @@
 [submodule "marisa"]
 	path = marisa
 	url = https://github.com/rime/marisa-trie
-[submodule "libmozc"]
-	path = libmozc
-	url = https://github.com/fcitx-contrib/fcitx5-mozc
 [submodule "opencc"]
 	path = opencc
 	url = https://github.com/BYVoid/OpenCC

@@ -5,14 +5,11 @@ on:
 
 jobs:
   build:
-    runs-on: ${{ matrix.os }}
+    runs-on: macos-15
     strategy:
       fail-fast: false
       matrix:
-        os: [macos-15, macos-13]
-        include:
-          - { os: macos-15, arch: arm64 }
-          - { os: macos-13, arch: x86_64 }
+        arch: [arm64, x86_64]
 
     steps:
       - uses: actions/checkout@v4
@@ -34,7 +31,7 @@ jobs:
       - name: Build
         run: |
           git submodule update --init librime librime-lua librime-octagram librime-predict
-          DEBUG=1 python scripts/librime.py macos
+          DEBUG=1 python scripts/librime.py macos ${{ matrix.arch }}
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4

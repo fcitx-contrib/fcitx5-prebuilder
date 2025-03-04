@@ -124,6 +124,7 @@ def get_platform_cflags() -> str:
 
 class Builder:
     def __init__(self, name: str, options: list[str] | None=None, js: list[str] | None=None,
+                 macos: list[str] | None=None,
                  ios: list[str] | None=None, harmony: list[str] | None=None, src='.',
                  definitions: list[str] | None=None, includes: list[str] | None=None):
         self.name = name
@@ -133,6 +134,7 @@ class Builder:
         self.src = src
         self.build_ = f'build/{TARGET}'
         self.needs_extract = any(name in deps for deps in dag.values())
+        self.macos = macos or []
         self.js = js or []
         self.ios = ios or []
         self.harmony = harmony or []
@@ -244,6 +246,7 @@ class CMakeBuilder(Builder):
                 f'-DCMAKE_OSX_DEPLOYMENT_TARGET={PLATFORM_VERSION[PLATFORM]}',
                 f'-DCMAKE_OSX_ARCHITECTURES={MACOS_ARCH}'
             ]
+            command += self.macos
         elif PLATFORM == 'ios':
             command.append(f'-DDEPLOYMENT_TARGET={PLATFORM_VERSION[PLATFORM]}') # ios.toolchain.cmake overrides CMAKE_OSX_DEPLOYMENT_TARGET anyway.
 

@@ -1,5 +1,5 @@
 import os
-from common import CMakeBuilder, PLATFORM, cache, ensure
+from common import CMakeBuilder, MACOS_ARCH, PLATFORM, cache, ensure
 
 version = '1.87.0'
 
@@ -48,10 +48,18 @@ libs = "algorithm;bimap;container;crc;interprocess;iostreams;multi_index;ptr_con
 if PLATFORM == 'macos':
     libs += ';beast'
 
+BOOST_CONTEXT_ABI = {
+    'arm64': 'aapcs',
+    'x86_64': 'sysv'
+}[MACOS_ARCH]
+
 CMakeBuilder('boost', [
     f'-DBOOST_INCLUDE_LIBRARIES="{libs}"',
     '-DBOOST_IOSTREAMS_ENABLE_BZIP2=Off',
     '-DBOOST_IOSTREAMS_ENABLE_ZLIB=Off',
     '-DBOOST_IOSTREAMS_ENABLE_LZMA=Off',
     '-DBOOST_IOSTREAMS_ENABLE_ZSTD=Off'
+], macos=[
+    f'-DBOOST_CONTEXT_ABI={BOOST_CONTEXT_ABI}',
+    f'-DBOOST_CONTEXT_ARCHITECTURE={MACOS_ARCH}'
 ]).exec()

@@ -48,8 +48,10 @@ windows = [
 ios = [
     'boost',
     'curl',
+    'ecm',
     'fmt',
     'glog',
+    'json',
     'json-c',
     'leveldb',
     'libintl',
@@ -68,6 +70,7 @@ harmony = [
     'curl',
     'ecm',
     'fmt',
+    'json',
     'libintl',
     'lua',
     'marisa',

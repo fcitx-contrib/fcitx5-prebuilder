@@ -1,0 +1,11 @@
+diff --git a/src/misc/process_memory.hpp b/src/misc/process_memory.hpp
+index 2923858..e3ea68c 100644
+--- a/src/misc/process_memory.hpp
++++ b/src/misc/process_memory.hpp
+@@ -69,5 +69,5 @@ inline void getMemoryUsage(size_t& vmUsage, size_t& residentSet) {
+ }
+ 
+ #else
+-#error "Platform not supported"
++void getMemoryUsage(size_t& vmUsage, size_t& residentSet) {}
+ #endif

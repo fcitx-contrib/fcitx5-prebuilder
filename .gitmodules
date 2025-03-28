@@ -64,6 +64,9 @@
 [submodule "librime-predict"]
 	path = librime-predict
 	url = https://github.com/rime/librime-predict
+[submodule "librime-qjs"]
+	path = librime-qjs
+	url = https://github.com/HuangJian/librime-qjs
 [submodule "libskk"]
 	path = libskk
 	url = https://github.com/ueno/libskk

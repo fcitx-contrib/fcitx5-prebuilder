@@ -30,7 +30,7 @@ jobs:
 
       - name: Build
         run: |
-          git submodule update --init librime librime-lua librime-octagram librime-predict
+          git submodule update --init librime librime-lua librime-octagram librime-predict librime-qjs
           DEBUG=1 python scripts/librime.py macos ${{ matrix.arch }}
 
       - name: Upload artifact

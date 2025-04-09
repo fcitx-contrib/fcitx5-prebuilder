@@ -269,13 +269,42 @@ class CMakeBuilder(Builder):
 
 
 class MesonBuilder(Builder):
+    @staticmethod
+    def cross_file_path():
+        if PLATFORM == 'macos':
+            name = f'meson-macos-{MACOS_ARCH}'
+        elif PLATFORM == 'ios':
+            name = f'meson-ios-{IOS_PLATFORM}'
+        elif PLATFORM == 'harmony':
+            name = f'meson-harmony-{OHOS_ARCH}'
+        else:
+            name = 'meson-cross-js'
+        return f'{ROOT}/scripts/{name}.ini'
+
+    @staticmethod
+    def generate_cross_file():
+        cross_file = MesonBuilder.cross_file_path()
+        if os.path.exists(cross_file):
+            return cross_file
+        if PLATFORM == 'ios':
+            with open(f'{ROOT}/scripts/meson-ios-template.ini', 'r') as f:
+                template = f.read()
+            array = repr(get_platform_cflags().split(' '))
+            replacement = ''
+            for key in ('c_args', 'cpp_args', 'c_link_args', 'cpp_link_args'):
+                replacement += f'{key} = {array}\n'
+            with open(cross_file, 'w') as f:
+                f.write(template.format(replacement, IOS_ARCH))
+        return cross_file
+
     def configure(self):
+        cross_file = self.generate_cross_file()
         os.environ['PKG_CONFIG_SYSROOT_DIR'] = f'{ROOT}/build/{TARGET}'
         os.environ['PKG_CONFIG_LIBDIR'] = f'{ROOT}/build/{USR}/lib/pkgconfig'
         ensure('meson', [
             'setup',
             self.build_,
-            f'--cross-file={ROOT}/scripts/meson-cross-js.ini' if PLATFORM == 'js' else f'--cross-file={ROOT}/scripts/meson-macos-{MACOS_ARCH}.ini',
+            f'--cross-file={cross_file}',
             '--buildtype=release',
             f'--prefix={INSTALL_PREFIX}',
             '--default-library=static',

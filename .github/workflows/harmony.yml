@@ -26,6 +26,7 @@ jobs:
       - name: Install dependencies
         run: |
           sudo apt install -y ninja-build
+          pip install -r requirements.txt
 
       - name: Install OpenHarmony SDK
         uses: fcitx-contrib/ohpm-cli-tools@master

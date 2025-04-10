@@ -41,7 +41,7 @@ jobs:
             autoconf automake libtool autoconf-archive \
             byacc vala \
             ninja || true # ignore brew link python error
-          pip install meson==1.7.0
+          pip install -r requirements.txt
 
       - name: Version info
         run: |

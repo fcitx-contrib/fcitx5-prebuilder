@@ -45,6 +45,7 @@ jobs:
           HOMEBREW_NO_INSTALLED_DEPENDENTS_CHECK: 1
         run: |
           brew install ninja
+          pip install -r requirements.txt
 
       - name: Build
         run: python scripts/build.py ios ${{ matrix.platform }}

@@ -72,13 +72,17 @@ harmony = [
     'boost',
     'curl',
     'ecm',
-    'fmt',
+    'iso-codes',
     'json',
+    'json-c',
+    'libexpat',
     'libintl',
+    'libxkbcommon',
     'lua',
     'marisa',
     'opencc',
     'openssl',
+    'xkeyboard-config',
     'zstd'
 ]
 

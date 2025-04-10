@@ -51,6 +51,7 @@ ios = [
     'ecm',
     'fmt',
     'glog',
+    'iso-codes',
     'json',
     'json-c',
     'leveldb',
@@ -58,9 +59,11 @@ ios = [
     'libmozc',
     'librime',
     'libuv',
+    'libxkbcommon',
     'lua',
     'marisa',
     'opencc',
+    'xkeyboard-config',
     'yaml-cpp',
     'zstd'
 ]
@@ -69,13 +72,17 @@ harmony = [
     'boost',
     'curl',
     'ecm',
-    'fmt',
+    'iso-codes',
     'json',
+    'json-c',
+    'libexpat',
     'libintl',
+    'libxkbcommon',
     'lua',
     'marisa',
     'opencc',
     'openssl',
+    'xkeyboard-config',
     'zstd'
 ]
 

@@ -5,3 +5,5 @@ __pycache__
 *.bz2
 *.xz
 mozc_data.inc
+meson-ios-*.ini
+!meson-ios-template.ini

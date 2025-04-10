@@ -45,7 +45,7 @@ jobs:
 
       - name: Version info
         run: |
-          bison --version
+          byacc --version
           clang --version
           cmake --version
           valac --version

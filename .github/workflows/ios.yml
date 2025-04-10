@@ -35,17 +35,18 @@ jobs:
         with:
           python-version: '3.13'
 
-      - name: Version info
-        run: |
-          clang --version
-          cmake --version
-
       - name: Install dependencies
         env:
           HOMEBREW_NO_INSTALLED_DEPENDENTS_CHECK: 1
         run: |
-          brew install ninja
+          brew install ninja byacc
           pip install -r requirements.txt
+
+      - name: Version info
+        run: |
+          byacc --version
+          clang --version
+          cmake --version
 
       - name: Build
         run: python scripts/build.py ios ${{ matrix.platform }}

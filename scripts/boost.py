@@ -1,7 +1,7 @@
 import os
 from common import CMakeBuilder, MACOS_ARCH, PLATFORM, cache, ensure
 
-version = '1.87.0'
+version = '1.88.0'
 
 boost_dir = f'boost-{version}'
 boost_tar = f'{boost_dir}-cmake.tar.xz'
@@ -31,14 +31,6 @@ file = 'boost/libs/container/include/boost/container/detail/thread_mutex.hpp'
 ensure('sed', [
     '-i.bak',
     '"s/#if defined(BOOST_HAS_PTHREADS)/#if 1/"',
-    file
-])
-ensure('rm ', ['-f', file + '.bak'])
-# For harmony. TODO: remove when 1.88 is released.
-file = 'boost/libs/core/include/boost/core/detail/sp_thread_sleep.hpp'
-ensure('sed', [
-    '-i.bak',
-    '"s/__ANDROID__/__OHOS__/"',
     file
 ])
 ensure('rm ', ['-f', file + '.bak'])

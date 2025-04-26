@@ -30,6 +30,8 @@ class MozcBuilder(CMakeBuilder):
         if PLATFORM != 'macos':
             ensure('rm', ['-rf', f'{self.dest_dir}{INSTALL_PREFIX}/bin'])
 
+# Accelerate build by dropping irrelevant compilers.
+patch('libmozc/mozc/src/third_party/protobuf')
 
 if PLATFORM == 'js':
     patch('libmozc/mozc')
@@ -52,9 +54,6 @@ if platform.system() == 'Darwin' and PLATFORM != 'macos':
 
 if PLATFORM in ('ios', 'js'):
     options.append(f'-DPROTOC_EXECUTABLE={protoc_exe}')
-
-# Accelerate build by dropping irrelevant compilers.
-patch('libmozc/mozc/src/third_party/protobuf')
 
 cache('https://github.com/fcitx-contrib/fcitx5-mozc/releases/download/latest/mozc_data.inc')
 

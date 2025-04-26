@@ -23,7 +23,7 @@ class MozcBuilder(CMakeBuilder):
         # Combine all .o files of absl to libabsl.a
         lib_dir = f'{self.dest_dir}{INSTALL_PREFIX}/lib'
         libabsl_a = f'{lib_dir}/libabsl.a'
-        all_libabsl_o = f'$(find {self.build_}/mozc/src/third_party/abseil-cpp -name "*.o")'
+        all_libabsl_o = f'$(find {self.build_}/mozc/src/third_party/abseil-cpp -name "*.o" | sort)'
         ensure('ar', ['rc', libabsl_a, all_libabsl_o])
 
     def pre_package(self):
@@ -52,6 +52,9 @@ if platform.system() == 'Darwin' and PLATFORM != 'macos':
 
 if PLATFORM in ('ios', 'js'):
     options.append(f'-DPROTOC_EXECUTABLE={protoc_exe}')
+
+# Accelerate build by dropping irrelevant compilers.
+patch('libmozc/mozc/src/third_party/protobuf')
 
 cache('https://github.com/fcitx-contrib/fcitx5-mozc/releases/download/latest/mozc_data.inc')
 

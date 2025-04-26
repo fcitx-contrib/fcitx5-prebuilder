@@ -1,8 +1,8 @@
 diff --git a/src/base/thread.h b/src/base/thread.h
-index 60fd2b8..93276a2 100644
+index 576192e..c2fb739 100644
 --- a/src/base/thread.h
 +++ b/src/base/thread.h
-@@ -67,7 +67,14 @@ class Thread {
+@@ -59,7 +59,14 @@ class Thread {
  
    template <class Function, class... Args>
    explicit Thread(Function &&f, Args &&...args)
@@ -16,11 +16,17 @@ index 60fd2b8..93276a2 100644
 +#endif
 +    }
  
-   ~Thread() = default;
- 
-@@ -77,12 +84,24 @@ class Thread {
-   Thread(Thread &&) noexcept = default;
-   Thread &operator=(Thread &&) noexcept = default;
+   ~Thread() {
+     if (Joinable()) {
+@@ -75,18 +82,32 @@ class Thread {
+     if (Joinable()) {
+       Join();
+     }
++#ifndef __EMSCRIPTEN__
+     thread_ = std::move(other.thread_);
++#endif
+     return *this;
+   }
  
 -  bool Joinable() const noexcept { return thread_.joinable(); }
 +  bool Joinable() const noexcept {
@@ -40,6 +46,8 @@ index 60fd2b8..93276a2 100644
  
 +#ifndef __EMSCRIPTEN__
   private:
+   // Some toolchains do not support `std::jthread` yet, so we use `std::thread`
+   // for now.
    std::thread thread_;
 +#endif
  };

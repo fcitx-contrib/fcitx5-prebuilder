@@ -18,7 +18,7 @@ index 16082869..5b6942f6 100644
      OUTPUT_NAME "rime" PREFIX "lib"
      ARCHIVE_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR}/lib)
 diff --git a/src/rime/engine.cc b/src/rime/engine.cc
-index 07aa6b7d..7360e0b5 100644
+index 9bb948ba..9bc012d6 100644
 --- a/src/rime/engine.cc
 +++ b/src/rime/engine.cc
 @@ -52,7 +52,6 @@ class ConcreteEngine : public Engine {

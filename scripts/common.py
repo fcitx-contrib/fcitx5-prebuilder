@@ -48,10 +48,13 @@ DEBUG = os.environ.get('DEBUG') == '1'
 
 HARMONY_NATIVE = '/tmp/command-line-tools/sdk/default/openharmony/native'
 
+ar = 'emar' if PLATFORM == 'js' else 'ar'
 tar = {
     'Linux': 'tar',
     'Windows': 'C:/msys64/usr/bin/tar.exe',
 }.get(platform.system(), 'gtar')
+
+os.environ['LC_ALL'] = 'C' # Reproducible: sort of .o of absl; package
 
 def ensure(program: str, args: list[str]):
     command = " ".join([program, *args])
@@ -170,7 +173,6 @@ class Builder:
 
     def package(self):
         os.chdir(f'{self.dest_dir}{INSTALL_PREFIX}')
-        os.environ['LC_ALL'] = 'C'
         ensure(tar, ['cj',
             '--sort=name', '--mtime=@0',
             '--numeric-owner', '--owner=0', '--group=0', '--mode=go+u,go-w',

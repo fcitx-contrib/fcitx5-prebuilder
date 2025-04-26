@@ -4,7 +4,7 @@
 # linux -> js: build protoc first
 
 import platform
-from common import CMakeBuilder, INSTALL_PREFIX, PLATFORM, ROOT, cache, ensure, patch, steal
+from common import CMakeBuilder, INSTALL_PREFIX, PLATFORM, ROOT, ar, cache, ensure, patch, steal
 
 no_addon = '-DBUILD_MOZC_ADDON=OFF'
 protoc_exe = ''
@@ -24,7 +24,7 @@ class MozcBuilder(CMakeBuilder):
         lib_dir = f'{self.dest_dir}{INSTALL_PREFIX}/lib'
         libabsl_a = f'{lib_dir}/libabsl.a'
         all_libabsl_o = f'$(find {self.build_}/mozc/src/third_party/abseil-cpp -name "*.o" | sort)'
-        ensure('ar', ['rc', libabsl_a, all_libabsl_o])
+        ensure(ar, ['rc', libabsl_a, all_libabsl_o])
 
     def pre_package(self):
         if PLATFORM != 'macos':

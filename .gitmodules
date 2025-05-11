@@ -82,6 +82,9 @@
 [submodule "lua"]
 	path = lua
 	url = https://github.com/lua/lua
+[submodule "m17n-cmake"]
+	path = m17n-cmake
+	url = https://github.com/fcitx-contrib/m17n-cmake
 [submodule "marisa"]
 	path = marisa
 	url = https://github.com/rime/marisa-trie

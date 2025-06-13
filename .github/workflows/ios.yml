@@ -39,12 +39,12 @@ jobs:
         env:
           HOMEBREW_NO_INSTALLED_DEPENDENTS_CHECK: 1
         run: |
-          brew install ninja byacc
+          brew install ninja bison
           pip install -r requirements.txt
 
       - name: Version info
         run: |
-          byacc --version
+          bison --version
           clang --version
           cmake --version
 

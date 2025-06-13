@@ -39,13 +39,14 @@ jobs:
           brew install \
             extra-cmake-modules \
             autoconf automake libtool autoconf-archive \
-            byacc vala \
+            bison vala \
             ninja || true # ignore brew link python error
           pip install -r requirements.txt
+          echo /opt/homebrew/opt/bison/bin >> $GITHUB_PATH
 
       - name: Version info
         run: |
-          byacc --version
+          bison --version
           clang --version
           cmake --version
           valac --version

@@ -42,6 +42,7 @@ jobs:
             bison vala \
             ninja || true # ignore brew link python error
           pip install -r requirements.txt
+          echo /opt/homebrew/opt/bison/bin >> $GITHUB_PATH
 
       - name: Version info
         run: |

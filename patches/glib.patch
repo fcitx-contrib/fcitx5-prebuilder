@@ -1,8 +1,8 @@
 diff --git a/meson.build b/meson.build
-index 487d12978..555684659 100644
+index 48cb6cd3c..5a26a917c 100644
 --- a/meson.build
 +++ b/meson.build
-@@ -2290,47 +2290,10 @@ endif
+@@ -2300,47 +2300,10 @@ endif
  # proxy-libintl subproject.
  # FIXME: glib-gettext.m4 has much more checks to detect broken/uncompatible
  # implementations. This could be extended if issues are found in some platforms.
@@ -54,7 +54,7 @@ index 487d12978..555684659 100644
  
  # We require gettext to always be present
  glib_conf.set('HAVE_DCGETTEXT', 1)
-@@ -2685,14 +2648,12 @@ subdir('gthread')
+@@ -2700,14 +2663,12 @@ subdir('gthread')
  subdir('gmodule')
  subdir('gio')
  subdir('girepository')

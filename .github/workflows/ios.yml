@@ -39,7 +39,7 @@ jobs:
         env:
           HOMEBREW_NO_INSTALLED_DEPENDENTS_CHECK: 1
         run: |
-          brew install ninja bison
+          brew install bison
           pip install -r requirements.txt
           echo /opt/homebrew/opt/bison/bin >> $GITHUB_PATH
 

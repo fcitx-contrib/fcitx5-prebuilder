@@ -7,8 +7,8 @@ jobs:
   build:
     runs-on: ubuntu-24.04
     env:
-      SDK_VERSION_MAJOR: 5.0.5
-      SDK_VERSION_MINOR: 310
+      SDK_VERSION_MAJOR: 5.1.0
+      SDK_VERSION_MINOR: 840
     strategy:
       fail-fast: false
       matrix:

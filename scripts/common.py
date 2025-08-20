@@ -173,7 +173,9 @@ class Builder:
 
     def package(self):
         os.chdir(f'{self.dest_dir}{INSTALL_PREFIX}')
-        ensure('rm', ['-rf', 'share/locale']) # To avoid unpack symlink failure on Windows (f5h).
+        # We will see if other packages also need locale be packaged.
+        if self.name not in ('iso-codes', 'xkeyboard-config'):
+            ensure('rm', ['-rf', 'share/locale'])
         ensure(tar, ['cj',
             '--sort=name', '--mtime=@0',
             '--numeric-owner', '--owner=0', '--group=0', '--mode=go+u,go-w',

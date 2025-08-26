@@ -48,6 +48,8 @@ DEBUG = os.environ.get('DEBUG') == '1'
 
 HARMONY_NATIVE = '/tmp/command-line-tools/sdk/default/openharmony/native'
 
+ENABLED_LANGUAGES = ['ca', 'da', 'de', 'es', 'fr', 'he', 'ja', 'ko', 'ru', 'vi', 'zh_CN', 'zh_TW']
+
 ar = 'emar' if PLATFORM == 'js' else 'ar'
 tar = {
     'Linux': 'tar',
@@ -173,8 +175,12 @@ class Builder:
 
     def package(self):
         os.chdir(f'{self.dest_dir}{INSTALL_PREFIX}')
-        # We will see if other packages also need locale be packaged.
-        if self.name not in ('iso-codes', 'xkeyboard-config'):
+        # We will see if other packages also need locale be packaged, or enable more languages.
+        if self.name in ('iso-codes', 'xkeyboard-config'):
+            for code in os.listdir('share/locale'):
+                if code not in ENABLED_LANGUAGES:
+                    ensure('rm', ['-rf', f'share/locale/{code}'])
+        else:
             ensure('rm', ['-rf', 'share/locale'])
         ensure(tar, ['cj',
             '--sort=name', '--mtime=@0',

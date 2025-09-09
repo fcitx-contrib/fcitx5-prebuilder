@@ -1,6 +1,6 @@
 from common import CMakeBuilder
 
-disable_tools = '-DBUILD_TOOLS=OFF'
+disable_tools = '-DENABLE_TOOLS=OFF'
 
 CMakeBuilder('marisa',
     js=[disable_tools],

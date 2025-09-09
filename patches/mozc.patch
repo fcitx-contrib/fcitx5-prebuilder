@@ -1,11 +1,11 @@
 diff --git a/src/base/thread.h b/src/base/thread.h
-index 576192e..c2fb739 100644
+index db12511..2b35406 100644
 --- a/src/base/thread.h
 +++ b/src/base/thread.h
 @@ -59,7 +59,14 @@ class Thread {
  
    template <class Function, class... Args>
-   explicit Thread(Function &&f, Args &&...args)
+   explicit Thread(Function&& f, Args&&... args)
 -      : thread_(std::forward<Function>(f), std::forward<Args>(args)...) {}
 +#ifndef __EMSCRIPTEN__
 +      : thread_(std::forward<Function>(f), std::forward<Args>(args)...)

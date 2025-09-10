@@ -1,10 +1,10 @@
 diff --git a/meson.build b/meson.build
-index 6105f1523..cb8ac8dee 100644
+index acaf44759..b91c8c3d0 100644
 --- a/meson.build
 +++ b/meson.build
 @@ -2303,47 +2303,10 @@ endif
  # proxy-libintl subproject.
- # FIXME: glib-gettext.m4 has much more checks to detect broken/uncompatible
+ # FIXME: glib-gettext.m4 has much more checks to detect broken/incompatible
  # implementations. This could be extended if issues are found in some platforms.
 -libintl_deps = []
 -libintl_prefix = '#include <libintl.h>'

@@ -87,7 +87,7 @@
 	url = https://github.com/fcitx-contrib/m17n-cmake
 [submodule "marisa"]
 	path = marisa
-	url = https://github.com/rime/marisa-trie
+	url = https://github.com/s-yata/marisa-trie
 [submodule "opencc"]
 	path = opencc
 	url = https://github.com/BYVoid/OpenCC

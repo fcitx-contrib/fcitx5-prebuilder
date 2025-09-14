@@ -6,7 +6,7 @@
 	url = https://github.com/curl/curl
 [submodule "default-icon-theme"]
 	path = default-icon-theme
-	url = https://gitlab.freedesktop.org/xdg/default-icon-theme.git
+	url = https://github.com/fcitx-contrib/default-icon-theme
 [submodule "ecm"]
 	path = ecm
 	url = https://github.com/KDE/extra-cmake-modules
@@ -21,7 +21,7 @@
 	url = https://github.com/google/glog
 [submodule "iso-codes"]
 	path = iso-codes
-	url = https://salsa.debian.org/iso-codes-team/iso-codes
+	url = https://github.com/fcitx-contrib/iso-codes
 [submodule "json"]
 	path = json
 	url = https://github.com/nlohmann/json

@@ -10,7 +10,7 @@ on:
 
 jobs:
   build:
-    runs-on: macos-15
+    runs-on: macos-26
     strategy:
       fail-fast: false
       matrix:
@@ -39,8 +39,7 @@ jobs:
           brew install \
             extra-cmake-modules \
             autoconf automake libtool autoconf-archive \
-            bison vala \
-            ninja || true # ignore brew link python error
+            bison vala || true # ignore brew link python error
           pip install -r requirements.txt
           echo /opt/homebrew/opt/bison/bin >> $GITHUB_PATH
 
@@ -81,7 +80,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Download artifact
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v5
         with:
           pattern: artifact-macos*
           merge-multiple: true

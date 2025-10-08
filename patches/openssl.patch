@@ -1,8 +1,8 @@
 diff --git a/Configurations/10-main.conf b/Configurations/10-main.conf
-index cba57b4127..bab71b2d93 100644
+index 7e9396868a..db6383f8ec 100644
 --- a/Configurations/10-main.conf
 +++ b/Configurations/10-main.conf
-@@ -907,6 +907,14 @@ my %targets = (
+@@ -908,6 +908,14 @@ my %targets = (
          perlasm_scheme   => "elf32",
          multilib         => "x32",
      },
@@ -18,7 +18,7 @@ index cba57b4127..bab71b2d93 100644
      "linux-ia64" => {
          inherit_from     => [ "linux-generic64" ],
 diff --git a/crypto/build.info b/crypto/build.info
-index 2642d30754..920935b0a0 100644
+index 872684cd7a..f006858178 100644
 --- a/crypto/build.info
 +++ b/crypto/build.info
 @@ -115,7 +115,7 @@ DEFINE[../libcrypto]=$UPLINKDEF

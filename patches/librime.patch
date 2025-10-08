@@ -1,5 +1,5 @@
 diff --git a/src/CMakeLists.txt b/src/CMakeLists.txt
-index 16082869..5b6942f6 100644
+index 8faa61f8..5170fa22 100644
 --- a/src/CMakeLists.txt
 +++ b/src/CMakeLists.txt
 @@ -166,6 +166,14 @@ if(BUILD_SHARED_LIBS)
@@ -18,7 +18,7 @@ index 16082869..5b6942f6 100644
      OUTPUT_NAME "rime" PREFIX "lib"
      ARCHIVE_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR}/lib)
 diff --git a/src/rime/engine.cc b/src/rime/engine.cc
-index 9bb948ba..9bc012d6 100644
+index 4a54f64c..2efe0c93 100644
 --- a/src/rime/engine.cc
 +++ b/src/rime/engine.cc
 @@ -52,7 +52,6 @@ class ConcreteEngine : public Engine {
@@ -73,7 +73,7 @@ index e3c3b40e..551716b2 100644
                                                FallbackOptions::All);
  }
 diff --git a/src/rime/gear/selector.cc b/src/rime/gear/selector.cc
-index 06874103..b288eaf2 100644
+index 3c55e94f..00dcb2aa 100644
 --- a/src/rime/gear/selector.cc
 +++ b/src/rime/gear/selector.cc
 @@ -14,6 +14,16 @@
@@ -190,7 +190,7 @@ index 06874103..b288eaf2 100644
 -    return !is_linear_layout(ctx);
 +    return !f5m_is_linear_layout;
    }
-   comp.back().selected_index = index - 1;
+   ctx->Highlight(index - 1);
    comp.back().tags.insert("paging");
 @@ -215,7 +261,7 @@ bool Selector::PreviousCandidate(Context* ctx) {
  }

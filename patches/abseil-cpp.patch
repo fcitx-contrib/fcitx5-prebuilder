@@ -1,0 +1,44 @@
+diff --git a/absl/container/internal/raw_hash_set.cc b/absl/container/internal/raw_hash_set.cc
+index 9f4cefff..8a94d732 100644
+--- a/absl/container/internal/raw_hash_set.cc
++++ b/absl/container/internal/raw_hash_set.cc
+@@ -1284,7 +1284,7 @@ void IncrementSmallSize(CommonFields& common,
+ 
+ std::pair<ctrl_t*, void*> Grow1To3AndPrepareInsert(
+     CommonFields& common, const PolicyFunctions& __restrict policy,
+-    absl::FunctionRef<size_t(size_t)> get_hash) {
++    std::function<size_t(size_t)> get_hash) {
+   // TODO(b/413062340): Refactor to reuse more code with
+   // GrowSooTableToNextCapacityAndPrepareInsert.
+   ABSL_SWISSTABLE_ASSERT(common.capacity() == 1);
+@@ -1410,7 +1410,7 @@ size_t GrowToNextCapacityAndPrepareInsert(
+ 
+ std::pair<ctrl_t*, void*> PrepareInsertSmallNonSoo(
+     CommonFields& common, const PolicyFunctions& __restrict policy,
+-    absl::FunctionRef<size_t(size_t)> get_hash) {
++    std::function<size_t(size_t)> get_hash) {
+   ABSL_SWISSTABLE_ASSERT(common.is_small());
+   ABSL_SWISSTABLE_ASSERT(!policy.soo_enabled);
+   if (common.capacity() == 1) {
+diff --git a/absl/container/internal/raw_hash_set.h b/absl/container/internal/raw_hash_set.h
+index 679d68c4..21b5698c 100644
+--- a/absl/container/internal/raw_hash_set.h
++++ b/absl/container/internal/raw_hash_set.h
+@@ -1768,7 +1768,7 @@ size_t GrowSooTableToNextCapacityAndPrepareInsert(
+ // (is_small()==false).
+ std::pair<ctrl_t*, void*> PrepareInsertSmallNonSoo(
+     CommonFields& common, const PolicyFunctions& policy,
+-    absl::FunctionRef<size_t(size_t)> get_hash);
++    std::function<size_t(size_t)> get_hash);
+ 
+ // Resizes table with allocated slots and change the table seed.
+ // Tables with SOO enabled must have capacity > policy.soo_capacity.
+@@ -3248,7 +3248,7 @@ class raw_hash_set {
+     }
+     return {iterator_at_ptr(PrepareInsertSmallNonSoo(
+                 common(), GetPolicyFunctions(),
+-                HashKey<hasher, K, kIsDefaultHash>{hash_ref(), key})),
++                [this, &key](size_t x) { return HashKey<hasher, K, kIsDefaultHash>{hash_ref(), key}(x); })),
+             true};
+   }
+ 

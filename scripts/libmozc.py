@@ -34,7 +34,6 @@ class MozcBuilder(CMakeBuilder):
 patch('libmozc/mozc/src/third_party/protobuf')
 
 if PLATFORM == 'js':
-    patch('libmozc/mozc')
     if platform.system() == 'Linux': # Nothing to steal so build it.
         build_dir = f'libmozc/build/linux-{platform.machine()}'
         ensure('cmake', [
@@ -47,6 +46,11 @@ if PLATFORM == 'js':
             '--target', 'protoc'
         ])
         protoc_exe = f'{ROOT}/{build_dir}/protoc'
+
+    # Disable thread.
+    patch('libmozc/mozc')
+    # Fix RuntimeError: null function or function signature mismatch.
+    patch('libmozc/mozc/src/third_party/abseil-cpp')
 
 if platform.system() == 'Darwin' and PLATFORM != 'macos':
     steal('libmozc', ('bin',)) # extracted to install dir so need to remove on prepack.

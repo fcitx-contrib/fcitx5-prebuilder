@@ -4,6 +4,7 @@ __pycache__
 /boost*
 *.bz2
 *.xz
+mozc.data
 mozc_data.inc
 meson-ios-*.ini
 !meson-ios-template.ini

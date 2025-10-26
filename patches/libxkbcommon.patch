@@ -1,8 +1,8 @@
 diff --git a/meson.build b/meson.build
-index 9b642bf0..dec9a632 100644
+index cfe8d949..ea13c9cb 100644
 --- a/meson.build
 +++ b/meson.build
-@@ -687,6 +687,7 @@ else
+@@ -737,6 +737,7 @@ else
  endif
  
  
@@ -10,7 +10,7 @@ index 9b642bf0..dec9a632 100644
  # xkeyboard-config "verifier"
  xkct_config = configuration_data()
  xkct_config.set('MESON_BUILD_ROOT', meson.current_build_dir())
-@@ -1150,6 +1151,7 @@ if get_option('enable-x11')
+@@ -1247,6 +1248,7 @@ if get_option('enable-x11')
        env: bench_env,
    )
  endif
@@ -18,7 +18,7 @@ index 9b642bf0..dec9a632 100644
  
  
  # Documentation.
-@@ -1277,6 +1279,6 @@ if meson.version().version_compare('>=0.62.0')
+@@ -1374,6 +1376,6 @@ if meson.version().version_compare('>=0.62.0')
        'variant': get_option('default-variant'),
      }, section: 'Defaults')
      summary({

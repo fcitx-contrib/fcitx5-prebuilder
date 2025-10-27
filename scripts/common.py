@@ -182,6 +182,7 @@ class Builder:
                     ensure('rm', ['-rf', f'share/locale/{code}'])
         else:
             ensure('rm', ['-rf', 'share/locale'])
+        ensure('rm', ['-rf', 'share/doc', 'share/man'])
         ensure(tar, ['cj',
             '--sort=name', '--mtime=@0',
             '--numeric-owner', '--owner=0', '--group=0', '--mode=go+u,go-w',

@@ -1,8 +1,8 @@
 diff --git a/CMakeLists.txt b/CMakeLists.txt
-index a6cd67b..4c05c90 100644
+index 1465dfb..2dc67c5 100644
 --- a/CMakeLists.txt
 +++ b/CMakeLists.txt
-@@ -11,7 +11,6 @@ include(CTest)
+@@ -25,7 +25,6 @@ include(CTest)
  set(CTEST_PARALLEL_LEVEL 1)
  
  if(UNIX)
@@ -10,9 +10,27 @@ index a6cd67b..4c05c90 100644
      add_compile_definitions(UNDER_POSIX PIC)
  endif()
  
-@@ -216,8 +215,9 @@ if(WITH_RUST)
-     list(APPEND ALL_INC ${INC_DIR}/chewing_rs.h)
+@@ -71,8 +70,16 @@ if(NOT Corrosion_FOUND)
  endif()
+ 
+ corrosion_import_crate(MANIFEST_PATH Cargo.toml CRATES chewing_capi)
+-corrosion_import_crate(MANIFEST_PATH Cargo.toml CRATES chewing_testhelper)
++if (EMSCRIPTEN)
++    corrosion_add_target_rustflags(chewing_capi -C panic=unwind)
++    set(CARGO_FEATURES "")
++else()
+ corrosion_import_crate(MANIFEST_PATH Cargo.toml CRATES chewing-cli)
++    set(CARGO_FEATURES "--features=threading")
++endif()
++set_target_properties(chewing_capi PROPERTIES
++    CORROSION_ADD_ARGS "${CARGO_FEATURES}"
++)
+ 
+ if(WITH_SQLITE3)
+     corrosion_set_features(chewing_capi FEATURES sqlite)
+@@ -158,8 +165,9 @@ set(ALL_INC
+     ${INC_DIR}/mod_aux.h
+ )
  
 -add_subdirectory(doc)
 +if (NOT EMSCRIPTEN)
@@ -21,19 +39,111 @@ index a6cd67b..4c05c90 100644
  if(BUILD_TESTING)
      add_subdirectory(tests)
  endif()
-@@ -229,13 +229,13 @@ add_library(common OBJECT
-     src/porting_layer/src/asprintf.c
- )
- target_compile_definitions(common PRIVATE
--    CHEWING_DATADIR=\"${CMAKE_INSTALL_FULL_DATADIR}/libchewing\"
-+    CHEWING_DATADIR=\"./libchewing\"
+@@ -176,7 +184,7 @@ target_include_directories(libchewing
  )
  
- add_library(libchewing ${ALL_INC} src/chewing.c)
- set_target_properties(libchewing PROPERTIES LINKER_LANGUAGE C)
- target_compile_definitions(libchewing PRIVATE
--    CHEWING_DATADIR=\"${CMAKE_INSTALL_FULL_DATADIR}/libchewing\"
+ corrosion_set_env_vars(chewing_capi
+-    CHEWING_DATADIR=${CMAKE_INSTALL_FULL_DATADIR}/libchewing
 +    CHEWING_DATADIR=\"./libchewing\"
  )
- if(NOT WITH_RUST)
-     target_sources(common PRIVATE
+ target_link_libraries(libchewing PRIVATE chewing_capi)
+ target_link_libraries(chewing_capi INTERFACE ${SQLite3_LIBRARIES})
+@@ -227,13 +235,12 @@ endif()
+ install(FILES ${ALL_INC} DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/chewing)
+ install(FILES ${PROJECT_BINARY_DIR}/chewing.pc
+     DESTINATION ${CMAKE_INSTALL_LIBDIR}/pkgconfig)
+-install(TARGETS libchewing
++install(TARGETS chewing_capi
+     EXPORT libchewingTargets
+     ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
+     INCLUDES DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
+     LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
+     RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR})
+-install(IMPORTED_RUNTIME_ARTIFACTS chewing-cli DESTINATION ${CMAKE_INSTALL_BINDIR})
+ 
+ # generate CMake Config files
+ include(CMakePackageConfigHelpers)
+diff --git a/Cargo.toml b/Cargo.toml
+index 9d7b4f2..557bb18 100644
+--- a/Cargo.toml
++++ b/Cargo.toml
+@@ -28,6 +28,7 @@ tempfile = { workspace = true }
+ [features]
+ default = []
+ sqlite = ["dep:rusqlite"]
++threading = []
+ 
+ [workspace]
+ members = ["capi", "fuzzer", "tests/testhelper", "tools"]
+diff --git a/src/dictionary/trie_buf.rs b/src/dictionary/trie_buf.rs
+index dd51478..c2a8f34 100644
+--- a/src/dictionary/trie_buf.rs
++++ b/src/dictionary/trie_buf.rs
+@@ -217,6 +217,7 @@ impl TrieBuf {
+ 
+     pub(crate) fn sync(&mut self) -> Result<(), UpdateDictionaryError> {
+         info!("Synchronize dictionary from disk...");
++    #[cfg(feature = "threading")] {
+         if let Some(join_handle) = self.join_handle.take() {
+             if !join_handle.is_finished() {
+                 info!("Aborted. Wait until previous sync is finished.");
+@@ -246,6 +247,7 @@ impl TrieBuf {
+                 self.trie = Some(Trie::open(self.path().unwrap())?);
+             }
+         }
++    }
+         Ok(())
+     }
+ 
+@@ -266,6 +268,7 @@ impl TrieBuf {
+             join_handle: None,
+             dirty: false,
+         };
++    #[cfg(feature = "threading")] {
+         self.join_handle = Some(thread::spawn(move || {
+             let mut builder = TrieBuilder::new();
+             info!("Saving snapshot...");
+@@ -281,6 +284,30 @@ impl TrieBuf {
+             info!("    Done");
+             Ok(())
+         }));
++    }
++        #[cfg(not(feature = "threading"))] {
++            let mut builder = TrieBuilder::new();
++            info!("Saving snapshot...");
++            let _ = builder.set_info(DictionaryInfo {
++                software: software_version(),
++                ..snapshot.about()
++            });
++            for (syllables, phrase) in snapshot.entries() {
++                builder.insert(&syllables, phrase);
++            }
++            info!("Flushing snapshot...");
++            builder.build(snapshot.path().unwrap());
++            info!("    Done");
++            info!("Reloading...");
++            let trie = Trie::open(self.path().unwrap());
++            if let Ok(value) = trie {
++                self.trie = Some(value)
++            }
++            if !self.dirty {
++                self.btree.clear();
++                self.graveyard.clear();
++            }
++        }
+         self.dirty = false;
+     }
+ }
+@@ -376,10 +403,12 @@ impl Drop for TrieBuf {
+     fn drop(&mut self) {
+         let _ = self.sync();
+         let _ = self.flush();
++    #[cfg(feature = "threading")] {
+         if let Some(join_handle) = self.join_handle.take() {
+             let _ = join_handle.join();
+         }
+     }
++    }
+ }
+ 
+ #[cfg(test)]

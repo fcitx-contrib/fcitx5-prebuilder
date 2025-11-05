@@ -39,6 +39,7 @@ jobs:
           sudo apt install -y ninja-build \
             gettext
           pip install -r requirements.txt
+          rustup target add wasm32-unknown-emscripten
 
       - name: Install emsdk
         working-directory: emsdk

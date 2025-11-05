@@ -42,6 +42,9 @@ jobs:
             bison vala || true # ignore brew link python error
           pip install -r requirements.txt
           echo /opt/homebrew/opt/bison/bin >> $GITHUB_PATH
+          if [[ "${{ matrix.arch }}" == "x86_64" ]]; then
+            rustup target add x86_64-apple-darwin
+          fi
 
       - name: Version info
         run: |

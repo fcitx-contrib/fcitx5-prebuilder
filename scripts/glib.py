@@ -7,5 +7,6 @@ patch(project)
 
 MesonBuilder(project, [
     '-Dtests=false',
-    '-Dintrospection=disabled'
+    '-Dintrospection=disabled',
+    '-Dxattr=false'
 ]).exec()

@@ -44,6 +44,10 @@ TARGET = f'{PLATFORM}{POSTFIX}'
 # macos-x86_64/usr, ios-arm64/usr, js/usr
 USR = f'{TARGET}{INSTALL_PREFIX}'
 
+PKG_CONFIG_SYSROOT_DIR = f'{ROOT}/build/{TARGET}'
+PKG_CONFIG_PATH = f'{ROOT}/build/{USR}/lib/pkgconfig'
+XDG_DATA_DIRS = f'{ROOT}/build/{USR}/share'
+
 DEBUG = os.environ.get('DEBUG') == '1'
 
 HARMONY_NATIVE = '/tmp/command-line-tools/sdk/default/openharmony/native'
@@ -124,6 +128,8 @@ def get_platform_cflags() -> str:
             sdk = f'-isysroot {subprocess.check_output("xcrun --sdk iphonesimulator --show-sdk-path", shell=True, text=True).strip()}'
             version = f'-mios-simulator-version-min={IOS_VERSION}'
         return ' '.join((arch, sdk, version))
+    if PLATFORM == 'js':
+        return '-fPIC'
     return ''
 
 
@@ -333,10 +339,18 @@ class MesonBuilder(Builder):
 
 class MakeBuilder(Builder):
     def configure(self):
-        ensure('./configure', [
+        command = './configure'
+        if PLATFORM == 'js':
+            command = f'emconfigure {command}'
+        ensure(command, [
             '-C',
             f'--prefix={INSTALL_PREFIX}',
-            *self.options
+            '--enable-static',
+            '--disable-shared',
+            *self.options,
+            f'PKG_CONFIG_SYSROOT_DIR={PKG_CONFIG_SYSROOT_DIR}',
+            f'PKG_CONFIG_PATH={PKG_CONFIG_PATH}',
+            f'XDG_DATA_DIRS={XDG_DATA_DIRS}'
         ])
 
     def build(self):

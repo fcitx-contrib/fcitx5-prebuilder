@@ -1,5 +1,4 @@
 import os
-import platform
 
 from common import MakeBuilder, ensure, patch
 
@@ -14,6 +13,4 @@ class LibgeeBuilder(MakeBuilder):
             ensure('./autogen.sh', [])
         super().configure()
 
-LibgeeBuilder(project, [
-    f'--host={platform.machine()}',
-]).exec()
+LibgeeBuilder(project).exec()

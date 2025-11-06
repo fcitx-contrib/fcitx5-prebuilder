@@ -1,0 +1,13 @@
+diff --git a/json-glib/meson.build b/json-glib/meson.build
+index ba70029..2c4bf5f 100644
+--- a/json-glib/meson.build
++++ b/json-glib/meson.build
+@@ -139,7 +139,7 @@ tools = [
+   [ 'json-glib-format', [ 'json-glib-format.c', ] ],
+ ]
+ 
+-foreach t: tools
++foreach t: []
+   bin_name = t[0]
+   bin_sources = t[1]
+ 

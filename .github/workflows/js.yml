@@ -12,7 +12,7 @@ jobs:
   build:
     runs-on: ubuntu-24.04
     env:
-      EMSCRIPTEN_VERSION: '4.0.18'
+      EMSCRIPTEN_VERSION: '4.0.19'
     steps:
       - uses: actions/checkout@v5
         with:
@@ -36,8 +36,8 @@ jobs:
 
       - name: Install dependencies
         run: |
-          sudo apt install -y ninja-build \
-            gettext
+          sudo apt install -y \
+            gettext valac
           pip install -r requirements.txt
           rustup target add wasm32-unknown-emscripten
 
@@ -51,6 +51,7 @@ jobs:
         run: |
           bison --version
           cmake --version
+          valac --version
 
       - name: Build
         run: |

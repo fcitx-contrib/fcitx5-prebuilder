@@ -76,3 +76,23 @@ index 20e6bef..2cb1ab1 100644
  Libs: -L${libdir} -lskk
 -Cflags: -I${includedir}/skk-@SKK_API_VERSION@
 +Cflags: -I${includedir}/libskk
+diff --git a/libskk/user-dict.vala b/libskk/user-dict.vala
+index 427877c..195a0d1 100644
+--- a/libskk/user-dict.vala
++++ b/libskk/user-dict.vala
+@@ -145,13 +145,13 @@ namespace Skk {
+         }
+ 
+         static int compare_entry_asc (Map.Entry<string,Gee.List<Candidate>> a,
+-                                      Map.Entry<string,Gee.List<Candidate>> b)
++                                      Map.Entry<string,Gee.List<Candidate>> b, void *user_data)
+         {
+             return strcmp (a.key, b.key);
+         }
+ 
+         static int compare_entry_dsc (Map.Entry<string,Gee.List<Candidate>> a,
+-                                      Map.Entry<string,Gee.List<Candidate>> b)
++                                      Map.Entry<string,Gee.List<Candidate>> b, void *user_data)
+         {
+             return strcmp (b.key, a.key);
+         }

@@ -323,7 +323,7 @@ class MesonBuilder(Builder):
             'setup',
             self.build_,
             f'--cross-file={cross_file}',
-            '--buildtype=release',
+            f'--buildtype={"debug" if DEBUG else "release"}',
             f'--prefix={INSTALL_PREFIX}',
             '--default-library=static',
             *self.options

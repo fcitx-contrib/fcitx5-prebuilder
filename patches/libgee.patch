@@ -25,10 +25,18 @@ index e9bfb37..6d0d9e1 100644
  
  AC_OUTPUT([Makefile
 diff --git a/gee/Makefile.am b/gee/Makefile.am
-index e0d950e..7de429a 100644
+index e0d950e..35ab6af 100644
 --- a/gee/Makefile.am
 +++ b/gee/Makefile.am
-@@ -147,30 +147,6 @@ dist_vapi_DATA = \
+@@ -68,7 +68,6 @@ libgee_0_8_la_VALASOURCES = \
+ 	sortedmap.vala \
+ 	sortedset.vala \
+ 	streamiterator.vala \
+-	task.vala \
+ 	teeiterator.vala \
+ 	timsort.vala \
+ 	traversable.vala \
+@@ -147,30 +146,6 @@ dist_vapi_DATA = \
  	gee-0.8.vapi \
  	$(NULL)
  

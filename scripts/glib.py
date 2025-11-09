@@ -21,7 +21,7 @@ class GLibBuilder(MesonBuilder):
             bak = f'{file}.bak'
             ensure('sed', ['-i.bak', '"s|-pthread||g"', file])
             ensure('rm', [bak])
-        ensure('rm', ['-f', f'{self.dest_dir}{INSTALL_PREFIX}/bin'])
+        ensure('rm', ['-rf', f'{self.dest_dir}{INSTALL_PREFIX}/bin'])
 
 GLibBuilder(project, [
     '-Dtests=false',

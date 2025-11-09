@@ -1,5 +1,5 @@
 import os
-from common import PLATFORM, ROOT, MesonBuilder, ensure, patch
+from common import INSTALL_PREFIX, PLATFORM, ROOT, MesonBuilder, ensure, patch
 
 version = '2.87.0'
 project = 'glib'
@@ -14,7 +14,16 @@ if PLATFORM == 'js':
 else:
     patch(project)
 
-MesonBuilder(project, [
+class GLibBuilder(MesonBuilder):
+    def pre_package(self):
+        if PLATFORM == 'js':
+            file = f'{self.dest_dir}{INSTALL_PREFIX}/lib/pkgconfig/glib-2.0.pc'
+            bak = f'{file}.bak'
+            ensure('sed', ['-i.bak', '"s|-pthread||g"', file])
+            ensure('rm', [bak])
+        ensure('rm', ['-f', f'{self.dest_dir}{INSTALL_PREFIX}/bin'])
+
+GLibBuilder(project, [
     '-Dtests=false',
     '-Dintrospection=disabled',
     '-Dxattr=false'

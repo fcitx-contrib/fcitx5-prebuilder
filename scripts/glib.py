@@ -24,6 +24,7 @@ class GLibBuilder(MesonBuilder):
 
 GLibBuilder(project, [
     '-Dtests=false',
+    '-Dlibffi:tests=false',
     '-Dintrospection=disabled',
     '-Dxattr=false'
 ]).exec()

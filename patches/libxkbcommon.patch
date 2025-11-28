@@ -1,8 +1,8 @@
 diff --git a/meson.build b/meson.build
-index 150bbd5f..71149cc8 100644
+index fd4462c7..8cac2a04 100644
 --- a/meson.build
 +++ b/meson.build
-@@ -710,6 +710,7 @@ else
+@@ -844,6 +844,7 @@ else
  endif
  
  
@@ -10,7 +10,7 @@ index 150bbd5f..71149cc8 100644
  # xkeyboard-config "verifier"
  xkct_config = configuration_data()
  xkct_config.set('MESON_BUILD_ROOT', meson.current_build_dir())
-@@ -1220,6 +1221,7 @@ if get_option('enable-x11')
+@@ -1372,6 +1373,7 @@ if get_option('enable-x11')
        env: bench_env,
    )
  endif
@@ -18,11 +18,10 @@ index 150bbd5f..71149cc8 100644
  
  
  # Documentation.
-@@ -1347,6 +1349,6 @@ if meson.version().version_compare('>=0.62.0')
+@@ -1506,6 +1508,5 @@ if meson.version().version_compare('>=0.62.0')
        'variant': get_option('default-variant'),
      }, section: 'Defaults')
      summary({
 -      'merge-modes': has_merge_modes_tests,
-+    #   'merge-modes': has_merge_modes_tests,
      }, section: 'Tests')
  endif

@@ -28,6 +28,9 @@
 [submodule "json-glib"]
 	path = json-glib
 	url = https://github.com/GNOME/json-glib
+[submodule "keyman"]
+	path = keyman
+	url = https://github.com/keymanapp/keyman
 [submodule "leveldb"]
 	path = leveldb
 	url = https://github.com/google/leveldb

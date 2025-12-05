@@ -25,9 +25,6 @@
 [submodule "json"]
 	path = json
 	url = https://github.com/nlohmann/json
-[submodule "json-c"]
-	path = json-c
-	url = https://github.com/json-c/json-c
 [submodule "json-glib"]
 	path = json-glib
 	url = https://github.com/GNOME/json-glib

@@ -1,0 +1,12 @@
+diff --git a/core/tests/meson.build b/core/tests/meson.build
+index ce0f68a257..5c350079e7 100644
+--- a/core/tests/meson.build
++++ b/core/tests/meson.build
+@@ -17,7 +17,6 @@ libsrc = include_directories(
+ 
+ # kmx_test_source is required for linux builds, so always enable it even when we
+ # disable all other tests
+-subdir('kmx_test_source')
+ 
+ if get_option('keyman_core_tests')
+   message('option "keyman_core_tests" is true, enabling tests')

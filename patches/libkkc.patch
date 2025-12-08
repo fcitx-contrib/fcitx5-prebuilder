@@ -1,0 +1,160 @@
+diff --git a/Makefile.am b/Makefile.am
+index 77c6a67..3d2d857 100644
+--- a/Makefile.am
++++ b/Makefile.am
+@@ -14,7 +14,7 @@
+ # You should have received a copy of the GNU General Public License
+ # along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ 
+-SUBDIRS = marisa-glib libkkc tools data tests po
++SUBDIRS = marisa-glib libkkc
+ DISTCHECK_CONFIGURE_FLAGS = --enable-docs
+ ACLOCAL_AMFLAGS = -I m4
+ 
+@@ -22,7 +22,7 @@ if HAVE_VALADOC
+ SUBDIRS += docs
+ endif
+ 
+-DIST_SUBDIRS = marisa-glib libkkc tools data tests po docs
++DIST_SUBDIRS = marisa-glib libkkc
+ 
+ GITIGNOREFILES =							\
+ 	ABOUT-NLS							\
+diff --git a/configure.ac b/configure.ac
+index f4a590e..f6f3284 100644
+--- a/configure.ac
++++ b/configure.ac
+@@ -96,10 +96,7 @@ AC_SUBST(LIBKKC_CFLAGS)
+ LIBKKC_LIBS="$GIO_LIBS $GEE_LIBS $JSON_GLIB_LIBS"
+ AC_SUBST(LIBKKC_LIBS)
+ 
+-GOBJECT_INTROSPECTION_CHECK([0.9.0])
+-
+ # check vapigen
+-VAPIGEN_CHECK
+ 
+ # check valac
+ AM_PROG_VALAC([0.16.0])
+@@ -165,17 +162,6 @@ if test -n "$VALGRIND"; then
+ fi
+ 
+ # check vapigen
+-AC_ARG_ENABLE([vapigen],
+-	AS_HELP_STRING([--enable-vapigen], [Enable vapi generation]),
+-	[enable_vapigen=$enableval], [enable_vapigen=auto])
+-if test "x$found_introspection" = "xyes" -a "x$enable_vapigen" != "xno"; then
+-  AC_PATH_PROG([VAPIGEN], [vapigen], [false])
+-  if test "x$VAPIGEN" != "xfalse"; then
+-    enable_vapigen=yes
+-  fi
+-  AC_SUBST(VAPIGEN)
+-fi
+-AM_CONDITIONAL(ENABLE_VAPIGEN, [test "x$enable_vapigen" = "xyes"])
+ 
+ AC_CHECK_PROGS(JSON_VALIDATE, json-validate, true)
+ 
+@@ -184,26 +170,5 @@ AC_CONFIG_FILES([Makefile
+ marisa-glib/Makefile
+ libkkc/Makefile
+ libkkc/kkc-1.0.pc
+-tools/Makefile
+-tests/Makefile
+-tests/lib/Makefile
+-data/Makefile
+-data/dbus/Makefile
+-data/rules/Makefile
+-data/rules/default/Makefile
+-data/rules/act/Makefile
+-data/rules/atok/Makefile
+-data/rules/azik/Makefile
+-data/rules/azik-jp106/Makefile
+-data/rules/kzik/Makefile
+-data/rules/tutcode/Makefile
+-data/rules/tutcode-touch16x/Makefile
+-data/rules/nicola/Makefile
+-data/rules/tcode/Makefile
+-data/rules/trycode/Makefile
+-data/rules/kana/Makefile
+-data/templates/Makefile
+-docs/Makefile
+-po/Makefile.in])
+-AC_CONFIG_FILES([tools/kkc-package-data], [chmod a+x tools/kkc-package-data])
++])
+ AC_OUTPUT
+diff --git a/libkkc/Makefile.am b/libkkc/Makefile.am
+index 28a9f68..bbc74bb 100644
+--- a/libkkc/Makefile.am
++++ b/libkkc/Makefile.am
+@@ -131,16 +131,6 @@ libkkc_la_SOURCES =				\
+ 	kkc.vala				\
+ 	$(NULL)
+ 
+-if HAVE_INTROSPECTION
+-girdir = $(datadir)/gir-1.0
+-gir_DATA = Kkc-@KKC_API_VERSION@.gir
+-
+-typelibdir = $(libdir)/girepository-1.0
+-typelib_DATA = Kkc-@KKC_API_VERSION@.typelib
+-
+-Kkc-@KKC_API_VERSION@.typelib: Kkc-@KKC_API_VERSION@.gir
+-	@INTROSPECTION_COMPILER@ --shared-library=libkkc -o $@ $^
+-endif
+ 
+ Kkc-@KKC_API_VERSION@.gir kkc-internals-@KKC_API_VERSION@.vapi kkc-@KKC_API_VERSION@.vapi: libkkc.la
+ 
+diff --git a/libkkc/kkc.vala b/libkkc/kkc.vala
+index a9a8e4d..f87bb88 100644
+--- a/libkkc/kkc.vala
++++ b/libkkc/kkc.vala
+@@ -32,7 +32,6 @@ namespace Kkc {
+         typeof (RuleMetadata).class_ref ();
+         typeof (RomKanaUtils).class_ref ();
+ 
+-        Intl.bindtextdomain (Config.GETTEXT_PACKAGE, Config.LOCALEDIR);
+     }
+ 
+     /**
+diff --git a/marisa-glib/Makefile.am b/marisa-glib/Makefile.am
+index 6d9c9d0..b424054 100644
+--- a/marisa-glib/Makefile.am
++++ b/marisa-glib/Makefile.am
+@@ -30,39 +30,5 @@ CLEANFILES =
+ DISTCLEANFILES =
+ MAINTAINERCLEANFILES =
+ 
+-if HAVE_INTROSPECTION
+--include $(INTROSPECTION_MAKEFILE)
+-INTROSPECTION_GIRS =
+-INTROSPECTION_SCANNER_ARGS = --add-include-path=$(builddir)
+-INTROSPECTION_COMPILER_ARGS = --includedir=$(srcdir)
+-
+-Marisa.gir: libmarisa-glib.la
+-Marisa_gir_SCANNERFLAGS = --pkg-export=marisa-glib --pkg=marisa --namespace=Marisa $(MARISA_GLIB_STATIC_DEPENDENCIES)
+-Marisa_gir_INCLUDES = GLib-2.0 GObject-2.0 Gio-2.0
+-Marisa_gir_CFLAGS = $(libmarisa_glib_la_CFLAGS)
+-Marisa_gir_LIBS = libmarisa-glib.la
+-Marisa_gir_FILES = $(libmarisa_glib_la_sources) $(libmarisa_glib_la_headers)
+-
+-INTROSPECTION_GIRS += Marisa.gir
+-
+-CLEANFILES += $(INTROSPECTION_GIRS)
+-endif
+-
+-if ENABLE_VAPIGEN
+--include $(VAPIGEN_MAKEFILE)
+-
+-marisa-glib.vapi: Marisa.gir
+-
+-VAPIGEN_VAPIS = marisa-glib.vapi
+-
+-marisa_glib_vapi_DEPS = gio-2.0
+-marisa_glib_vapi_METADATADIRS = $(srcdir)
+-marisa_glib_vapi_FILES = Marisa.gir
+-
+-noinst_DATA = $(VAPIGEN_VAPIS)
+-
+-DISTCLEANFILES += $(VAPIGEN_VAPIS)
+-EXTRA_DIST += Marisa.metadata
+-endif
+ 
+ -include $(top_srcdir)/git.mk

@@ -26,6 +26,5 @@ class ChewingBuilder(CMakeBuilder):
 
 ChewingBuilder(project, [
     '-DWITH_SQLITE3=OFF',
-    '-DBUILD_TESTING=OFF',
     f'-DRust_CARGO_TARGET={cargo_target}'
 ]).exec()

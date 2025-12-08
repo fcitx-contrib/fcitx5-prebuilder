@@ -49,6 +49,9 @@
 [submodule "libintl"]
 	path = libintl
 	url = https://github.com/j-jorge/libintl-lite
+[submodule "libkkc"]
+	path = libkkc
+	url = https://github.com/ueno/libkkc
 [submodule "libmozc"]
 	path = libmozc
 	url = https://github.com/fcitx-contrib/fcitx5-mozc

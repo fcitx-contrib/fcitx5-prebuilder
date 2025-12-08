@@ -116,6 +116,12 @@ def steal(package: str, directories: tuple[str, ...] = ('share',)):
     ])
 
 
+def sed(file: str, command: str):
+    bak = f'{file}.bak'
+    ensure('sed', ['-i.bak', command, file])
+    ensure('rm', ['-f', bak])
+
+
 def get_platform_cflags() -> str:
     if PLATFORM == 'macos':
         return f'-arch {MACOS_ARCH} -mmacosx-version-min={MACOS_VERSION}'
@@ -129,7 +135,10 @@ def get_platform_cflags() -> str:
             version = f'-mios-simulator-version-min={IOS_VERSION}'
         return ' '.join((arch, sdk, version))
     if PLATFORM == 'js':
-        return '-fPIC'
+        flag = '-fPIC'
+        if not DEBUG:
+            flag += ' -DNDEBUG' # Reproducible: assert.
+        return flag
     return ''
 
 
@@ -224,6 +233,7 @@ class CMakeBuilder(Builder):
             '-G', 'Ninja',
             '-S', self.src,
             '-DBUILD_SHARED_LIBS=OFF',
+            '-DBUILD_TESTING=OFF',
             f'-DCMAKE_BUILD_TYPE={"Debug" if DEBUG else "Release"}',
             f'-DCMAKE_INSTALL_PREFIX={INSTALL_PREFIX}',
             f'-DCMAKE_FIND_ROOT_PATH={ROOT}/build/{USR}'
@@ -354,7 +364,11 @@ class MakeBuilder(Builder):
         ])
 
     def build(self):
-        ensure('make', ['-j8', f'CFLAGS="{get_platform_cflags()}"'])
+        ensure('make', [
+            '-j8',
+            f'CFLAGS="{get_platform_cflags()}"',
+            f'CXXFLAGS="{get_platform_cflags()}"'
+        ])
 
     def install(self):
         os.environ['DESTDIR'] = self.dest_dir

@@ -129,7 +129,10 @@ def get_platform_cflags() -> str:
             version = f'-mios-simulator-version-min={IOS_VERSION}'
         return ' '.join((arch, sdk, version))
     if PLATFORM == 'js':
-        return '-fPIC'
+        flag = '-fPIC'
+        if not DEBUG:
+            flag += ' -DNDEBUG' # Reproducible: assert.
+        return flag
     return ''
 
 

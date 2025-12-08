@@ -116,6 +116,12 @@ def steal(package: str, directories: tuple[str, ...] = ('share',)):
     ])
 
 
+def sed(file: str, command: str):
+    bak = f'{file}.bak'
+    ensure('sed', ['-i.bak', command, file])
+    ensure('rm', ['-f', bak])
+
+
 def get_platform_cflags() -> str:
     if PLATFORM == 'macos':
         return f'-arch {MACOS_ARCH} -mmacosx-version-min={MACOS_VERSION}'

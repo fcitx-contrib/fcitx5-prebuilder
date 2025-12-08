@@ -1,5 +1,5 @@
 import os
-from common import CMakeBuilder, MACOS_ARCH, PLATFORM, cache, ensure
+from common import CMakeBuilder, MACOS_ARCH, PLATFORM, cache, ensure, sed
 
 version = '1.89.0'
 
@@ -27,13 +27,7 @@ if not os.path.isdir('boost'):
     ])
 
 # For js, but harmless for non-windows platform so no need to revert.
-file = 'boost/libs/container/include/boost/container/detail/thread_mutex.hpp'
-ensure('sed', [
-    '-i.bak',
-    '"s/#if defined(BOOST_HAS_PTHREADS)/#if 1/"',
-    file
-])
-ensure('rm ', ['-f', file + '.bak'])
+sed('boost/libs/container/include/boost/container/detail/thread_mutex.hpp', '"s/#if defined(BOOST_HAS_PTHREADS)/#if 1/"')
 
 libs = "algorithm;bimap;container;crc;interprocess;iostreams;multi_index;ptr_container;scope_exit;signals2;uuid"
 

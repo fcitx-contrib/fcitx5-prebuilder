@@ -1,5 +1,5 @@
 import os
-from common import INSTALL_PREFIX, PLATFORM, ROOT, MesonBuilder, ensure, patch
+from common import INSTALL_PREFIX, PLATFORM, ROOT, MesonBuilder, ensure, patch, sed
 
 version = '2.87.0'
 project = 'glib'
@@ -17,17 +17,11 @@ else:
 class GLibBuilder(MesonBuilder):
     def pre_package(self):
         # kkc
-        file = f'{self.dest_dir}{INSTALL_PREFIX}/lib/pkgconfig/gio-2.0.pc'
-        bak = f'{file}.bak'
-        ensure('sed', ['-i.bak', '"s|-lintl||g"', file])
-        ensure('rm', [bak])
-
+        sed(f'{self.dest_dir}{INSTALL_PREFIX}/lib/pkgconfig/gio-2.0.pc', '"s|-lintl||g"')
+        sed(f'{self.dest_dir}{INSTALL_PREFIX}/lib/pkgconfig/gmodule-no-export-2.0.pc', '"s|-pthread||g"')
         # skk
         if PLATFORM == 'js':
-            file = f'{self.dest_dir}{INSTALL_PREFIX}/lib/pkgconfig/glib-2.0.pc'
-            bak = f'{file}.bak'
-            ensure('sed', ['-i.bak', '"s|-pthread||g"', file])
-            ensure('rm', [bak])
+            sed(f'{self.dest_dir}{INSTALL_PREFIX}/lib/pkgconfig/glib-2.0.pc', '"s|-pthread||g"')
 
 GLibBuilder(project, [
     '-Dtests=false',

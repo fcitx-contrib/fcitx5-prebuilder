@@ -224,6 +224,7 @@ class CMakeBuilder(Builder):
             '-G', 'Ninja',
             '-S', self.src,
             '-DBUILD_SHARED_LIBS=OFF',
+            '-DBUILD_TESTING=OFF',
             f'-DCMAKE_BUILD_TYPE={"Debug" if DEBUG else "Release"}',
             f'-DCMAKE_INSTALL_PREFIX={INSTALL_PREFIX}',
             f'-DCMAKE_FIND_ROOT_PATH={ROOT}/build/{USR}'
@@ -354,7 +355,11 @@ class MakeBuilder(Builder):
         ])
 
     def build(self):
-        ensure('make', ['-j8', f'CFLAGS="{get_platform_cflags()}"'])
+        ensure('make', [
+            '-j8',
+            f'CFLAGS="{get_platform_cflags()}"',
+            f'CXXFLAGS="{get_platform_cflags()}"'
+        ])
 
     def install(self):
         os.environ['DESTDIR'] = self.dest_dir

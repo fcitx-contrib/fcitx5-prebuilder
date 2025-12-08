@@ -16,6 +16,13 @@ else:
 
 class GLibBuilder(MesonBuilder):
     def pre_package(self):
+        # kkc
+        file = f'{self.dest_dir}{INSTALL_PREFIX}/lib/pkgconfig/gio-2.0.pc'
+        bak = f'{file}.bak'
+        ensure('sed', ['-i.bak', '"s|-lintl||g"', file])
+        ensure('rm', [bak])
+
+        # skk
         if PLATFORM == 'js':
             file = f'{self.dest_dir}{INSTALL_PREFIX}/lib/pkgconfig/glib-2.0.pc'
             bak = f'{file}.bak'

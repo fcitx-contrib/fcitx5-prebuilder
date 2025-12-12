@@ -1,4 +1,7 @@
-from common import Builder, CARGO_TARGET, INSTALL_PREFIX, ROOT, ensure
+from common import Builder, CARGO_TARGET, INSTALL_PREFIX, ROOT, ensure, patch
+
+project = 'cskk'
+patch(project)
 
 
 class CskkBuilder(Builder):
@@ -21,4 +24,4 @@ class CskkBuilder(Builder):
         for directory in ('rule', 'rules'):
             ensure('cp', ['-r', f'assets/{directory}', share_dir])
 
-CskkBuilder('cskk').exec()
+CskkBuilder(project).exec()

@@ -1,0 +1,13 @@
+diff --git a/cskk/Cargo.toml b/cskk/Cargo.toml
+index 0ae5dce..a99f311 100644
+--- a/cskk/Cargo.toml
++++ b/cskk/Cargo.toml
+@@ -12,7 +12,7 @@ categories = ["internationalization", "text-processing"]
+ rust-version.workspace = true
+ 
+ [lib]
+-crate-type = ["cdylib", "lib"]
++crate-type = ["staticlib"]
+ 
+ [features]
+ capi = []

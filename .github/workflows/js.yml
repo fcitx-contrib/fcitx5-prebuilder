@@ -40,6 +40,7 @@ jobs:
             gettext autopoint valac
           pip install -r requirements.txt
           rustup target add wasm32-unknown-emscripten
+          cargo install cbindgen
 
       - name: Install emsdk
         working-directory: emsdk

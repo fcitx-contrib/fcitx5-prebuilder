@@ -1,3 +1,4 @@
+import os
 from common import Builder, CARGO_TARGET, INSTALL_PREFIX, ROOT, ensure, patch
 
 project = 'cskk'
@@ -6,6 +7,7 @@ patch(project)
 
 class CskkBuilder(Builder):
     def build(self):
+        os.environ['RUSTFLAGS'] = f'--remap-path-prefix={ROOT}/{project}=.' # Reproducible: absolute path
         ensure('cargo', ['build', '--release', '--features=capi', f'--target={CARGO_TARGET}'])
         ensure('cbindgen', ['--output', 'libcskk.h', 'cskk'])
 

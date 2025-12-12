@@ -1,6 +1,9 @@
 [submodule "anthy-cmake"]
 	path = anthy-cmake
 	url = https://github.com/fcitx5-android/anthy-cmake
+[submodule "cskk"]
+	path = cskk
+	url = https://github.com/naokiri/cskk
 [submodule "curl"]
 	path = curl
 	url = https://github.com/curl/curl

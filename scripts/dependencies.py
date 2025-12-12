@@ -12,6 +12,7 @@ dag = {
 macos = [
     'anthy-cmake',
     'boost',
+    'cskk',
     'default-icon-theme',
     'fmt',
     'glib',
@@ -92,6 +93,7 @@ harmony = [
 js = [
     'anthy-cmake',
     'boost',
+    'cskk',
     'ecm',
     'fmt',
     'glib',

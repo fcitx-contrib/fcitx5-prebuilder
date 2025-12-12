@@ -33,8 +33,15 @@ elif PLATFORM == 'ios' and IOS_PLATFORM != 'OS64':
 else: # iOS real device or JS
     POSTFIX = ''
 
+CARGO_TARGET = ''
+if PLATFORM == 'macos':
+    CARGO_TARGET = f'{MACOS_ARCH.replace('arm64', 'aarch64')}-apple-darwin'
+elif PLATFORM == 'js':
+    CARGO_TARGET = 'wasm32-unknown-emscripten'
+
 if PLATFORM in ('macos', 'ios'):
     os.environ['ZERO_AR_DATE'] = '1' # Reproducible: timestamp of __.SYMDEF SORTED and .o in .a
+    os.environ['MACOSX_DEPLOYMENT_TARGET'] = MACOS_VERSION # cargo
 
 ROOT = os.getcwd()
 

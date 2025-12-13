@@ -34,6 +34,9 @@
 [submodule "keyman"]
 	path = keyman
 	url = https://github.com/keymanapp/keyman
+[submodule "kyotocabinet"]
+	path = kyotocabinet
+	url = https://github.com/deepin-community/kyotocabinet
 [submodule "leveldb"]
 	path = leveldb
 	url = https://github.com/google/leveldb
@@ -58,6 +61,9 @@
 [submodule "libmozc"]
 	path = libmozc
 	url = https://github.com/fcitx-contrib/fcitx5-mozc
+[submodule "libpinyin"]
+	path = libpinyin
+	url = https://github.com/libpinyin/libpinyin
 [submodule "librime"]
 	path = librime
 	url = https://github.com/rime/librime

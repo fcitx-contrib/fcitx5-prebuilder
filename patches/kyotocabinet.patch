@@ -11,3 +11,16 @@ index 6447b39..64fec24 100755
  MYCPPFLAGS="$MYCPPFLAGS -DNDEBUG -D_GNU_SOURCE=1"
  MYCPPFLAGS="$MYCPPFLAGS -D_FILE_OFFSET_BITS=64 -D_REENTRANT -D__EXTENSIONS__"
  MYLDFLAGS="-L. -L\$(LIBDIR) -L/usr/local/lib"
+diff --git a/kccommon.h b/kccommon.h
+index 999f37a..946b8b4 100644
+--- a/kccommon.h
++++ b/kccommon.h
+@@ -190,7 +190,7 @@ using tr1::unordered_set;
+ #else
+ #define __KCFUNC__  "-"                  ///< for debugging
+ #endif
+-#define _KCCODELINE_  __FILE__, __LINE__, __KCFUNC__  ///< for debugging
++#define _KCCODELINE_  __FILE_NAME__, __LINE__, __KCFUNC__  ///< for debugging
+ 
+ /**
+  * All symbols of Kyoto Cabinet.

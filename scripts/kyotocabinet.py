@@ -1,5 +1,8 @@
-from common import INSTALL_PREFIX, MakeBuilder, ensure
+from common import INSTALL_PREFIX, MakeBuilder, ensure, patch
 
+
+project = 'kyotocabinet'
+patch(project) # hard-coded include directory
 
 class KyotoCabinetBuilder(MakeBuilder):
     target = 'libkyotocabinet.a'
@@ -14,4 +17,4 @@ class KyotoCabinetBuilder(MakeBuilder):
         ensure('cp', [self.target, lib_dir])
         ensure('cp', ['kyotocabinet.pc', pkgconfig_dir])
 
-KyotoCabinetBuilder('kyotocabinet', js=['--disable-zlib']).exec()
+KyotoCabinetBuilder(project, js=['--disable-zlib']).exec()

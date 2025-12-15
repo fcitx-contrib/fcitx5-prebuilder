@@ -355,6 +355,8 @@ class MesonBuilder(Builder):
 
 
 class MakeBuilder(Builder):
+    target = ''
+
     def configure(self):
         command = './configure'
         if PLATFORM == 'js':
@@ -365,6 +367,7 @@ class MakeBuilder(Builder):
             '--enable-static',
             '--disable-shared',
             *self.options,
+            *(self.js if PLATFORM == 'js' else []),
             f'PKG_CONFIG_SYSROOT_DIR={PKG_CONFIG_SYSROOT_DIR}',
             f'PKG_CONFIG_PATH={PKG_CONFIG_PATH}',
             f'XDG_DATA_DIRS={XDG_DATA_DIRS}'
@@ -373,6 +376,7 @@ class MakeBuilder(Builder):
     def build(self):
         ensure('make', [
             '-j8',
+            self.target,
             f'CFLAGS="{get_platform_cflags()}"',
             f'CXXFLAGS="{get_platform_cflags()}"'
         ])

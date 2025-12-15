@@ -1,0 +1,167 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index 4f62a9f..0942e6b 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -15,7 +15,7 @@
+ ## Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+ 
+ ######## Project settings
+-cmake_minimum_required(VERSION 2.8)
++cmake_minimum_required(VERSION 3.5)
+ set (PACKAGE_NAME libpinyin)
+ project (${PACKAGE_NAME} CXX C)
+ enable_testing()
+@@ -24,9 +24,9 @@ enable_testing()
+ set (PACKAGE_URL https://github.com/libpinyin/libpinyin)
+ set (PACKAGE_BUGREPORT https://github.com/libpinyin/libpinyin/issues)
+ set (LIBPINYIN_VERSION_MAJOR 2)
+-set (LIBPINYIN_VERSION_MINOR 1)
+-set (LIBPINYIN_VERSION_REVISION 0)
+-set (LIBPINYIN_BINARY_VERSION 13.0)
++set (LIBPINYIN_VERSION_MINOR 11)
++set (LIBPINYIN_VERSION_REVISION 91)
++set (LIBPINYIN_BINARY_VERSION 15.0)
+ 
+ if (CMAKE_BUILD_TYPE MATCHES Debug)
+     set (version_suffix .Debug)
+@@ -79,14 +79,12 @@ endif (DB_FOUND)
+ if (NOT HAVE_BERKELEY_DB)
+   # DBM: Kyoto Cabinet
+   find_package(KyotoCabinet)
+-  if (KyotoCabinet_FOUND)
+     include_directories ( ${KyotoCabinet_INCLUDE_PATH} )
+     SET (LIBS ${LIBS} ${KyotoCabinet_LIBRARY})
+     SET (HAVE_KYOTO_CABINET 1)
+     SET (DATABASE_FORMAT "KyotoCabinet")
+     SET (CMAKE_CXX_LINK_EXECUTABLE
+       "${CMAKE_CXX_LINK_EXECUTABLE} ${LIBS}")
+-  endif (KyotoCabinet_FOUND)
+ endif (NOT HAVE_BERKELEY_DB)
+ 
+ 
+@@ -141,6 +139,12 @@ configure_file(
+     @ONLY
+ )
+ 
++configure_file(
++    libzhuyin.pc.in
++    libzhuyin.pc
++    @ONLY
++)
++
+ configure_file(
+   config.h.cmake
+   config.h
+@@ -150,6 +154,7 @@ configure_file(
+ install(
+     FILES
+         ${CMAKE_BINARY_DIR}/libpinyin.pc
++        ${CMAKE_BINARY_DIR}/libzhuyin.pc
+     DESTINATION
+         ${DIR_LIBRARY}/pkgconfig
+ )
+@@ -178,6 +183,3 @@ include_directories(
+ ######## Subdirectories
+ 
+ add_subdirectory(src)
+-add_subdirectory(tests)
+-add_subdirectory(utils)
+-add_subdirectory(data)
+diff --git a/libzhuyin.pc.in b/libzhuyin.pc.in
+index f248d1c..0e6b944 100644
+--- a/libzhuyin.pc.in
++++ b/libzhuyin.pc.in
+@@ -11,5 +11,5 @@ Name: libzhuyin
+ Description: Library to deal with zhuyin
+ Version: @VERSION@
+ Requires: glib-2.0
+-Libs: -L${libdir} -lzhuyin
++Libs: -L${libdir} -lpinyin
+ Cflags: -I${libzhuyinincludedir}
+diff --git a/src/CMakeLists.txt b/src/CMakeLists.txt
+index fe16a66..f8a496f 100644
+--- a/src/CMakeLists.txt
++++ b/src/CMakeLists.txt
+@@ -10,8 +10,8 @@ set(
+ 
+ add_library(
+     pinyin
+-    SHARED
+     ${LIBPINYIN_SOURCES}
++    zhuyin.cpp
+ )
+ 
+ target_link_libraries(
+@@ -41,6 +41,7 @@ install(
+ install(
+     FILES
+         ${LIBPINYIN_HEADERS}
++        zhuyin.h
+     DESTINATION
+         ${DIR_INCLUDE_LIBPINYIN}
+ )
+diff --git a/src/lookup/CMakeLists.txt b/src/lookup/CMakeLists.txt
+index 767748c..77da8b1 100644
+--- a/src/lookup/CMakeLists.txt
++++ b/src/lookup/CMakeLists.txt
+@@ -12,7 +12,7 @@ set(
+ 
+ add_library(
+     lookup
+-    STATIC
++    OBJECT
+     ${LIBLOOKUP_SOURCES}
+ )
+ 
+diff --git a/src/storage/CMakeLists.txt b/src/storage/CMakeLists.txt
+index 26330e0..da215d7 100644
+--- a/src/storage/CMakeLists.txt
++++ b/src/storage/CMakeLists.txt
+@@ -45,7 +45,7 @@ endif (HAVE_KYOTO_CABINET)
+ 
+ add_library(
+     storage
+-    STATIC
++    OBJECT
+     ${LIBSTORAGE_SOURCES}
+ )
+ 
+@@ -58,6 +58,7 @@ target_link_libraries(
+ install(
+     FILES
+         ${LIBSTORAGE_HEADERS}
++        zhuyin_custom2.h
+     DESTINATION
+         ${DIR_INCLUDE_LIBPINYIN}
+ )
+diff --git a/src/zhuyin.cpp b/src/zhuyin.cpp
+index 1aeecf5..a4d868b 100644
+--- a/src/zhuyin.cpp
++++ b/src/zhuyin.cpp
+@@ -1127,7 +1127,7 @@ static gint compare_item_with_token(gconstpointer lhs,
+ #endif
+ 
+ static gint compare_item_with_length_and_frequency(gconstpointer lhs,
+-                                                   gconstpointer rhs) {
++                                                   gconstpointer rhs, void *) {
+     lookup_candidate_t * item_lhs = (lookup_candidate_t *)lhs;
+     lookup_candidate_t * item_rhs = (lookup_candidate_t *)rhs;
+ 
+@@ -1526,7 +1526,7 @@ bool zhuyin_guess_candidates_after_cursor(zhuyin_instance_t * instance,
+     _compute_frequency_of_items(context, prev_token, &merged_gram, candidates);
+ 
+     /* sort the candidates by length and frequency. */
+-    g_array_sort(candidates, compare_item_with_length_and_frequency);
++    g_array_sort(candidates, (GCompareFunc)compare_item_with_length_and_frequency);
+ 
+     /* post process to remove duplicated candidates */
+ 
+@@ -1607,7 +1607,7 @@ bool zhuyin_guess_candidates_before_cursor(zhuyin_instance_t * instance,
+         _compute_frequency_of_items(context, prev_token, &merged_gram, items);
+ 
+         /* sort the items by length and frequency. */
+-        g_array_sort(items, compare_item_with_length_and_frequency);
++        g_array_sort(items, (GCompareFunc)compare_item_with_length_and_frequency);
+ 
+         g_array_append_vals(candidates, items->data, items->len);
+ 

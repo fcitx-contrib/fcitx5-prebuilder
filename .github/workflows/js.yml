@@ -36,7 +36,7 @@ jobs:
 
       - name: Install dependencies
         run: |
-          sudo apt install -y \
+          sudo apt update && sudo apt install -y \
             gettext autopoint valac
           pip install -r requirements.txt
           rustup target add wasm32-unknown-emscripten
@@ -60,7 +60,7 @@ jobs:
           python scripts/build.py js
 
       - name: Upload artifact
-        uses: actions/upload-artifact@v5
+        uses: actions/upload-artifact@v6
         with:
           name: artifact-js
           path: |

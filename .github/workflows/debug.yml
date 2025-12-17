@@ -35,7 +35,7 @@ jobs:
           DEBUG=1 python scripts/librime.py macos ${{ matrix.arch }}
 
       - name: Upload artifact
-        uses: actions/upload-artifact@v5
+        uses: actions/upload-artifact@v6
         with:
           name: artifact-librime-${{ matrix.arch }}
           path: |
@@ -50,7 +50,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Download artifact
-        uses: actions/download-artifact@v6
+        uses: actions/download-artifact@v7
         with:
           pattern: artifact-librime*
           merge-multiple: true

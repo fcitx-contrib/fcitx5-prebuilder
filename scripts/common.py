@@ -361,6 +361,8 @@ class MakeBuilder(Builder):
         command = './configure'
         if PLATFORM == 'js':
             command = f'emconfigure {command}'
+        if not os.path.exists('configure'):
+            ensure('autoreconf', ['-i'])
         ensure(command, [
             '-C',
             f'--prefix={INSTALL_PREFIX}',

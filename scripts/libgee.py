@@ -1,16 +1,7 @@
-import os
-
-from common import MakeBuilder, ensure, patch
+from common import MakeBuilder, patch
 
 project = 'libgee'
 
 patch(project)
 
-class LibgeeBuilder(MakeBuilder):
-    def configure(self):
-        if not os.path.exists('configure'):
-            os.environ['NOCONFIGURE'] = '1'
-            ensure('./autogen.sh', [])
-        super().configure()
-
-LibgeeBuilder(project).exec()
+MakeBuilder(project).exec()

@@ -14,10 +14,4 @@ ensure('cp', ['patches/marisa-glib.vapi', 'libkkc/marisa-glib'])
 # valac uses it to locate gee-0.8.vapi
 os.environ['XDG_DATA_DIRS'] = XDG_DATA_DIRS
 
-class LibkkcBuilder(MakeBuilder):
-    def configure(self):
-        if not os.path.exists('configure'):
-            ensure('autoreconf', ['-i'])
-        super().configure()
-
-LibkkcBuilder(project).exec()
+MakeBuilder(project).exec()

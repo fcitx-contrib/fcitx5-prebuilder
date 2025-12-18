@@ -52,6 +52,7 @@ jobs:
           clang --version
           cmake --version
           valac --version
+          rustc --version
 
       - name: Build
         run: python scripts/build.py macos ${{ matrix.arch }}

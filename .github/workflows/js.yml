@@ -53,6 +53,7 @@ jobs:
           bison --version
           cmake --version
           valac --version
+          rustc --version
 
       - name: Build
         run: |

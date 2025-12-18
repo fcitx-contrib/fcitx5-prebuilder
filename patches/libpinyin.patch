@@ -1,29 +1,7 @@
 diff --git a/CMakeLists.txt b/CMakeLists.txt
-index 4f62a9f..0942e6b 100644
+index aac36dfe..0942e6b5 100644
 --- a/CMakeLists.txt
 +++ b/CMakeLists.txt
-@@ -15,7 +15,7 @@
- ## Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
- 
- ######## Project settings
--cmake_minimum_required(VERSION 2.8)
-+cmake_minimum_required(VERSION 3.5)
- set (PACKAGE_NAME libpinyin)
- project (${PACKAGE_NAME} CXX C)
- enable_testing()
-@@ -24,9 +24,9 @@ enable_testing()
- set (PACKAGE_URL https://github.com/libpinyin/libpinyin)
- set (PACKAGE_BUGREPORT https://github.com/libpinyin/libpinyin/issues)
- set (LIBPINYIN_VERSION_MAJOR 2)
--set (LIBPINYIN_VERSION_MINOR 1)
--set (LIBPINYIN_VERSION_REVISION 0)
--set (LIBPINYIN_BINARY_VERSION 13.0)
-+set (LIBPINYIN_VERSION_MINOR 11)
-+set (LIBPINYIN_VERSION_REVISION 91)
-+set (LIBPINYIN_BINARY_VERSION 15.0)
- 
- if (CMAKE_BUILD_TYPE MATCHES Debug)
-     set (version_suffix .Debug)
 @@ -79,14 +79,12 @@ endif (DB_FOUND)
  if (NOT HAVE_BERKELEY_DB)
    # DBM: Kyoto Cabinet
@@ -68,7 +46,7 @@ index 4f62a9f..0942e6b 100644
 -add_subdirectory(utils)
 -add_subdirectory(data)
 diff --git a/libzhuyin.pc.in b/libzhuyin.pc.in
-index f248d1c..0e6b944 100644
+index f248d1c0..0e6b944f 100644
 --- a/libzhuyin.pc.in
 +++ b/libzhuyin.pc.in
 @@ -11,5 +11,5 @@ Name: libzhuyin
@@ -79,7 +57,7 @@ index f248d1c..0e6b944 100644
 +Libs: -L${libdir} -lpinyin
  Cflags: -I${libzhuyinincludedir}
 diff --git a/src/CMakeLists.txt b/src/CMakeLists.txt
-index fe16a66..f8a496f 100644
+index fe16a668..f8a496fe 100644
 --- a/src/CMakeLists.txt
 +++ b/src/CMakeLists.txt
 @@ -10,8 +10,8 @@ set(
@@ -101,7 +79,7 @@ index fe16a66..f8a496f 100644
          ${DIR_INCLUDE_LIBPINYIN}
  )
 diff --git a/src/lookup/CMakeLists.txt b/src/lookup/CMakeLists.txt
-index 767748c..77da8b1 100644
+index 767748c2..77da8b1c 100644
 --- a/src/lookup/CMakeLists.txt
 +++ b/src/lookup/CMakeLists.txt
 @@ -12,7 +12,7 @@ set(
@@ -114,7 +92,7 @@ index 767748c..77da8b1 100644
  )
  
 diff --git a/src/storage/CMakeLists.txt b/src/storage/CMakeLists.txt
-index 26330e0..da215d7 100644
+index 26330e0f..da215d76 100644
 --- a/src/storage/CMakeLists.txt
 +++ b/src/storage/CMakeLists.txt
 @@ -45,7 +45,7 @@ endif (HAVE_KYOTO_CABINET)
@@ -135,7 +113,7 @@ index 26330e0..da215d7 100644
          ${DIR_INCLUDE_LIBPINYIN}
  )
 diff --git a/src/zhuyin.cpp b/src/zhuyin.cpp
-index 1aeecf5..a4d868b 100644
+index 1aeecf58..a4d868b8 100644
 --- a/src/zhuyin.cpp
 +++ b/src/zhuyin.cpp
 @@ -1127,7 +1127,7 @@ static gint compare_item_with_token(gconstpointer lhs,

@@ -1,12 +1,11 @@
 diff --git a/CMakeLists.txt b/CMakeLists.txt
-index 1465dfb..ecc58d8 100644
+index d1f1aa2..4003d6f 100644
 --- a/CMakeLists.txt
 +++ b/CMakeLists.txt
-@@ -71,8 +71,17 @@ if(NOT Corrosion_FOUND)
+@@ -75,7 +75,17 @@ corrosion_import_crate(MANIFEST_PATH Cargo.toml CRATES chewing_capi)
+ if(BUILD_TESTING)
+     corrosion_import_crate(MANIFEST_PATH Cargo.toml CRATES chewing_testhelper)
  endif()
- 
- corrosion_import_crate(MANIFEST_PATH Cargo.toml CRATES chewing_capi)
--corrosion_import_crate(MANIFEST_PATH Cargo.toml CRATES chewing_testhelper)
 +if (EMSCRIPTEN)
 +    corrosion_add_target_rustflags(chewing_capi -C panic=unwind)
 +    set(CARGO_FEATURES "")
@@ -21,9 +20,9 @@ index 1465dfb..ecc58d8 100644
  
  if(WITH_SQLITE3)
      corrosion_set_features(chewing_capi FEATURES sqlite)
-@@ -158,8 +167,9 @@ set(ALL_INC
-     ${INC_DIR}/mod_aux.h
- )
+@@ -168,8 +178,9 @@ if(NOT USE_SYSTEM_CHEWING_CLI)
+     set(CHEWING_CLI $<TARGET_FILE:chewing-cli>)
+ endif()
  
 -add_subdirectory(doc)
 +if (NOT EMSCRIPTEN)
@@ -32,7 +31,7 @@ index 1465dfb..ecc58d8 100644
  if(BUILD_TESTING)
      add_subdirectory(tests)
  endif()
-@@ -176,7 +186,7 @@ target_include_directories(libchewing
+@@ -183,7 +194,7 @@ target_include_directories(libchewing
  )
  
  corrosion_set_env_vars(chewing_capi
@@ -41,7 +40,7 @@ index 1465dfb..ecc58d8 100644
  )
  target_link_libraries(libchewing PRIVATE chewing_capi)
  target_link_libraries(chewing_capi INTERFACE ${SQLite3_LIBRARIES})
-@@ -227,13 +237,12 @@ endif()
+@@ -234,7 +245,7 @@ endif()
  install(FILES ${ALL_INC} DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/chewing)
  install(FILES ${PROJECT_BINARY_DIR}/chewing.pc
      DESTINATION ${CMAKE_INSTALL_LIBDIR}/pkgconfig)
@@ -50,29 +49,31 @@ index 1465dfb..ecc58d8 100644
      EXPORT libchewingTargets
      ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
      INCLUDES DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
-     LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
-     RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR})
+@@ -249,7 +260,6 @@ install(
+     DESTINATION
+         ${CMAKE_INSTALL_DATADIR}/libchewing
+ )
 -install(IMPORTED_RUNTIME_ARTIFACTS chewing-cli DESTINATION ${CMAKE_INSTALL_BINDIR})
  
  # generate CMake Config files
  include(CMakePackageConfigHelpers)
 diff --git a/Cargo.toml b/Cargo.toml
-index 9d7b4f2..557bb18 100644
+index fccb102..9022072 100644
 --- a/Cargo.toml
 +++ b/Cargo.toml
-@@ -28,6 +28,7 @@ tempfile = { workspace = true }
- [features]
- default = []
+@@ -30,6 +30,7 @@ default = []
  sqlite = ["dep:rusqlite"]
+ sqlite-bundled = ["sqlite", "rusqlite/bundled"]
+ log = ["tracing/log"]
 +threading = []
  
  [workspace]
  members = ["capi", "fuzzer", "tests/testhelper", "tools"]
 diff --git a/src/dictionary/trie_buf.rs b/src/dictionary/trie_buf.rs
-index dd51478..c2a8f34 100644
+index 933e0ba..5a844fe 100644
 --- a/src/dictionary/trie_buf.rs
 +++ b/src/dictionary/trie_buf.rs
-@@ -217,6 +217,7 @@ impl TrieBuf {
+@@ -209,6 +209,7 @@ impl TrieBuf {
  
      pub(crate) fn sync(&mut self) -> Result<(), UpdateDictionaryError> {
          info!("Synchronize dictionary from disk...");
@@ -80,7 +81,7 @@ index dd51478..c2a8f34 100644
          if let Some(join_handle) = self.join_handle.take() {
              if !join_handle.is_finished() {
                  info!("Aborted. Wait until previous sync is finished.");
-@@ -246,6 +247,7 @@ impl TrieBuf {
+@@ -238,6 +239,7 @@ impl TrieBuf {
                  self.trie = Some(Trie::open(self.path().unwrap())?);
              }
          }
@@ -88,7 +89,7 @@ index dd51478..c2a8f34 100644
          Ok(())
      }
  
-@@ -266,6 +268,7 @@ impl TrieBuf {
+@@ -258,6 +260,7 @@ impl TrieBuf {
              join_handle: None,
              dirty: false,
          };
@@ -96,7 +97,7 @@ index dd51478..c2a8f34 100644
          self.join_handle = Some(thread::spawn(move || {
              let mut builder = TrieBuilder::new();
              info!("Saving snapshot...");
-@@ -281,6 +284,30 @@ impl TrieBuf {
+@@ -273,6 +276,30 @@ impl TrieBuf {
              info!("    Done");
              Ok(())
          }));
@@ -127,7 +128,7 @@ index dd51478..c2a8f34 100644
          self.dirty = false;
      }
  }
-@@ -376,10 +403,12 @@ impl Drop for TrieBuf {
+@@ -357,10 +384,12 @@ impl Drop for TrieBuf {
      fn drop(&mut self) {
          let _ = self.sync();
          let _ = self.flush();

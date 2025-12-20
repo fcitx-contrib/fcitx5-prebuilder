@@ -1,5 +1,5 @@
 diff --git a/CMakeLists.txt b/CMakeLists.txt
-index d1f1aa2..4003d6f 100644
+index d1f1aa2..cc03a10 100644
 --- a/CMakeLists.txt
 +++ b/CMakeLists.txt
 @@ -75,7 +75,17 @@ corrosion_import_crate(MANIFEST_PATH Cargo.toml CRATES chewing_capi)
@@ -40,7 +40,7 @@ index d1f1aa2..4003d6f 100644
  )
  target_link_libraries(libchewing PRIVATE chewing_capi)
  target_link_libraries(chewing_capi INTERFACE ${SQLite3_LIBRARIES})
-@@ -234,7 +245,7 @@ endif()
+@@ -234,22 +245,12 @@ endif()
  install(FILES ${ALL_INC} DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/chewing)
  install(FILES ${PROJECT_BINARY_DIR}/chewing.pc
      DESTINATION ${CMAKE_INSTALL_LIBDIR}/pkgconfig)
@@ -49,10 +49,17 @@ index d1f1aa2..4003d6f 100644
      EXPORT libchewingTargets
      ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
      INCLUDES DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
-@@ -249,7 +260,6 @@ install(
-     DESTINATION
-         ${CMAKE_INSTALL_DATADIR}/libchewing
- )
+     LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
+     RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR})
+-install(
+-    FILES
+-        ${PROJECT_BINARY_DIR}/data/dict/chewing/tsi.dat
+-        ${PROJECT_BINARY_DIR}/data/dict/chewing/word.dat
+-        ${PROJECT_BINARY_DIR}/data/misc/swkb.dat
+-        ${PROJECT_BINARY_DIR}/data/misc/symbols.dat
+-    DESTINATION
+-        ${CMAKE_INSTALL_DATADIR}/libchewing
+-)
 -install(IMPORTED_RUNTIME_ARTIFACTS chewing-cli DESTINATION ${CMAKE_INSTALL_BINDIR})
  
  # generate CMake Config files

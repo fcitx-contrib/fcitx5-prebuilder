@@ -141,6 +141,8 @@ def get_platform_cflags() -> str:
             sdk = f'-isysroot {subprocess.check_output("xcrun --sdk iphonesimulator --show-sdk-path", shell=True, text=True).strip()}'
             version = f'-mios-simulator-version-min={IOS_VERSION}'
         return ' '.join((arch, sdk, version))
+    if PLATFORM == 'harmony':
+        return f'-O3 -fPIC --target={OHOS_TARGET}'
     if PLATFORM == 'js':
         flag = '-fPIC'
         if not DEBUG:
@@ -376,12 +378,19 @@ class MakeBuilder(Builder):
         ])
 
     def build(self):
-        ensure('make', [
+        command = [
             '-j8',
             self.target,
             f'CFLAGS="{get_platform_cflags()}"',
             f'CXXFLAGS="{get_platform_cflags()}"'
-        ])
+        ]
+        if PLATFORM == 'harmony':
+            command += [
+                f'CC={HARMONY_NATIVE}/llvm/bin/clang',
+                f'AR="{HARMONY_NATIVE}/llvm/bin/llvm-ar"',
+                f'RANLIB={HARMONY_NATIVE}/llvm/bin/llvm-ranlib'
+            ]
+        ensure('make', command)
 
     def install(self):
         os.environ['DESTDIR'] = self.dest_dir

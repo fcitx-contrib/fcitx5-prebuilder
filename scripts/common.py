@@ -141,6 +141,8 @@ def get_platform_cflags() -> str:
             sdk = f'-isysroot {subprocess.check_output("xcrun --sdk iphonesimulator --show-sdk-path", shell=True, text=True).strip()}'
             version = f'-mios-simulator-version-min={IOS_VERSION}'
         return ' '.join((arch, sdk, version))
+    if PLATFORM == 'harmony':
+        return f'-O3 -fPIC --target={OHOS_TARGET}'
     if PLATFORM == 'js':
         flag = '-fPIC'
         if not DEBUG:
@@ -376,13 +378,25 @@ class MakeBuilder(Builder):
         ])
 
     def build(self):
-        ensure('make', [
+        command = [
             '-j8',
             self.target,
             f'CFLAGS="{get_platform_cflags()}"',
             f'CXXFLAGS="{get_platform_cflags()}"'
-        ])
+        ]
+        if PLATFORM == 'harmony':
+            # Use environment variable so that libcrypto-lib-cversion.o in openssl doesn't contain absolute path of clang.
+            os.environ['PATH'] = f'{HARMONY_NATIVE}/llvm/bin:{os.environ['PATH']}'
+            command += [
+                'CC=clang',
+                'AR=llvm-ar',
+                'RANLIB=llvm-ranlib'
+            ]
+        ensure('make', command)
 
     def install(self):
         os.environ['DESTDIR'] = self.dest_dir
-        ensure('make', ['install'])
+        ensure('make', [
+            'install',
+            f'DESTDIR={self.dest_dir}', # openssl doesn't accept environment variable. 
+        ]) 

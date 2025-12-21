@@ -385,13 +385,18 @@ class MakeBuilder(Builder):
             f'CXXFLAGS="{get_platform_cflags()}"'
         ]
         if PLATFORM == 'harmony':
+            # Use environment variable so that libcrypto-lib-cversion.o in openssl doesn't contain absolute path of clang.
+            os.environ['PATH'] = f'{HARMONY_NATIVE}/llvm/bin:{os.environ['PATH']}'
             command += [
-                f'CC={HARMONY_NATIVE}/llvm/bin/clang',
-                f'AR="{HARMONY_NATIVE}/llvm/bin/llvm-ar"',
-                f'RANLIB={HARMONY_NATIVE}/llvm/bin/llvm-ranlib'
+                f'CC=clang',
+                f'AR=llvm-ar',
+                f'RANLIB=llvm-ranlib'
             ]
         ensure('make', command)
 
     def install(self):
         os.environ['DESTDIR'] = self.dest_dir
-        ensure('make', ['install'])
+        ensure('make', [
+            'install',
+            f'DESTDIR={self.dest_dir}', # openssl doesn't accept environment variable. 
+        ]) 

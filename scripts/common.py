@@ -388,9 +388,9 @@ class MakeBuilder(Builder):
             # Use environment variable so that libcrypto-lib-cversion.o in openssl doesn't contain absolute path of clang.
             os.environ['PATH'] = f'{HARMONY_NATIVE}/llvm/bin:{os.environ['PATH']}'
             command += [
-                f'CC=clang',
-                f'AR=llvm-ar',
-                f'RANLIB=llvm-ranlib'
+                'CC=clang',
+                'AR=llvm-ar',
+                'RANLIB=llvm-ranlib'
             ]
         ensure('make', command)
 

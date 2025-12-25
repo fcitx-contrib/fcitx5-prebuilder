@@ -1,23 +1,8 @@
 diff --git a/CMakeLists.txt b/CMakeLists.txt
-index aac36dfe..0942e6b5 100644
+index c04f10cf..a5a45a41 100644
 --- a/CMakeLists.txt
 +++ b/CMakeLists.txt
-@@ -79,14 +79,12 @@ endif (DB_FOUND)
- if (NOT HAVE_BERKELEY_DB)
-   # DBM: Kyoto Cabinet
-   find_package(KyotoCabinet)
--  if (KyotoCabinet_FOUND)
-     include_directories ( ${KyotoCabinet_INCLUDE_PATH} )
-     SET (LIBS ${LIBS} ${KyotoCabinet_LIBRARY})
-     SET (HAVE_KYOTO_CABINET 1)
-     SET (DATABASE_FORMAT "KyotoCabinet")
-     SET (CMAKE_CXX_LINK_EXECUTABLE
-       "${CMAKE_CXX_LINK_EXECUTABLE} ${LIBS}")
--  endif (KyotoCabinet_FOUND)
- endif (NOT HAVE_BERKELEY_DB)
- 
- 
-@@ -141,6 +139,12 @@ configure_file(
+@@ -145,6 +145,12 @@ configure_file(
      @ONLY
  )
  
@@ -30,7 +15,7 @@ index aac36dfe..0942e6b5 100644
  configure_file(
    config.h.cmake
    config.h
-@@ -150,6 +154,7 @@ configure_file(
+@@ -154,6 +160,7 @@ configure_file(
  install(
      FILES
          ${CMAKE_BINARY_DIR}/libpinyin.pc
@@ -38,13 +23,6 @@ index aac36dfe..0942e6b5 100644
      DESTINATION
          ${DIR_LIBRARY}/pkgconfig
  )
-@@ -178,6 +183,3 @@ include_directories(
- ######## Subdirectories
- 
- add_subdirectory(src)
--add_subdirectory(tests)
--add_subdirectory(utils)
--add_subdirectory(data)
 diff --git a/libzhuyin.pc.in b/libzhuyin.pc.in
 index f248d1c0..0e6b944f 100644
 --- a/libzhuyin.pc.in
@@ -57,20 +35,18 @@ index f248d1c0..0e6b944f 100644
 +Libs: -L${libdir} -lpinyin
  Cflags: -I${libzhuyinincludedir}
 diff --git a/src/CMakeLists.txt b/src/CMakeLists.txt
-index fe16a668..f8a496fe 100644
+index f48a9b3e..f8a496fe 100644
 --- a/src/CMakeLists.txt
 +++ b/src/CMakeLists.txt
-@@ -10,8 +10,8 @@ set(
- 
+@@ -11,6 +11,7 @@ set(
  add_library(
      pinyin
--    SHARED
      ${LIBPINYIN_SOURCES}
 +    zhuyin.cpp
  )
  
  target_link_libraries(
-@@ -41,6 +41,7 @@ install(
+@@ -40,6 +41,7 @@ install(
  install(
      FILES
          ${LIBPINYIN_HEADERS}
@@ -92,10 +68,10 @@ index 767748c2..77da8b1c 100644
  )
  
 diff --git a/src/storage/CMakeLists.txt b/src/storage/CMakeLists.txt
-index 26330e0f..da215d76 100644
+index cceccdf1..43fa3245 100644
 --- a/src/storage/CMakeLists.txt
 +++ b/src/storage/CMakeLists.txt
-@@ -45,7 +45,7 @@ endif (HAVE_KYOTO_CABINET)
+@@ -48,7 +48,7 @@ endif (HAVE_KYOTO_CABINET)
  
  add_library(
      storage
@@ -104,7 +80,7 @@ index 26330e0f..da215d76 100644
      ${LIBSTORAGE_SOURCES}
  )
  
-@@ -58,6 +58,7 @@ target_link_libraries(
+@@ -61,6 +61,7 @@ target_link_libraries(
  install(
      FILES
          ${LIBSTORAGE_HEADERS}

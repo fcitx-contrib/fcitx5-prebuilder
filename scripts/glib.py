@@ -1,7 +1,7 @@
 import os
 from common import INSTALL_PREFIX, PLATFORM, ROOT, MesonBuilder, ensure, patch, sed
 
-version = '2.87.0'
+version = '2.87.1'
 project = 'glib'
 
 # Make sure glib selects proxy-libintl

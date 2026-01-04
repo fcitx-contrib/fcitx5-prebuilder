@@ -19,6 +19,9 @@ class ChewingBuilder(CMakeBuilder):
 
 
 ChewingBuilder(project, [
+    '-DBUILD_DOC=OFF',
     '-DWITH_SQLITE3=OFF',
     f'-DRust_CARGO_TARGET={CARGO_TARGET}'
+], js=[
+    '-DBUILD_DATA=OFF'
 ]).exec()

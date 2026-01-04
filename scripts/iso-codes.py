@@ -1,12 +1,12 @@
 import os
-from common import MakeBuilder, ensure
+from common import MesonBuilder, ensure
 
 NEEDED_JSON = 'iso_639-3.json'
 # The only translation we need: language code/name when system doesn't recognize.
 # iso_639_3.mo is a symlink to it, which causes extraction error on Windows (f5h).
 NEEDED_MO = 'iso_639-3.mo'
 
-class IsoCodesBuilder(MakeBuilder):
+class IsoCodesBuilder(MesonBuilder):
     def pre_package(self):
         # Keep only the needed .json file.
         json_path = f'{self.dest_dir}/usr/share/iso-codes/json'

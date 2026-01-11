@@ -6,8 +6,6 @@ on:
 jobs:
   build:
     runs-on: ubuntu-24.04
-    env:
-      EMSCRIPTEN_VERSION: '4.0.22'
     steps:
       - uses: actions/checkout@v6
         with:
@@ -29,6 +27,10 @@ jobs:
           pip install -r requirements.txt
           rustup target add wasm32-unknown-emscripten
           cargo install cbindgen
+
+      - name: Get emscripten version
+        run: |
+          echo "EMSCRIPTEN_VERSION=$(cat .emscripten-version)" >> $GITHUB_ENV
 
       - name: Install emsdk
         working-directory: emsdk

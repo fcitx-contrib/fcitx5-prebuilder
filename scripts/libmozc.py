@@ -55,8 +55,6 @@ if PLATFORM == 'js':
         ])
         protoc_exe = f'{ROOT}/{build_dir}/protoc'
 
-    # Disable thread.
-    patch('libmozc/mozc')
     # Fix RuntimeError: null function or function signature mismatch.
     patch('libmozc/mozc/src/third_party/abseil-cpp')
     # Use raw data instead of embed data into libmozc.so so that Chrome accepts it

@@ -108,6 +108,7 @@ js = [
     'kyotocabinet',
     'leveldb',
     'libchewing',
+    'libcurl.js',
     'libexpat',
     'libgee',
     'libhangul',

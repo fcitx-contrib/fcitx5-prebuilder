@@ -7,6 +7,9 @@
 [submodule "curl"]
 	path = curl
 	url = https://github.com/curl/curl
+[submodule "libcurl.js"]
+	path = libcurl.js
+	url = https://github.com/fcitx-contrib/libcurl.js
 [submodule "default-icon-theme"]
 	path = default-icon-theme
 	url = https://github.com/fcitx-contrib/default-icon-theme

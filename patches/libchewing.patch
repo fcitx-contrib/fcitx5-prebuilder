@@ -1,5 +1,5 @@
 diff --git a/CMakeLists.txt b/CMakeLists.txt
-index 4c175c1..783abfb 100644
+index 59e012d..094818a 100644
 --- a/CMakeLists.txt
 +++ b/CMakeLists.txt
 @@ -77,7 +77,17 @@ corrosion_import_crate(MANIFEST_PATH Cargo.toml CRATES chewing_capi)
@@ -38,19 +38,40 @@ index 4c175c1..783abfb 100644
  # generate CMake Config files
  include(CMakePackageConfigHelpers)
 diff --git a/Cargo.toml b/Cargo.toml
-index fccb102..9022072 100644
+index d546d77..0e6a5af 100644
 --- a/Cargo.toml
 +++ b/Cargo.toml
-@@ -30,6 +30,7 @@ default = []
+@@ -29,6 +29,7 @@ tempfile = { workspace = true }
+ default = []
  sqlite = ["dep:rusqlite"]
  sqlite-bundled = ["sqlite", "rusqlite/bundled"]
- log = ["tracing/log"]
 +threading = []
  
  [workspace]
  members = ["capi", "fuzzer", "tests/testhelper", "tools"]
+@@ -44,7 +45,6 @@ lto = true
+ opt-level = 3
+ panic = "abort"
+ codegen-units = 1
+-debug = true
+ 
+ [package.metadata.docs.rs]
+ features = ["sqlite"]
+diff --git a/capi/Cargo.toml b/capi/Cargo.toml
+index 517dd9e..12fefb9 100644
+--- a/capi/Cargo.toml
++++ b/capi/Cargo.toml
+@@ -7,7 +7,7 @@ rust-version = "1.88"
+ edition = "2024"
+ 
+ [lib]
+-crate-type = ["rlib", "staticlib"]
++crate-type = ["staticlib"]
+ 
+ [dependencies]
+ chewing = { version = "0.11.0", path = ".." }
 diff --git a/src/dictionary/trie_buf.rs b/src/dictionary/trie_buf.rs
-index 933e0ba..5a844fe 100644
+index 7d004a9..a01647f 100644
 --- a/src/dictionary/trie_buf.rs
 +++ b/src/dictionary/trie_buf.rs
 @@ -209,6 +209,7 @@ impl TrieBuf {

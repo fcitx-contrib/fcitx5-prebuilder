@@ -13,15 +13,16 @@ class LuaBuilder(Builder):
         cflags = '-O3'
         if PLATFORM in ('macos', 'ios'):
             cflags += ' ' + get_platform_cflags()
-        if PLATFORM == 'macos':
-            # Enable dlopen for librime-cloud
-            cflags += ' -DLUA_USE_MACOSX'
-        elif PLATFORM == 'ios':
-            cflags += ' -DLUA_USE_IOS'
-        elif PLATFORM == 'harmony':
-            cflags += f' -fPIC --target={'aarch64' if OHOS_ARCH == 'arm64-v8a' else 'x86_64'}-linux-ohos'
-        elif PLATFORM == 'js':
-            cflags += ' -fPIC'
+        match PLATFORM:
+            case 'macos':
+                # Enable dlopen for librime-cloud
+                cflags += ' -DLUA_USE_MACOSX'
+            case 'ios':
+                cflags += ' -DLUA_USE_IOS'
+            case 'harmony':
+                cflags += f' -fPIC --target={'aarch64' if OHOS_ARCH == 'arm64-v8a' else 'x86_64'}-linux-ohos'
+            case 'js':
+                cflags += ' -fPIC'
 
         command += [
             'make',
@@ -30,18 +31,19 @@ class LuaBuilder(Builder):
             f'CFLAGS="{cflags}"'
         ]
 
-        if PLATFORM == 'js':
-            command += [
-                'CC=emcc',
-                'AR="emar q"',
-                'RANLIB=emranlib'
-            ]
-        elif PLATFORM == 'harmony':
-            command += [
-                f'CC={HARMONY_NATIVE}/llvm/bin/clang',
-                f'AR="{HARMONY_NATIVE}/llvm/bin/llvm-ar rc"',
-                f'RANLIB={HARMONY_NATIVE}/llvm/bin/llvm-ranlib'
-            ]
+        match PLATFORM:
+            case 'js':
+                command += [
+                    'CC=emcc',
+                    'AR="emar q"',
+                    'RANLIB=emranlib'
+                ]
+            case 'harmony':
+                command += [
+                    f'CC={HARMONY_NATIVE}/llvm/bin/clang',
+                    f'AR="{HARMONY_NATIVE}/llvm/bin/llvm-ar rc"',
+                    f'RANLIB={HARMONY_NATIVE}/llvm/bin/llvm-ranlib'
+                ]
 
         ensure(command[0], command[1:])
 

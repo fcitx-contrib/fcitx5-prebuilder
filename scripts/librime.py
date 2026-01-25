@@ -4,6 +4,9 @@ from common import CMakeBuilder, INSTALL_PREFIX, ROOT, USR, ensure, patch
 
 project = 'librime'
 
+# vertical-lr
+# persistent set_option
+# no trash "deprecated" default.yaml
 patch(project)
 patch('librime-lua')
 patch('librime-qjs')

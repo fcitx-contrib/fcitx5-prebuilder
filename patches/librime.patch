@@ -50,10 +50,10 @@ index 6b51a68..c5b8f7e 100644
   protected:
    Engine();
 diff --git a/src/rime/gear/navigator.cc b/src/rime/gear/navigator.cc
-index a6096c6..7dd5fba 100644
+index a83d9ca..2cc4f14 100644
 --- a/src/rime/gear/navigator.cc
 +++ b/src/rime/gear/navigator.cc
-@@ -15,6 +15,9 @@
+@@ -16,6 +16,9 @@
  #include <rime/gear/navigator.h>
  #include <rime/gear/translator_commons.h>
  
@@ -63,7 +63,7 @@ index a6096c6..7dd5fba 100644
  namespace rime {
  
  static Navigator::ActionDef navigation_actions[] = {
-@@ -81,7 +84,7 @@ ProcessResult Navigator::ProcessKeyEvent(const KeyEvent& key_event) {
+@@ -82,7 +85,7 @@ ProcessResult Navigator::ProcessKeyEvent(const KeyEvent& key_event) {
    if (!ctx->IsComposing())
      return kNoop;
    TextOrientation text_orientation =
@@ -220,6 +220,22 @@ index 5e4bfce..e88aace 100644
    };
    enum CandidateListLayout {
      Stacked = 0,
+diff --git a/src/rime/lever/deployment_tasks.cc b/src/rime/lever/deployment_tasks.cc
+index 6e6ff89..35769d9 100644
+--- a/src/rime/lever/deployment_tasks.cc
++++ b/src/rime/lever/deployment_tasks.cc
+@@ -435,11 +435,6 @@ bool ConfigFileUpdate::Run(Deployer* deployer) {
+   path source_config_path(shared_data_path / file_name_);
+   path dest_config_path(user_data_path / file_name_);
+   path trash = user_data_path / "trash";
+-  if (TrashDeprecatedUserCopy(source_config_path, dest_config_path,
+-                              version_key_, trash)) {
+-    LOG(WARNING) << "deprecated user copy of '" << file_name_
+-                 << "' is moved to " << trash;
+-  }
+   // build the config file if needs update
+   the<Config> config(Config::Require("config")->Create(file_name_));
+   if (ConfigNeedsUpdate(config.get())) {
 diff --git a/src/rime/service.h b/src/rime/service.h
 index a69ae74..9b3d4b1 100644
 --- a/src/rime/service.h

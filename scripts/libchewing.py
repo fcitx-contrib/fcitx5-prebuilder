@@ -2,6 +2,7 @@ from common import CMakeBuilder, CARGO_TARGET, INSTALL_PREFIX, PLATFORM, ensure,
 
 project = 'libchewing'
 
+# Shrink binary size.
 patch(project)
 
 if PLATFORM != 'macos':

@@ -1,13 +1,15 @@
 import os
 from common import INSTALL_PREFIX, PLATFORM, ROOT, MesonBuilder, ensure, patch, sed
 
-version = '2.87.1'
+with open('.glib-version') as f:
+    version = f.read().strip()
 project = 'glib'
 
 # Make sure glib selects proxy-libintl
 if PLATFORM == 'js':
     os.chdir('glib')
     branch = f'fcitx-{version}'
+    # Originally https://github.com/kleisauke/glib
     ensure('git', ['fetch', 'https://github.com/fcitx-contrib/glib', f'{branch}:{branch}'])
     ensure('git', ['checkout', branch])
     os.chdir(ROOT)

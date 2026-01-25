@@ -22,22 +22,24 @@ IOS_ARCH = 'x86_64' if IOS_PLATFORM == 'SIMULATOR64' else 'arm64'
 OHOS_ARCH = sys.argv[2] if PLATFORM == 'harmony' else ''
 OHOS_TARGET = f'{'aarch64' if OHOS_ARCH == 'arm64-v8a' else 'x86_64'}-linux-ohos'
 
-if PLATFORM == 'macos':
-    POSTFIX = '-' + MACOS_ARCH
-elif PLATFORM == 'windows':
-    POSTFIX = '-' + WINDOWS_ARCH
-elif PLATFORM == 'harmony':
-    POSTFIX = '-' + OHOS_ARCH
-elif PLATFORM == 'ios' and IOS_PLATFORM != 'OS64':
-    POSTFIX = '-' + IOS_ARCH
-else: # iOS real device or JS
-    POSTFIX = ''
+match PLATFORM:
+    case 'macos':
+        POSTFIX = '-' + MACOS_ARCH
+    case 'windows':
+        POSTFIX = '-' + WINDOWS_ARCH
+    case 'harmony':
+        POSTFIX = '-' + OHOS_ARCH
+    case 'ios' if IOS_PLATFORM != 'OS64':
+        POSTFIX = '-' + IOS_ARCH
+    case _: # iOS real device or JS
+        POSTFIX = ''
 
 CARGO_TARGET = ''
-if PLATFORM == 'macos':
-    CARGO_TARGET = f'{MACOS_ARCH.replace('arm64', 'aarch64')}-apple-darwin'
-elif PLATFORM == 'js':
-    CARGO_TARGET = 'wasm32-unknown-emscripten'
+match PLATFORM:
+    case 'macos':
+        CARGO_TARGET = f'{MACOS_ARCH.replace("arm64", "aarch64")}-apple-darwin'
+    case 'js':
+        CARGO_TARGET = 'wasm32-unknown-emscripten'
 
 if PLATFORM in ('macos', 'ios'):
     os.environ['ZERO_AR_DATE'] = '1' # Reproducible: timestamp of __.SYMDEF SORTED and .o in .a
@@ -130,25 +132,27 @@ def sed(file: str, command: str):
 
 
 def get_platform_cflags() -> str:
-    if PLATFORM == 'macos':
-        return f'-arch {MACOS_ARCH} -mmacosx-version-min={MACOS_VERSION}'
-    if PLATFORM == 'ios':
-        arch = f'-arch {IOS_ARCH}'
-        if IOS_PLATFORM == 'OS64':
-            sdk = f'-isysroot {subprocess.check_output("xcrun --sdk iphoneos --show-sdk-path", shell=True, text=True).strip()}'
-            version = f'-miphoneos-version-min={IOS_VERSION}'
-        else:
-            sdk = f'-isysroot {subprocess.check_output("xcrun --sdk iphonesimulator --show-sdk-path", shell=True, text=True).strip()}'
-            version = f'-mios-simulator-version-min={IOS_VERSION}'
-        return ' '.join((arch, sdk, version))
-    if PLATFORM == 'harmony':
-        return f'-O3 -fPIC --target={OHOS_TARGET}'
-    if PLATFORM == 'js':
-        flag = '-fPIC'
-        if not DEBUG:
-            flag += ' -DNDEBUG' # Reproducible: assert.
-        return flag
-    return ''
+    match PLATFORM:
+        case 'macos':
+            return f'-arch {MACOS_ARCH} -mmacosx-version-min={MACOS_VERSION}'
+        case 'ios':
+            arch = f'-arch {IOS_ARCH}'
+            if IOS_PLATFORM == 'OS64':
+                sdk = f'-isysroot {subprocess.check_output("xcrun --sdk iphoneos --show-sdk-path", shell=True, text=True).strip()}'
+                version = f'-miphoneos-version-min={IOS_VERSION}'
+            else:
+                sdk = f'-isysroot {subprocess.check_output("xcrun --sdk iphonesimulator --show-sdk-path", shell=True, text=True).strip()}'
+                version = f'-mios-simulator-version-min={IOS_VERSION}'
+            return ' '.join((arch, sdk, version))
+        case 'harmony':
+            return f'-O3 -fPIC --target={OHOS_TARGET}'
+        case 'js':
+            flag = '-fPIC'
+            if not DEBUG:
+                flag += ' -DNDEBUG' # Reproducible: assert.
+            return flag
+        case _:
+            return ''
 
 
 class Builder:
@@ -184,15 +188,16 @@ class Builder:
         if not os.path.exists(lib_dir):
             return
         all_a = f'{lib_dir}/*.a'
-        if PLATFORM == 'harmony':
-            ensure(f'{HARMONY_NATIVE}/llvm/bin/llvm-strip', ['--strip-unneeded', all_a])
-        elif PLATFORM == 'js':
-            ensure('emstrip', ['--strip-unneeded', all_a])
-        elif PLATFORM == 'windows':
-            all_lib = f'{lib_dir}/*.lib'
-            ensure('llvm-strip', ['--strip-unneeded', all_lib])
-        else:
-            ensure('strip', ['-x', all_a])
+        match PLATFORM:
+            case 'harmony':
+                ensure(f'{HARMONY_NATIVE}/llvm/bin/llvm-strip', ['--strip-unneeded', all_a])
+            case 'js':
+                ensure('emstrip', ['--strip-unneeded', all_a])
+            case 'windows':
+                all_lib = f'{lib_dir}/*.lib'
+                ensure('llvm-strip', ['--strip-unneeded', all_lib])
+            case _:
+                ensure('strip', ['-x', all_a])
 
     def pre_package(self):
         pass
@@ -308,14 +313,15 @@ class CMakeBuilder(Builder):
 class MesonBuilder(Builder):
     @staticmethod
     def cross_file_path():
-        if PLATFORM == 'macos':
-            name = f'meson-macos-{MACOS_ARCH}'
-        elif PLATFORM == 'ios':
-            name = f'meson-ios-{IOS_PLATFORM}'
-        elif PLATFORM == 'harmony':
-            name = f'meson-harmony-{OHOS_ARCH}'
-        else:
-            name = 'meson-cross-js'
+        match PLATFORM:
+            case 'macos':
+                name = f'meson-macos-{MACOS_ARCH}'
+            case 'ios':
+                name = f'meson-ios-{IOS_PLATFORM}'
+            case 'harmony':
+                name = f'meson-harmony-{OHOS_ARCH}'
+            case _:
+                name = 'meson-cross-js'
         return f'{ROOT}/scripts/{name}.ini'
 
     @staticmethod

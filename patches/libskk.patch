@@ -1,5 +1,5 @@
 diff --git a/Makefile.am b/Makefile.am
-index c5ae55c..562caf8 100644
+index 335bb7d..2cd3f20 100644
 --- a/Makefile.am
 +++ b/Makefile.am
 @@ -14,7 +14,7 @@
@@ -18,10 +18,10 @@ index c5ae55c..562caf8 100644
 -DIST_SUBDIRS = libskk rules tools tests docs po
 +DIST_SUBDIRS = libskk rules po
  
- GITIGNOREFILES =				\
- 	ABOUT-NLS				\
+ distclean-local:
+ 	if test "x$(srcdir)" = "x."; then :; else \
 diff --git a/configure.ac b/configure.ac
-index e78082d..799419f 100644
+index 397b92c..5bb95da 100644
 --- a/configure.ac
 +++ b/configure.ac
 @@ -87,7 +87,6 @@ AC_SUBST(LIBSKK_CFLAGS)
@@ -42,10 +42,10 @@ index e78082d..799419f 100644
  po/Makefile.in])
  AC_OUTPUT
 diff --git a/libskk/Makefile.am b/libskk/Makefile.am
-index c96dc1f..44c460f 100644
+index 470563c..af676bb 100644
 --- a/libskk/Makefile.am
 +++ b/libskk/Makefile.am
-@@ -79,17 +79,6 @@ libskk_la_SOURCES =				\
+@@ -80,19 +80,6 @@ libskk_la_SOURCES =				\
  	completion.vala			\
  	$(NULL)
  
@@ -57,7 +57,9 @@ index c96dc1f..44c460f 100644
 -typelib_DATA = Skk-@SKK_API_VERSION@.typelib
 -
 -Skk-@SKK_API_VERSION@.typelib: Skk-@SKK_API_VERSION@.gir
--	@INTROSPECTION_COMPILER@ --shared-library=libskk -o $@ $^
+-	$(AM_V_GEN) srcdir=''; \
+-	test -f ./$< || srcdir=$(srcdir)/; \
+-	@INTROSPECTION_COMPILER@ --shared-library=libskk -o $@ $${srcdir}$<
 -endif
 -
  Skk-@SKK_API_VERSION@.gir skk-internals-@SKK_API_VERSION@.vapi skk-@SKK_API_VERSION@.vapi: libskk.la
@@ -77,7 +79,7 @@ index 20e6bef..2cb1ab1 100644
 -Cflags: -I${includedir}/skk-@SKK_API_VERSION@
 +Cflags: -I${includedir}/libskk
 diff --git a/libskk/user-dict.vala b/libskk/user-dict.vala
-index 427877c..195a0d1 100644
+index 247769a..0785c63 100644
 --- a/libskk/user-dict.vala
 +++ b/libskk/user-dict.vala
 @@ -145,13 +145,13 @@ namespace Skk {

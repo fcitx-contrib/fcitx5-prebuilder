@@ -1,10 +1,7 @@
-from common import CMakeBuilder, patch
+from common import CMakeBuilder
 
-project = 'libhangul'
-
-patch(project)
-
-CMakeBuilder(project, [
+CMakeBuilder('libhangul', [
     '-DENABLE_EXTERNAL_KEYBOARDS=OFF',
-    '-DENABLE_UNIT_TEST=OFF'
+    '-DENABLE_UNIT_TEST=OFF',
+    '-DENABLE_TOOLS=OFF'
 ]).exec()

@@ -61,13 +61,12 @@ jobs:
         run: ./scripts/check-absolute-path.sh
 
       - name: Release
-        if: ${{ github.ref == 'refs/heads/master' }}
         uses: 'marvinpinto/action-automatic-releases@latest'
         with:
           repo_token: ${{ secrets.GITHUB_TOKEN }}
-          automatic_release_tag: js
+          automatic_release_tag: ${{ github.ref == 'refs/heads/master' && 'js' || 'js-testing' }}
           prerelease: true
-          title: "JS Build"
+          title: ${{ github.ref == 'refs/heads/master' && 'JS Build' || 'JS Testing Build' }}
           files: |
             build/js/*.tar.bz2
 

@@ -70,6 +70,12 @@ jobs:
           files: |
             build/js/*.tar.bz2
 
+      - name: Delete js-testing release
+        if: ${{ github.ref == 'refs/heads/master' }}
+        run: gh release delete js-testing -y || true
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
       - name: Setup tmate session
         if: ${{ failure() }}
         uses: mxschmitt/action-tmate@v3

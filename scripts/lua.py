@@ -1,4 +1,4 @@
-from common import Builder, INSTALL_PREFIX, PLATFORM, ROOT, HARMONY_NATIVE, OHOS_ARCH, ensure, get_platform_cflags, patch
+from common import Builder, INSTALL_PREFIX, PLATFORM, ROOT, HARMONY_NATIVE, ensure, get_platform_cflags, patch
 
 project = 'lua'
 
@@ -10,19 +10,13 @@ class LuaBuilder(Builder):
         ensure('make', ['clean'])
         command = ['emmake'] if PLATFORM == 'js' else []
 
-        cflags = '-O3'
-        if PLATFORM in ('macos', 'ios'):
-            cflags += ' ' + get_platform_cflags()
+        cflags = get_platform_cflags()
         match PLATFORM:
             case 'macos':
                 # Enable dlopen for librime-cloud
                 cflags += ' -DLUA_USE_MACOSX'
             case 'ios':
                 cflags += ' -DLUA_USE_IOS'
-            case 'harmony':
-                cflags += f' -fPIC --target={'aarch64' if OHOS_ARCH == 'arm64-v8a' else 'x86_64'}-linux-ohos'
-            case 'js':
-                cflags += ' -fPIC'
 
         command += [
             'make',

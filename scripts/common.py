@@ -134,20 +134,22 @@ def sed(file: str, command: str):
 def get_platform_cflags() -> str:
     match PLATFORM:
         case 'macos':
-            return f'-arch {MACOS_ARCH} -mmacosx-version-min={MACOS_VERSION}'
+            return f'-O3 -arch {MACOS_ARCH} -mmacosx-version-min={MACOS_VERSION}'
         case 'ios':
-            arch = f'-arch {IOS_ARCH}'
+            arch = f'-O3 -arch {IOS_ARCH}'
             if IOS_PLATFORM == 'OS64':
                 sdk = f'-isysroot {subprocess.check_output("xcrun --sdk iphoneos --show-sdk-path", shell=True, text=True).strip()}'
                 version = f'-miphoneos-version-min={IOS_VERSION}'
             else:
                 sdk = f'-isysroot {subprocess.check_output("xcrun --sdk iphonesimulator --show-sdk-path", shell=True, text=True).strip()}'
                 version = f'-mios-simulator-version-min={IOS_VERSION}'
-            return ' '.join((arch, sdk, version))
+            return ' '.join(('-O3', arch, sdk, version))
         case 'harmony':
             return f'-O3 -fPIC --target={OHOS_TARGET}'
         case 'js':
-            flag = '-fPIC'
+            # Starting from Rust 1.93, wasm eh is enabled by default and we follow this change globally.
+            # Thus we need explicitly enable wasm longjmp support for lua.
+            flag = '-O3 -fPIC -sSUPPORT_LONGJMP=wasm'
             if not DEBUG:
                 flag += ' -DNDEBUG' # Reproducible: assert.
             return flag

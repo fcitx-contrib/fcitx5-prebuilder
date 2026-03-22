@@ -21,7 +21,7 @@ index 335bb7d..2cd3f20 100644
  distclean-local:
  	if test "x$(srcdir)" = "x."; then :; else \
 diff --git a/configure.ac b/configure.ac
-index 397b92c..5bb95da 100644
+index 1dff05f..5d24360 100644
 --- a/configure.ac
 +++ b/configure.ac
 @@ -87,7 +87,6 @@ AC_SUBST(LIBSKK_CFLAGS)
@@ -66,15 +66,16 @@ index 470563c..af676bb 100644
  
  GITIGNOREFILES =				\
 diff --git a/libskk/libskk.pc.in b/libskk/libskk.pc.in
-index 20e6bef..2cb1ab1 100644
+index d3b5513..d9f86b1 100644
 --- a/libskk/libskk.pc.in
 +++ b/libskk/libskk.pc.in
-@@ -24,6 +24,6 @@ includedir=@includedir@
+@@ -24,7 +24,7 @@ includedir=@includedir@
  Name: libskk
  Description: a library to deal with Japanese kana-to-kanji conversion method
  Version: @VERSION@
--Requires: gobject-2.0 gio-2.0 gee-0.8
-+Requires: gobject-2.0 gio-2.0 gee-0.8 json-glib-1.0 xkbcommon
+-Requires: gobject-2.0 gio-2.0
++Requires: gobject-2.0 gio-2.0 json-glib-1.0 xkbcommon
+ Requires.private: gee-0.8
  Libs: -L${libdir} -lskk
 -Cflags: -I${includedir}/skk-@SKK_API_VERSION@
 +Cflags: -I${includedir}/libskk

@@ -26,7 +26,7 @@ class MozcBuilder(CMakeBuilder):
         # Combine all .o files of absl to libabsl.a
         lib_dir = f'{self.dest_dir}{INSTALL_PREFIX}/lib'
         libabsl_a = f'{lib_dir}/libabsl.a'
-        all_libabsl_o = f'$(find {self.build_}/mozc/src/third_party/abseil-cpp -name "*.o" | sort)'
+        all_libabsl_o = f'$(find {self.build_}/abseil-cpp -name "*.o" | sort)'
         ensure(ar, ['rc', libabsl_a, all_libabsl_o])
 
         if PLATFORM == 'js':
@@ -39,7 +39,7 @@ class MozcBuilder(CMakeBuilder):
             ensure('rm', ['-rf', f'{self.dest_dir}{INSTALL_PREFIX}/bin'])
 
 # Accelerate build by dropping irrelevant compilers.
-patch('libmozc/mozc/src/third_party/protobuf')
+patch('libmozc/protobuf')
 
 if PLATFORM == 'js':
     if platform.system() == 'Linux': # Nothing to steal so build it.
@@ -56,7 +56,7 @@ if PLATFORM == 'js':
         protoc_exe = f'{ROOT}/{build_dir}/protoc'
 
     # Fix RuntimeError: null function or function signature mismatch.
-    patch('libmozc/mozc/src/third_party/abseil-cpp')
+    patch('libmozc/abseil-cpp')
     # Use raw data instead of embed data into libmozc.so so that Chrome accepts it
     # without --enable-features=WebAssemblyUnlimitedSyncCompilation.
     cache('https://github.com/fcitx-contrib/fcitx5-mozc/releases/download/latest/mozc.data')

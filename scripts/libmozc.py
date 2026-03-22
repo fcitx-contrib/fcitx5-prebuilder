@@ -53,7 +53,7 @@ if PLATFORM == 'js':
             '--build', build_dir,
             '--target', 'protoc'
         ])
-        protoc_exe = f'{ROOT}/{build_dir}/protoc'
+        protoc_exe = f'{ROOT}/{build_dir}/protobuf/protoc'
 
     # Fix RuntimeError: null function or function signature mismatch.
     patch('libmozc/abseil-cpp')
@@ -69,5 +69,6 @@ if platform.system() == 'Darwin' and PLATFORM != 'macos':
 
 if PLATFORM in ('ios', 'js'):
     options.append(f'-DPROTOC_EXECUTABLE={protoc_exe}')
+    options.append('-Dprotobuf_BUILD_PROTOC_BINARIES=OFF')
 
 MozcBuilder('libmozc', options).exec()

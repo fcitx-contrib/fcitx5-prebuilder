@@ -7,7 +7,7 @@ from typing import Literal, cast
 from dependencies import dag
 
 MACOS_VERSION = '13.3' # Also need to update meson-macos-*.ini
-IOS_VERSION = '17'
+IOS_VERSION = '16.3'
 
 PLATFORM_VERSION = {
     'macos': MACOS_VERSION,

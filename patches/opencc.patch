@@ -1,27 +1,132 @@
 diff --git a/CMakeLists.txt b/CMakeLists.txt
-index b79e5b5..4b2686a 100644
+index 9b661b3..2f45054 100644
 --- a/CMakeLists.txt
 +++ b/CMakeLists.txt
-@@ -220,9 +220,9 @@ endif()
+@@ -29,6 +29,7 @@ option(BUILD_SHARED_LIBS "Build opencc as shared library" ON)
+ option(ENABLE_GTEST "Build all tests." OFF)
+ option(ENABLE_BENCHMARK "Build benchmark tests." OFF)
+ option(ENABLE_DARTS "Build DartsDict (ocd format)." ON)
++option(ENABLE_PLUGINS "" ON)
+ option(BUILD_OPENCC_JIEBA_PLUGIN "Build Jieba segmentation as a loadable plugin." OFF)
+ option(BUILD_PYTHON "Build python library" OFF)
+ option(USE_SYSTEM_DARTS "Use system version of Darts" OFF)
+@@ -262,10 +263,12 @@ endif()
  ######## Subdirectories
  
  add_subdirectory(src)
 -add_subdirectory(doc)
 +if(APPLE AND NOT IOS)
  add_subdirectory(data)
++endif()
++if(ENABLE_PLUGINS)
+ add_subdirectory(plugins)
 -add_subdirectory(test)
 +endif()
  
- ######## Testing
- 
+ if (ENABLE_BENCHMARK AND TARGET performance AND TARGET opencc_jieba)
+   target_compile_definitions(performance PRIVATE
 diff --git a/src/CMakeLists.txt b/src/CMakeLists.txt
-index 7768c89..5e5c5b1 100644
+index ac9f518..f87c700 100644
 --- a/src/CMakeLists.txt
 +++ b/src/CMakeLists.txt
-@@ -205,4 +205,6 @@ endif()
+@@ -32,7 +32,6 @@ set(
+   MarisaDict.hpp
+   MaxMatchSegmentation.hpp
+   Optional.hpp
+-  PluginSegmentation.hpp
+   PhraseExtract.hpp
+   Segmentation.hpp
+   Segments.hpp
+@@ -59,7 +58,6 @@ set(
+   Lexicon.cpp
+   MarisaDict.cpp
+   MaxMatchSegmentation.cpp
+-  PluginSegmentation.cpp
+   PhraseExtract.cpp
+   SerializedValues.cpp
+   SimpleConverter.cpp
+@@ -69,6 +67,11 @@ set(
+   UTF8Util.cpp
+ )
+ 
++if (ENABLE_PLUGINS)
++  list(APPEND LIBOPENCC_HEADERS PluginSegmentation.hpp)
++  list(APPEND LIBOPENCC_SOURCES PluginSegmentation.cpp)
++endif()
++
+ set(UNITTESTS
+   ConfigTest
+   ConversionChainTest
+@@ -135,6 +138,8 @@ target_link_libraries(libopencc marisa)
+ if (NOT BUILD_SHARED_LIBS)
+   target_compile_definitions(libopencc PUBLIC Opencc_BUILT_AS_STATIC)
+ endif()
++if (ENABLE_PLUGINS)
++target_compile_definitions(libopencc PUBLIC OPENCC_ENABLE_PLUGINS)
+ # PluginSegmentation.cpp uses LoadLibrary on _WIN32 (MSVC and MinGW).
+ # Only non-Windows targets may need libdl for dlopen.
+ if (NOT CMAKE_SYSTEM_NAME STREQUAL "Windows")
+@@ -144,6 +149,7 @@ if (NOT CMAKE_SYSTEM_NAME STREQUAL "Windows")
+     target_link_libraries(libopencc dl)
+   endif ()
+ endif ()
++endif ()
+ target_include_directories(libopencc PUBLIC
+     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>
+     $<INSTALL_INTERFACE:${DIR_INCLUDE}/opencc>
+@@ -199,10 +205,12 @@ install(
+   DESTINATION ${DIR_INCLUDE}/opencc
+ )
+ 
++if (ENABLE_PLUGINS)
+ install(
+   FILES plugin/OpenCCPlugin.h
+   DESTINATION ${DIR_INCLUDE}/opencc/plugin
+ )
++endif ()
+ 
+ # Gtest
+ 
+@@ -238,4 +246,6 @@ endif()
  
  # Subdir
  
 +if(APPLE AND NOT IOS)
  add_subdirectory(tools)
 +endif()
+diff --git a/src/Config.cpp b/src/Config.cpp
+index faecea9..0b87cac 100644
+--- a/src/Config.cpp
++++ b/src/Config.cpp
+@@ -34,7 +34,9 @@
+ #include "Exception.hpp"
+ #include "MarisaDict.hpp"
+ #include "MaxMatchSegmentation.hpp"
++#ifdef OPENCC_ENABLE_PLUGINS
+ #include "PluginSegmentation.hpp"
++#endif
+ #include "TextDict.hpp"
+ 
+ #ifdef ENABLE_DARTS
+@@ -245,6 +247,7 @@ public:
+       // Required: dict
+       DictPtr dict = ParseDict(GetObjectProperty(doc, "dict"));
+       segmentation = SegmentationPtr(new MaxMatchSegmentation(dict));
++#ifdef OPENCC_ENABLE_PLUGINS
+     } else {
+       PluginConfigPairs configPairs;
+       configPairs.push_back(std::make_pair("__config_dir", configDirectory));
+@@ -272,6 +275,13 @@ public:
+         configPairs.push_back(std::make_pair(key, it->value.GetString()));
+       }
+       segmentation = CreatePluginSegmentation(type, configPairs);
++#else
++    } else {
++      throw InvalidFormat(
++          "Segmentation plugin '" + type +
++          "' is not supported. Plugins are disabled (ENABLE_PLUGINS=OFF). "
++          "Only 'mmseg' type is available.");
++#endif
+     }
+     return segmentation;
+   }

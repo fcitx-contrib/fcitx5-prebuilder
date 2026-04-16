@@ -57,6 +57,8 @@ if PLATFORM == 'js':
 
     # Fix RuntimeError: null function or function signature mismatch.
     patch('libmozc/abseil-cpp')
+    # Unblock single-thread build since fcitx5-js already overrides pthread.
+    patch('libmozc/mozc')
     # Use raw data instead of embed data into libmozc.so so that Chrome accepts it
     # without --enable-features=WebAssemblyUnlimitedSyncCompilation.
     cache('https://github.com/fcitx-contrib/fcitx5-mozc/releases/download/latest/mozc.data')

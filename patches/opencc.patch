@@ -26,28 +26,38 @@ index 9b661b3..2f45054 100644
  if (ENABLE_BENCHMARK AND TARGET performance AND TARGET opencc_jieba)
    target_compile_definitions(performance PRIVATE
 diff --git a/src/CMakeLists.txt b/src/CMakeLists.txt
-index ac9f518..acf0bfa 100644
+index ac9f518..f87c700 100644
 --- a/src/CMakeLists.txt
 +++ b/src/CMakeLists.txt
-@@ -32,7 +32,7 @@ set(
+@@ -32,7 +32,6 @@ set(
    MarisaDict.hpp
    MaxMatchSegmentation.hpp
    Optional.hpp
 -  PluginSegmentation.hpp
-+  $<$<BOOL:${ENABLE_PLUGINS}>:PluginSegmentation.hpp>
    PhraseExtract.hpp
    Segmentation.hpp
    Segments.hpp
-@@ -59,7 +59,7 @@ set(
+@@ -59,7 +58,6 @@ set(
    Lexicon.cpp
    MarisaDict.cpp
    MaxMatchSegmentation.cpp
 -  PluginSegmentation.cpp
-+  $<$<BOOL:${ENABLE_PLUGINS}>:PluginSegmentation.cpp>
    PhraseExtract.cpp
    SerializedValues.cpp
    SimpleConverter.cpp
-@@ -135,6 +135,8 @@ target_link_libraries(libopencc marisa)
+@@ -69,6 +67,11 @@ set(
+   UTF8Util.cpp
+ )
+ 
++if (ENABLE_PLUGINS)
++  list(APPEND LIBOPENCC_HEADERS PluginSegmentation.hpp)
++  list(APPEND LIBOPENCC_SOURCES PluginSegmentation.cpp)
++endif()
++
+ set(UNITTESTS
+   ConfigTest
+   ConversionChainTest
+@@ -135,6 +138,8 @@ target_link_libraries(libopencc marisa)
  if (NOT BUILD_SHARED_LIBS)
    target_compile_definitions(libopencc PUBLIC Opencc_BUILT_AS_STATIC)
  endif()
@@ -56,7 +66,7 @@ index ac9f518..acf0bfa 100644
  # PluginSegmentation.cpp uses LoadLibrary on _WIN32 (MSVC and MinGW).
  # Only non-Windows targets may need libdl for dlopen.
  if (NOT CMAKE_SYSTEM_NAME STREQUAL "Windows")
-@@ -144,6 +146,7 @@ if (NOT CMAKE_SYSTEM_NAME STREQUAL "Windows")
+@@ -144,6 +149,7 @@ if (NOT CMAKE_SYSTEM_NAME STREQUAL "Windows")
      target_link_libraries(libopencc dl)
    endif ()
  endif ()
@@ -64,7 +74,7 @@ index ac9f518..acf0bfa 100644
  target_include_directories(libopencc PUBLIC
      $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>
      $<INSTALL_INTERFACE:${DIR_INCLUDE}/opencc>
-@@ -199,10 +202,12 @@ install(
+@@ -199,10 +205,12 @@ install(
    DESTINATION ${DIR_INCLUDE}/opencc
  )
  
@@ -77,7 +87,7 @@ index ac9f518..acf0bfa 100644
  
  # Gtest
  
-@@ -238,4 +243,6 @@ endif()
+@@ -238,4 +246,6 @@ endif()
  
  # Subdir
  

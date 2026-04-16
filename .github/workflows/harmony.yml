@@ -42,7 +42,7 @@ jobs:
         run: python scripts/build.py harmony ${{ matrix.arch }}
 
       - name: Upload artifact
-        uses: actions/upload-artifact@v6
+        uses: actions/upload-artifact@v7
         with:
           name: artifact-harmony-${{ matrix.arch }}
           path: |
@@ -68,7 +68,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Download artifact
-        uses: actions/download-artifact@v7
+        uses: actions/download-artifact@v8
         with:
           pattern: artifact-harmony*
           merge-multiple: true

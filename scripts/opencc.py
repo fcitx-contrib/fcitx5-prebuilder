@@ -10,4 +10,5 @@ patch(project)
 CMakeBuilder(project, [
     '-DUSE_SYSTEM_MARISA=ON',
     '-DENABLE_DARTS=OFF'
-], includes=[f'{ROOT}/build/{USR}/include']).exec()
+], includes=[f'{ROOT}/build/{USR}/include'],
+ios=['-DENABLE_PLUGINS=OFF']).exec()

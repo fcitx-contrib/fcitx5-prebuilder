@@ -12,7 +12,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Download artifact
-        uses: actions/download-artifact@v7
+        uses: actions/download-artifact@v8
         with:
           pattern: artifact-${{ inputs.platform }}*
           merge-multiple: true
@@ -27,7 +27,7 @@ jobs:
           mkdir release
           while read file; do
             echo "## $file" >> summary.md
-            if wget -P release https://github.com/fcitx-contrib/fcitx5-prebuilder/releases/download/${{ inputs.platform }}/$file; then
+            if curl -fsSLO --output-dir release https://github.com/fcitx-contrib/fcitx5-prebuilder/releases/download/${{ inputs.platform }}/$file; then
               if diff release/$file $file; then
                 echo "Same." >> summary.md
               else

@@ -24,7 +24,7 @@ jobs:
           mkdir -p build/macos-${{ matrix.arch }}/usr
           for dep in boost glog leveldb lua marisa opencc yaml-cpp; do
             file=${dep}-${{ matrix.arch }}.tar.bz2
-            wget -P cache https://github.com/fcitx-contrib/fcitx5-prebuilder/releases/download/macos/$file
+            curl -fsSLO --output-dir cache https://github.com/fcitx-contrib/fcitx5-prebuilder/releases/download/macos/$file
             tar xf cache/$file -C build/macos-${{ matrix.arch }}/usr
           done
 
@@ -35,7 +35,7 @@ jobs:
           DEBUG=1 python scripts/librime.py macos ${{ matrix.arch }}
 
       - name: Upload artifact
-        uses: actions/upload-artifact@v6
+        uses: actions/upload-artifact@v7
         with:
           name: artifact-librime-${{ matrix.arch }}
           path: |
@@ -50,7 +50,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Download artifact
-        uses: actions/download-artifact@v7
+        uses: actions/download-artifact@v8
         with:
           pattern: artifact-librime*
           merge-multiple: true

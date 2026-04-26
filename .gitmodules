@@ -45,7 +45,7 @@
 	url = https://github.com/google/leveldb
 [submodule "libchewing"]
 	path = libchewing
-	url = https://github.com/chewing/libchewing
+	url = https://github.com/fcitx-contrib/libchewing
 [submodule "libexpat"]
 	path = libexpat
 	url = https://github.com/libexpat/libexpat

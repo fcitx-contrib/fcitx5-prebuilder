@@ -71,7 +71,7 @@ index e87d416..cfb932e 100644
  [dependencies]
  chewing = { version = "0.12.0", path = ".." }
 diff --git a/src/dictionary/trie_buf.rs b/src/dictionary/trie_buf.rs
-index 722df3f..49e0add 100644
+index 722df3f..b6ef2e7 100644
 --- a/src/dictionary/trie_buf.rs
 +++ b/src/dictionary/trie_buf.rs
 @@ -231,6 +231,7 @@ impl TrieBuf {
@@ -94,7 +94,7 @@ index 722df3f..49e0add 100644
          let make_error = |e| UpdateDictionaryError {
              message: "synchornize dictionary from disk failed",
              source: Some(Box::new(e)),
-@@ -293,6 +296,7 @@ impl TrieBuf {
+@@ -293,11 +296,12 @@ impl TrieBuf {
                  self.trie = Some(trie);
              }
          }
@@ -102,6 +102,12 @@ index 722df3f..49e0add 100644
          Ok(())
      }
  
+     pub(crate) fn checkpoint(&mut self) {
+-        let make_error = |e| UpdateDictionaryError {
++        let make_error = |e: std::io::Error| UpdateDictionaryError {
+             message: "failed to save snapshot",
+             source: Some(Box::new(e)),
+         };
 @@ -318,6 +322,7 @@ impl TrieBuf {
              dirty: false,
              usage: self.usage,

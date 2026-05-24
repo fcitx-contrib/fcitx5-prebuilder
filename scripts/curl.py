@@ -1,7 +1,10 @@
 
-from common import CMakeBuilder
+from common import CMakeBuilder, PLATFORM, patch
 
 project = 'curl'
+
+if PLATFORM == 'ios':
+    patch(project)
 
 CMakeBuilder(project, [
     '-DBUILD_CURL_EXE=OFF',

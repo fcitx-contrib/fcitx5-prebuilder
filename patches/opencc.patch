@@ -1,8 +1,8 @@
 diff --git a/CMakeLists.txt b/CMakeLists.txt
-index 9b661b3..2f45054 100644
+index 5692e44..ca9e39d 100644
 --- a/CMakeLists.txt
 +++ b/CMakeLists.txt
-@@ -29,6 +29,7 @@ option(BUILD_SHARED_LIBS "Build opencc as shared library" ON)
+@@ -50,6 +50,7 @@ option(OPENCC_ENABLE_INSTALL "Generate install targets" ${_OPENCC_DEFAULT_ENABLE
  option(ENABLE_GTEST "Build all tests." OFF)
  option(ENABLE_BENCHMARK "Build benchmark tests." OFF)
  option(ENABLE_DARTS "Build DartsDict (ocd format)." ON)
@@ -10,7 +10,7 @@ index 9b661b3..2f45054 100644
  option(BUILD_OPENCC_JIEBA_PLUGIN "Build Jieba segmentation as a loadable plugin." OFF)
  option(BUILD_PYTHON "Build python library" OFF)
  option(USE_SYSTEM_DARTS "Use system version of Darts" OFF)
-@@ -262,10 +263,12 @@ endif()
+@@ -287,10 +288,12 @@ endif()
  ######## Subdirectories
  
  add_subdirectory(src)
@@ -26,26 +26,26 @@ index 9b661b3..2f45054 100644
  if (ENABLE_BENCHMARK AND TARGET performance AND TARGET opencc_jieba)
    target_compile_definitions(performance PRIVATE
 diff --git a/src/CMakeLists.txt b/src/CMakeLists.txt
-index ac9f518..f87c700 100644
+index d4edff8..1dfcd15 100644
 --- a/src/CMakeLists.txt
 +++ b/src/CMakeLists.txt
-@@ -32,7 +32,6 @@ set(
+@@ -33,7 +33,6 @@ set(
    MarisaDict.hpp
    MaxMatchSegmentation.hpp
    Optional.hpp
 -  PluginSegmentation.hpp
    PhraseExtract.hpp
+   PrefixMatch.hpp
    Segmentation.hpp
-   Segments.hpp
-@@ -59,7 +58,6 @@ set(
+@@ -61,7 +60,6 @@ set(
    Lexicon.cpp
    MarisaDict.cpp
    MaxMatchSegmentation.cpp
 -  PluginSegmentation.cpp
    PhraseExtract.cpp
+   PrefixMatch.cpp
    SerializedValues.cpp
-   SimpleConverter.cpp
-@@ -69,6 +67,11 @@ set(
+@@ -72,6 +70,11 @@ set(
    UTF8Util.cpp
  )
  
@@ -57,7 +57,7 @@ index ac9f518..f87c700 100644
  set(UNITTESTS
    ConfigTest
    ConversionChainTest
-@@ -135,6 +138,8 @@ target_link_libraries(libopencc marisa)
+@@ -139,6 +142,8 @@ target_link_libraries(libopencc marisa)
  if (NOT BUILD_SHARED_LIBS)
    target_compile_definitions(libopencc PUBLIC Opencc_BUILT_AS_STATIC)
  endif()
@@ -66,7 +66,7 @@ index ac9f518..f87c700 100644
  # PluginSegmentation.cpp uses LoadLibrary on _WIN32 (MSVC and MinGW).
  # Only non-Windows targets may need libdl for dlopen.
  if (NOT CMAKE_SYSTEM_NAME STREQUAL "Windows")
-@@ -144,6 +149,7 @@ if (NOT CMAKE_SYSTEM_NAME STREQUAL "Windows")
+@@ -148,6 +153,7 @@ if (NOT CMAKE_SYSTEM_NAME STREQUAL "Windows")
      target_link_libraries(libopencc dl)
    endif ()
  endif ()
@@ -74,7 +74,7 @@ index ac9f518..f87c700 100644
  target_include_directories(libopencc PUBLIC
      $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>
      $<INSTALL_INTERFACE:${DIR_INCLUDE}/opencc>
-@@ -199,10 +205,12 @@ install(
+@@ -204,11 +210,13 @@ install(
    DESTINATION ${DIR_INCLUDE}/opencc
  )
  
@@ -83,11 +83,12 @@ index ac9f518..f87c700 100644
    FILES plugin/OpenCCPlugin.h
    DESTINATION ${DIR_INCLUDE}/opencc/plugin
  )
-+endif ()
+ endif()
++endif()
  
  # Gtest
  
-@@ -238,4 +246,6 @@ endif()
+@@ -244,4 +252,6 @@ endif()
  
  # Subdir
  
@@ -95,10 +96,10 @@ index ac9f518..f87c700 100644
  add_subdirectory(tools)
 +endif()
 diff --git a/src/Config.cpp b/src/Config.cpp
-index faecea9..0b87cac 100644
+index 6a80e5d..0ab2838 100644
 --- a/src/Config.cpp
 +++ b/src/Config.cpp
-@@ -34,7 +34,9 @@
+@@ -35,7 +35,9 @@
  #include "Exception.hpp"
  #include "MarisaDict.hpp"
  #include "MaxMatchSegmentation.hpp"
@@ -106,9 +107,9 @@ index faecea9..0b87cac 100644
  #include "PluginSegmentation.hpp"
 +#endif
  #include "TextDict.hpp"
+ #include "UTF8Util.hpp"
  
- #ifdef ENABLE_DARTS
-@@ -245,6 +247,7 @@ public:
+@@ -347,6 +349,7 @@ public:
        // Required: dict
        DictPtr dict = ParseDict(GetObjectProperty(doc, "dict"));
        segmentation = SegmentationPtr(new MaxMatchSegmentation(dict));
@@ -116,7 +117,7 @@ index faecea9..0b87cac 100644
      } else {
        PluginConfigPairs configPairs;
        configPairs.push_back(std::make_pair("__config_dir", configDirectory));
-@@ -272,6 +275,13 @@ public:
+@@ -374,6 +377,13 @@ public:
          configPairs.push_back(std::make_pair(key, it->value.GetString()));
        }
        segmentation = CreatePluginSegmentation(type, configPairs);

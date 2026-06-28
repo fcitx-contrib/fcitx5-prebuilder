@@ -30,7 +30,7 @@ if not os.path.isdir('boost'):
 # For js, but harmless for non-windows platform so no need to revert.
 sed('boost/libs/container/include/boost/container/detail/thread_mutex.hpp', '"s/#if defined(BOOST_HAS_PTHREADS)/#if 1/"')
 
-libs = "algorithm;bimap;container;crc;interprocess;iostreams;multi_index;ptr_container;scope_exit;signals2;uuid"
+libs = "algorithm;bimap;container;crc;interprocess;iostreams;multi_index;ptr_container;scope_exit;signals2;uuid;vmd"
 
 if PLATFORM == 'macos':
     libs += ';beast'

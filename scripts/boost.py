@@ -1,7 +1,8 @@
 import os
 from common import CMakeBuilder, MACOS_ARCH, PLATFORM, cache, ensure, sed
 
-version = '1.90.0'
+with open('.boost-version') as f:
+    version = f.read().strip()
 
 boost_dir = f'boost-{version}'
 boost_tar = f'{boost_dir}-cmake.tar.xz'

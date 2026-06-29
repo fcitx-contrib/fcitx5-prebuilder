@@ -1,5 +1,5 @@
 diff --git a/CMakeLists.txt b/CMakeLists.txt
-index 5692e44..ca9e39d 100644
+index ed468bc..2378ad9 100644
 --- a/CMakeLists.txt
 +++ b/CMakeLists.txt
 @@ -50,6 +50,7 @@ option(OPENCC_ENABLE_INSTALL "Generate install targets" ${_OPENCC_DEFAULT_ENABLE
@@ -26,26 +26,26 @@ index 5692e44..ca9e39d 100644
  if (ENABLE_BENCHMARK AND TARGET performance AND TARGET opencc_jieba)
    target_compile_definitions(performance PRIVATE
 diff --git a/src/CMakeLists.txt b/src/CMakeLists.txt
-index d4edff8..1dfcd15 100644
+index a053e42..94bb4cb 100644
 --- a/src/CMakeLists.txt
 +++ b/src/CMakeLists.txt
-@@ -33,7 +33,6 @@ set(
-   MarisaDict.hpp
-   MaxMatchSegmentation.hpp
+@@ -35,7 +35,6 @@ set(
    Optional.hpp
--  PluginSegmentation.hpp
    PhraseExtract.hpp
+   PipelineConverter.hpp
+-  PluginSegmentation.hpp
+   SingleStageConverter.hpp
    PrefixMatch.hpp
-   Segmentation.hpp
-@@ -61,7 +60,6 @@ set(
-   Lexicon.cpp
-   MarisaDict.cpp
+   ResourceProvider.hpp
+@@ -66,7 +65,6 @@ set(
    MaxMatchSegmentation.cpp
--  PluginSegmentation.cpp
    PhraseExtract.cpp
+   PipelineConverter.cpp
+-  PluginSegmentation.cpp
    PrefixMatch.cpp
-   SerializedValues.cpp
-@@ -72,6 +70,11 @@ set(
+   SingleStageConverter.cpp
+   ResourceProvider.cpp
+@@ -79,6 +77,11 @@ set(
    UTF8Util.cpp
  )
  
@@ -57,7 +57,7 @@ index d4edff8..1dfcd15 100644
  set(UNITTESTS
    ConfigTest
    ConversionChainTest
-@@ -139,6 +142,8 @@ target_link_libraries(libopencc marisa)
+@@ -147,6 +150,8 @@ target_link_libraries(libopencc marisa)
  if (NOT BUILD_SHARED_LIBS)
    target_compile_definitions(libopencc PUBLIC Opencc_BUILT_AS_STATIC)
  endif()
@@ -66,7 +66,7 @@ index d4edff8..1dfcd15 100644
  # PluginSegmentation.cpp uses LoadLibrary on _WIN32 (MSVC and MinGW).
  # Only non-Windows targets may need libdl for dlopen.
  if (NOT CMAKE_SYSTEM_NAME STREQUAL "Windows")
-@@ -148,6 +153,7 @@ if (NOT CMAKE_SYSTEM_NAME STREQUAL "Windows")
+@@ -156,6 +161,7 @@ if (NOT CMAKE_SYSTEM_NAME STREQUAL "Windows")
      target_link_libraries(libopencc dl)
    endif ()
  endif ()
@@ -74,7 +74,7 @@ index d4edff8..1dfcd15 100644
  target_include_directories(libopencc PUBLIC
      $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>
      $<INSTALL_INTERFACE:${DIR_INCLUDE}/opencc>
-@@ -204,11 +210,13 @@ install(
+@@ -212,11 +218,13 @@ install(
    DESTINATION ${DIR_INCLUDE}/opencc
  )
  
@@ -88,7 +88,7 @@ index d4edff8..1dfcd15 100644
  
  # Gtest
  
-@@ -244,4 +252,6 @@ endif()
+@@ -252,4 +260,6 @@ endif()
  
  # Subdir
  
@@ -96,11 +96,11 @@ index d4edff8..1dfcd15 100644
  add_subdirectory(tools)
 +endif()
 diff --git a/src/Config.cpp b/src/Config.cpp
-index 6a80e5d..0ab2838 100644
+index 3d2afe0..8a9b2bc 100644
 --- a/src/Config.cpp
 +++ b/src/Config.cpp
-@@ -35,7 +35,9 @@
- #include "Exception.hpp"
+@@ -40,7 +40,9 @@
+ #include "Lexicon.hpp"
  #include "MarisaDict.hpp"
  #include "MaxMatchSegmentation.hpp"
 +#ifdef OPENCC_ENABLE_PLUGINS
@@ -109,15 +109,15 @@ index 6a80e5d..0ab2838 100644
  #include "TextDict.hpp"
  #include "UTF8Util.hpp"
  
-@@ -347,6 +349,7 @@ public:
+@@ -556,6 +558,7 @@ public:
        // Required: dict
-       DictPtr dict = ParseDict(GetObjectProperty(doc, "dict"));
+       DictPtr dict = ParseDict(GetObjectProperty(doc, "dict"), true);
        segmentation = SegmentationPtr(new MaxMatchSegmentation(dict));
 +#ifdef OPENCC_ENABLE_PLUGINS
      } else {
        PluginConfigPairs configPairs;
        configPairs.push_back(std::make_pair("__config_dir", configDirectory));
-@@ -374,6 +377,13 @@ public:
+@@ -583,6 +586,13 @@ public:
          configPairs.push_back(std::make_pair(key, it->value.GetString()));
        }
        segmentation = CreatePluginSegmentation(type, configPairs);

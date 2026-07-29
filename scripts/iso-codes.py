@@ -1,4 +1,5 @@
 import os
+
 from common import MesonBuilder, ensure
 
 NEEDED_JSON = 'iso_639-3.json'

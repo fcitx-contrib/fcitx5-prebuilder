@@ -1,4 +1,5 @@
 import os
+
 from common import INSTALL_PREFIX, OHOS_ARCH, MakeBuilder, ensure
 
 os.environ['SOURCE_DATE_EPOCH'] = '0' # Reproducible: crypto/buildinf.h

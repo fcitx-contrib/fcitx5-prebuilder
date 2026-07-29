@@ -1,6 +1,6 @@
 import os
 
-from common import MakeBuilder, XDG_DATA_DIRS, patch
+from common import XDG_DATA_DIRS, MakeBuilder, patch
 
 project = 'libskk'
 

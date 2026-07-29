@@ -75,7 +75,7 @@ def ensure(program: str, args: list[str]):
     command = " ".join([program, *args])
     print(command)
     if os.system(command) != 0:
-        raise Exception("Command failed")
+        raise SystemError("Command failed")
 
 
 def patch(project: str, src: str | None = None, dst: str | None = None):
@@ -143,7 +143,7 @@ def get_platform_cflags() -> str:
             else:
                 sdk = f'-isysroot {subprocess.check_output("xcrun --sdk iphonesimulator --show-sdk-path", shell=True, text=True).strip()}'
                 version = f'-mios-simulator-version-min={IOS_VERSION}'
-            return ' '.join(('-O3', arch, sdk, version))
+            return f'-O3 {arch} {sdk} {version}'
         case 'harmony':
             return f'-O3 -fPIC --target={OHOS_TARGET}'
         case 'js':

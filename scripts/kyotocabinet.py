@@ -1,6 +1,5 @@
 from common import INSTALL_PREFIX, MakeBuilder, ensure, patch
 
-
 project = 'kyotocabinet'
 patch(project) # hard-coded include directory
 

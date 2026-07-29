@@ -1,4 +1,12 @@
-from common import CMakeBuilder, CARGO_TARGET, INSTALL_PREFIX, PLATFORM, ensure, patch, steal
+from common import (
+    CARGO_TARGET,
+    INSTALL_PREFIX,
+    PLATFORM,
+    CMakeBuilder,
+    ensure,
+    patch,
+    steal,
+)
 
 project = 'libchewing'
 

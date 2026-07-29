@@ -1,5 +1,6 @@
 import os
-from common import CMakeBuilder, MACOS_ARCH, PLATFORM, cache, ensure, sed
+
+from common import MACOS_ARCH, PLATFORM, CMakeBuilder, cache, ensure, sed
 
 with open('.boost-version') as f:
     version = f.read().strip()

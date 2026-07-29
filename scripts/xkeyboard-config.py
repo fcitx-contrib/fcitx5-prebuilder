@@ -1,5 +1,6 @@
 from common import MesonBuilder, ensure
 
+
 class XKeyboardConfigBuilder(MesonBuilder):
     def pre_package(self):
         # Remove X11 to avoid unpack symlink failure on Windows (f5h).

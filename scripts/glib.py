@@ -1,4 +1,5 @@
 import os
+
 from common import INSTALL_PREFIX, PLATFORM, ROOT, MesonBuilder, ensure, patch, sed
 
 with open('.glib-version') as f:

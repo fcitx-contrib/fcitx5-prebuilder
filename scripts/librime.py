@@ -1,6 +1,6 @@
 import os
 
-from common import CMakeBuilder, INSTALL_PREFIX, ROOT, USR, ensure, patch
+from common import INSTALL_PREFIX, ROOT, USR, CMakeBuilder, ensure, patch
 
 project = 'librime'
 

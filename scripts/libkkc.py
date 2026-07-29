@@ -1,6 +1,6 @@
 import os
 
-from common import MakeBuilder, XDG_DATA_DIRS, ensure, patch
+from common import XDG_DATA_DIRS, MakeBuilder, ensure, patch
 
 project = 'libkkc'
 

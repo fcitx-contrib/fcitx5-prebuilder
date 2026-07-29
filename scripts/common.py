@@ -1,5 +1,6 @@
 import os
 import platform
+import shutil
 import subprocess
 import sys
 from typing import Literal, cast
@@ -78,6 +79,11 @@ def ensure(program: str, args: list[str]):
         raise SystemError("Command failed")
 
 
+def rmrf(path: str):
+    if os.path.isdir(path):
+        shutil.rmtree(path)
+
+
 def patch(project: str, src: str | None = None, dst: str | None = None):
     if src and dst:
         ensure('cp', [
@@ -136,7 +142,7 @@ def get_platform_cflags() -> str:
         case 'macos':
             return f'-O3 -arch {MACOS_ARCH} -mmacosx-version-min={MACOS_VERSION}'
         case 'ios':
-            arch = f'-O3 -arch {IOS_ARCH}'
+            arch = f'-arch {IOS_ARCH}'
             if IOS_PLATFORM == 'OS64':
                 sdk = f'-isysroot {subprocess.check_output("xcrun --sdk iphoneos --show-sdk-path", shell=True, text=True).strip()}'
                 version = f'-miphoneos-version-min={IOS_VERSION}'
@@ -210,10 +216,11 @@ class Builder:
         if self.name in ('iso-codes', 'xkeyboard-config'):
             for code in os.listdir('share/locale'):
                 if code not in ENABLED_LANGUAGES:
-                    ensure('rm', ['-rf', f'share/locale/{code}'])
+                    rmrf(f'share/locale/{code}')
         else:
-            ensure('rm', ['-rf', 'share/locale'])
-        ensure('rm', ['-rf', 'share/doc', 'share/man'])
+            rmrf('share/locale')
+        for d in ('share/doc', 'share/man'):
+            rmrf(d)
         ensure(tar, ['cj',
             '--sort=name', '--mtime=@0',
             '--numeric-owner', '--owner=0', '--group=0', '--mode=go+u,go-w',

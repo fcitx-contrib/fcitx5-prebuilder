@@ -14,6 +14,7 @@ from common import (
     cache,
     ensure,
     patch,
+    rmrf,
     steal,
 )
 
@@ -47,7 +48,7 @@ class MozcBuilder(CMakeBuilder):
 
     def pre_package(self):
         if PLATFORM != 'macos':
-            ensure('rm', ['-rf', f'{self.dest_dir}{INSTALL_PREFIX}/bin'])
+            rmrf(f'{self.dest_dir}{INSTALL_PREFIX}/bin')
 
 # Accelerate build by dropping irrelevant compilers.
 patch('libmozc/protobuf')

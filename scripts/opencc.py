@@ -1,4 +1,4 @@
-from common import CMakeBuilder, PLATFORM, ROOT, USR, patch, steal
+from common import PLATFORM, ROOT, USR, CMakeBuilder, patch, steal
 
 project = 'opencc'
 

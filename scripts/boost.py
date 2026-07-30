@@ -1,5 +1,6 @@
 import os
-from common import CMakeBuilder, MACOS_ARCH, PLATFORM, cache, ensure, sed
+
+from common import MACOS_ARCH, PLATFORM, CMakeBuilder, cache, ensure, rmrf, sed
 
 with open('.boost-version') as f:
     version = f.read().strip()
@@ -13,7 +14,7 @@ if os.path.isdir('boost'):
     pattern = 'VERSION ' + version.replace('.', '\\.')
     if os.system(f"grep '{pattern}' boost/CMakeLists.txt") != 0:
         # Version mismatch
-        ensure('rm', ['-rf', 'boost'])
+        rmrf('boost')
 
 if not os.path.isdir('boost'):
     ensure('tar', [

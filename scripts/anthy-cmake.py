@@ -1,6 +1,7 @@
 import os
 
-from common import CMakeBuilder, INSTALL_PREFIX, ensure
+from common import INSTALL_PREFIX, CMakeBuilder, ensure
+
 
 class AnthyBuilder(CMakeBuilder):
     def pre_package(self):

@@ -2,7 +2,7 @@ import sys
 from collections import defaultdict, deque
 
 from common import ensure
-from dependencies import platform_projects, dag
+from dependencies import dag, platform_projects
 
 
 def sort_projects(projects: list[str]) -> list[str]:

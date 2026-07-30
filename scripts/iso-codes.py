@@ -1,5 +1,6 @@
 import os
-from common import MesonBuilder, ensure
+
+from common import MesonBuilder, rmrf
 
 NEEDED_JSON = 'iso_639-3.json'
 # The only translation we need: language code/name when system doesn't recognize.
@@ -25,6 +26,6 @@ class IsoCodesBuilder(MesonBuilder):
                     if mo != NEEDED_MO:
                         os.remove(f'{lc_messages_path}/{mo}')
             else:
-                ensure('rm', ['-rf', code_path])            
+                rmrf(code_path)            
 
 IsoCodesBuilder('iso-codes').exec()

@@ -1,4 +1,13 @@
-from common import Builder, INSTALL_PREFIX, PLATFORM, ROOT, HARMONY_NATIVE, ensure, get_platform_cflags, patch
+from common import (
+    HARMONY_NATIVE,
+    INSTALL_PREFIX,
+    PLATFORM,
+    ROOT,
+    Builder,
+    ensure,
+    get_platform_cflags,
+    patch,
+)
 
 project = 'lua'
 

@@ -1,5 +1,6 @@
 import os
-from common import Builder, CARGO_TARGET, INSTALL_PREFIX, ROOT, ensure, patch
+
+from common import CARGO_TARGET, INSTALL_PREFIX, ROOT, Builder, ensure, patch
 
 project = 'cskk'
 patch(project)

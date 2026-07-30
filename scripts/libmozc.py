@@ -4,7 +4,19 @@
 # linux -> js: build protoc first
 
 import platform
-from common import CMakeBuilder, INSTALL_PREFIX, PLATFORM, ROOT, ar, cache, ensure, patch, steal
+
+from common import (
+    INSTALL_PREFIX,
+    PLATFORM,
+    ROOT,
+    CMakeBuilder,
+    ar,
+    cache,
+    ensure,
+    patch,
+    rmrf,
+    steal,
+)
 
 no_addon = '-DBUILD_MOZC_ADDON=OFF'
 protoc_exe = ''
@@ -36,7 +48,7 @@ class MozcBuilder(CMakeBuilder):
 
     def pre_package(self):
         if PLATFORM != 'macos':
-            ensure('rm', ['-rf', f'{self.dest_dir}{INSTALL_PREFIX}/bin'])
+            rmrf(f'{self.dest_dir}{INSTALL_PREFIX}/bin')
 
 # Accelerate build by dropping irrelevant compilers.
 patch('libmozc/protobuf')

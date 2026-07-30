@@ -1,5 +1,6 @@
 import os
-from common import INSTALL_PREFIX, OHOS_ARCH, MakeBuilder, ensure
+
+from common import INSTALL_PREFIX, OHOS_ARCH, MakeBuilder, ensure, rmrf
 
 os.environ['SOURCE_DATE_EPOCH'] = '0' # Reproducible: crypto/buildinf.h
 
@@ -18,9 +19,8 @@ class OpenSSLBuilder(MakeBuilder):
         ])
 
     def pre_package(self):
-        ensure('rm', ['-rf',
-            f'{self.dest_dir}{INSTALL_PREFIX}/bin',
-            f'{self.dest_dir}{INSTALL_PREFIX}/ssl'
-        ])
+        for d in (f'{self.dest_dir}{INSTALL_PREFIX}/bin',
+                  f'{self.dest_dir}{INSTALL_PREFIX}/ssl'):
+            rmrf(d)
 
 OpenSSLBuilder('openssl').exec()

@@ -1,5 +1,5 @@
 
-from common import CMakeBuilder, PLATFORM, patch
+from common import PLATFORM, CMakeBuilder, patch
 
 project = 'curl'
 

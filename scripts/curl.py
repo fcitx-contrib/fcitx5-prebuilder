@@ -48,6 +48,6 @@ CMakeBuilder(project, [
     '-DUSE_NGHTTP2=OFF',
 ], ios=['-DCURL_USE_SECTRANSP=ON'],
 harmony=[
-    '-DCURL_CA_BUNDLE="/etc/ssl/certs/cacert.pem"',
-    '-DCURL_CA_PATH="/etc/ssl/certs/"'
+    '-DCURL_CA_BUNDLE=/etc/ssl/certs/cacert.pem',
+    '-DCURL_CA_PATH=/etc/ssl/certs/'
 ]).exec()

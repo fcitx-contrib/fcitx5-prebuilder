@@ -4,6 +4,7 @@
 # linux -> js: build protoc first
 
 import platform
+from glob import glob
 
 from common import (
     INSTALL_PREFIX,
@@ -39,8 +40,8 @@ class MozcBuilder(CMakeBuilder):
         # Combine all .o files of absl to libabsl.a
         lib_dir = f'{self.dest_dir}{INSTALL_PREFIX}/lib'
         libabsl_a = f'{lib_dir}/libabsl.a'
-        all_libabsl_o = f'$(find {self.build_}/abseil-cpp -name "*.o" | sort)'
-        ensure(ar, ['rc', libabsl_a, all_libabsl_o])
+        all_libabsl_o = sorted(glob(f'{self.build_}/abseil-cpp/**/*.o', recursive=True))
+        ensure(ar, ['rc', libabsl_a, *all_libabsl_o])
 
         if PLATFORM == 'js':
             share_dir = f'{self.dest_dir}{INSTALL_PREFIX}/share/mozc'

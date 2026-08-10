@@ -45,7 +45,7 @@ class LuaBuilder(Builder):
             case 'harmony':
                 command += [
                     f'CC={HARMONY_NATIVE}/llvm/bin/clang',
-                    f'AR="{HARMONY_NATIVE}/llvm/bin/llvm-ar rc"',
+                    f'AR={HARMONY_NATIVE}/llvm/bin/llvm-ar rc',
                     f'RANLIB={HARMONY_NATIVE}/llvm/bin/llvm-ranlib'
                 ]
 

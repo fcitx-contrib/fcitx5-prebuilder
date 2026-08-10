@@ -403,7 +403,7 @@ class MakeBuilder(Builder):
     def build(self):
         command = [
             '-j8',
-            self.target,
+            *([self.target] if self.target else []),
             f'CFLAGS={' '.join(get_platform_cflags())}',
             f'CXXFLAGS={' '.join(get_platform_cflags())}'
         ]

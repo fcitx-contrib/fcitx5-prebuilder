@@ -24,22 +24,22 @@ class LuaBuilder(Builder):
         match PLATFORM:
             case 'macos':
                 # Enable dlopen for librime-cloud
-                cflags += ' -DLUA_USE_MACOSX'
+                cflags.append('-DLUA_USE_MACOSX')
             case 'ios':
-                cflags += ' -DLUA_USE_IOS'
+                cflags.append('-DLUA_USE_IOS')
 
         command += [
             'make',
             'a',
             '-j8',
-            f'CFLAGS="{cflags}"'
+            f'CFLAGS={" ".join(cflags)}'
         ]
 
         match PLATFORM:
             case 'js':
                 command += [
                     'CC=emcc',
-                    'AR="emar q"',
+                    'AR=emar q',
                     'RANLIB=emranlib'
                 ]
             case 'harmony':

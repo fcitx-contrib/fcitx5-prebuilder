@@ -1,4 +1,5 @@
 import os
+import subprocess
 
 from common import MACOS_ARCH, PLATFORM, CMakeBuilder, cache, ensure, rmrf, sed
 
@@ -12,7 +13,7 @@ cache(url)
 
 if os.path.isdir('boost'):
     pattern = 'VERSION ' + version.replace('.', '\\.')
-    if os.system(f"grep '{pattern}' boost/CMakeLists.txt") != 0:
+    if subprocess.run(['grep', pattern, 'boost/CMakeLists.txt'], check=False).returncode != 0:
         # Version mismatch
         rmrf('boost')
 

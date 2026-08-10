@@ -1,3 +1,5 @@
+from glob import glob
+
 from common import INSTALL_PREFIX, MakeBuilder, ensure, patch
 
 project = 'kyotocabinet'
@@ -12,7 +14,7 @@ class KyotoCabinetBuilder(MakeBuilder):
         lib_dir = f'{usr}/lib'
         pkgconfig_dir = f'{lib_dir}/pkgconfig'
         ensure('mkdir', ['-p', include_dir, pkgconfig_dir])
-        ensure('cp', ['k*.h', include_dir])
+        ensure('cp', [*glob('k*.h'), include_dir])
         ensure('cp', [self.target, lib_dir])
         ensure('cp', ['kyotocabinet.pc', pkgconfig_dir])
 

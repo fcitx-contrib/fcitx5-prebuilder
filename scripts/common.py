@@ -86,6 +86,11 @@ def rmrf(path: str):
         shutil.rmtree(path)
 
 
+def mkdir(*dirs: str):
+    for d in dirs:
+        os.makedirs(d, exist_ok=True)
+
+
 def patch(project: str, src: str | None = None, dst: str | None = None):
     if src and dst:
         ensure('cp', [
@@ -123,7 +128,7 @@ def steal(package: str, directories: tuple[str, ...] = ('share',)):
 
     cache(url)
     directory = f'build/{TARGET}/{package}{INSTALL_PREFIX}'
-    ensure('mkdir', ['-p', directory])
+    mkdir(directory)
     ensure(tar, [
         'xjf',
         f'cache/{prebuilt}',
@@ -153,7 +158,7 @@ def get_platform_cflags() -> list[str]:
                 version = f'-mios-simulator-version-min={IOS_VERSION}'
             return ['-O3', *arch, *sdk, version]
         case 'harmony':
-            return ['-O3', '-fPIC', '--target={OHOS_TARGET}']
+            return ['-O3', '-fPIC', f'--target={OHOS_TARGET}']
         case 'js':
             # Starting from Rust 1.93, wasm eh is enabled by default and we follow this change globally.
             # Thus we need explicitly enable wasm longjmp support for lua.
@@ -233,7 +238,7 @@ class Builder:
     def extract(self):
         directory = f'build/{USR}'
         os.chdir(ROOT)
-        ensure('mkdir', ['-p', directory])
+        mkdir(directory)
         ensure(tar, ['xf', f'{self.dest_dir}{POSTFIX}.tar.bz2', '-C', directory])
 
     def exec(self):
@@ -377,12 +382,13 @@ class MakeBuilder(Builder):
     target = ''
 
     def configure(self):
-        command = './configure'
+        command = ['./configure']
         if PLATFORM == 'js':
-            command = f'emconfigure {command}'
+            command = ['emconfigure', './configure']
         if not os.path.exists('configure'):
             ensure('autoreconf', ['-i'])
-        ensure(command, [
+        ensure(command[0], [
+            *command[1:],
             '-C',
             f'--prefix={INSTALL_PREFIX}',
             '--enable-static',

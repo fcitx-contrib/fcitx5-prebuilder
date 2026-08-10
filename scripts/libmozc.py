@@ -13,6 +13,7 @@ from common import (
     ar,
     cache,
     ensure,
+    mkdir,
     patch,
     rmrf,
     steal,
@@ -27,7 +28,7 @@ class MozcBuilder(CMakeBuilder):
     def configure(self):
         super().configure()
         oss_dir = f'{self.build_}/data_manager/oss'
-        ensure('mkdir', ['-p', oss_dir])
+        mkdir(oss_dir)
         if PLATFORM == 'js':
             ensure('ln', ['-sf', f'{ROOT}/patches/mozc_data.inc', f'{oss_dir}/mozc_data.inc'])
         else:
@@ -43,7 +44,7 @@ class MozcBuilder(CMakeBuilder):
 
         if PLATFORM == 'js':
             share_dir = f'{self.dest_dir}{INSTALL_PREFIX}/share/mozc'
-            ensure('mkdir', ['-p', share_dir])
+            mkdir(share_dir)
             ensure('cp', [f'{ROOT}/cache/mozc.data', share_dir])
 
     def pre_package(self):

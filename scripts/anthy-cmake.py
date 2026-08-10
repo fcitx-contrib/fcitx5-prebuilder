@@ -1,6 +1,6 @@
 import os
 
-from common import INSTALL_PREFIX, CMakeBuilder, ensure
+from common import INSTALL_PREFIX, CMakeBuilder, ensure, mkdir
 
 
 class AnthyBuilder(CMakeBuilder):
@@ -10,7 +10,7 @@ class AnthyBuilder(CMakeBuilder):
         ensure('./autogen.sh', [])
         ensure('make', ['-j8'])
         anthy_dict_dir = f'{self.dest_dir}{INSTALL_PREFIX}/share/anthy'
-        ensure('mkdir', ['-p', anthy_dict_dir])
+        mkdir(anthy_dict_dir)
         ensure('touch', [f'{anthy_dict_dir}/anthy-unicode.conf']) # for fcitx5-anthy to locate
         ensure('cp', ['mkanthydic/anthy.dic', anthy_dict_dir])
         os.chdir(cwd)

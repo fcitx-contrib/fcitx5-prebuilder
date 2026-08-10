@@ -12,7 +12,7 @@ url = f'https://github.com/boostorg/boost/releases/download/{boost_dir}/{boost_t
 cache(url)
 
 if os.path.isdir('boost'):
-    pattern = 'VERSION ' + version.replace('.', '\\.')
+    pattern = 'VERSION ' + version.replace('.', '\\.') # XXX: 1.91.0-1 still has 1.91.0 in CMakeLists.txt.
     if subprocess.run(['grep', pattern, 'boost/CMakeLists.txt'], check=False).returncode != 0:
         # Version mismatch
         rmrf('boost')
@@ -30,7 +30,7 @@ if not os.path.isdir('boost'):
     ])
 
 # For js, but harmless for non-windows platform so no need to revert.
-sed('boost/libs/container/include/boost/container/detail/thread_mutex.hpp', '"s/#if defined(BOOST_HAS_PTHREADS)/#if 1/"')
+sed('boost/libs/container/include/boost/container/detail/thread_mutex.hpp', 's/#if defined(BOOST_HAS_PTHREADS)/#if 1/')
 
 libs = "algorithm;bimap;container;crc;interprocess;iostreams;multi_index;ptr_container;scope_exit;signals2;uuid;vmd"
 

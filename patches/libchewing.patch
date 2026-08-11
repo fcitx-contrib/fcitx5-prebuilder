@@ -67,7 +67,7 @@ index c51380d7..f735f51d 100644
  [dependencies]
  chewing = { workspace = true }
 diff --git a/src/dictionary/trie_buf.rs b/src/dictionary/trie_buf.rs
-index 1e319365..170f9355 100644
+index 1e319365..83dbd765 100644
 --- a/src/dictionary/trie_buf.rs
 +++ b/src/dictionary/trie_buf.rs
 @@ -232,6 +232,7 @@ impl TrieBuf {
@@ -119,7 +119,7 @@ index 1e319365..170f9355 100644
 +    }
 +        #[cfg(not(feature = "threading"))] {
 +            let mut builder = TrieBuilder::new();
-+            info!("Saving snapshot...");
++            trace!("Saving snapshot...");
 +            let _ = builder.set_info(DictionaryInfo {
 +                software: software_version(),
 +                ..snapshot.about()
@@ -127,10 +127,10 @@ index 1e319365..170f9355 100644
 +            for (syllables, phrase) in snapshot.entries() {
 +                builder.insert(&syllables, phrase);
 +            }
-+            info!("Flushing snapshot...");
++            trace!("Flushing snapshot...");
 +            builder.build(snapshot.path().unwrap());
-+            info!("    Done");
-+            info!("Reloading...");
++            trace!("    Done");
++            trace!("Reloading...");
 +            let trie = Trie::open(self.path().unwrap());
 +            if let Ok(value) = trie {
 +                self.trie = Some(value)

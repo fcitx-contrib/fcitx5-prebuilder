@@ -23,9 +23,7 @@ jobs:
         run: pip install ruff pyright
 
       - name: Lint
-        run: |
-          ruff check scripts
-          pyright scripts/*.py
+        run: ./scripts/lint.sh
 
       - name: Pass commit message
         id: commit-message

@@ -9,7 +9,8 @@ patch(project)
 
 CMakeBuilder(
     project,
-    ["-DUSE_SYSTEM_MARISA=ON", "-DENABLE_DARTS=OFF"],
+    ["-DUSE_SYSTEM_MARISA=ON"],
     includes=[f"{ROOT}/build/{USR}/include"],
     ios=["-DENABLE_PLUGINS=OFF"],
+    harmony=["-DENABLE_PLUGINS=OFF"],
 ).exec()

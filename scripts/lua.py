@@ -6,6 +6,7 @@ from common import (
     Builder,
     ensure,
     get_platform_cflags,
+    mkdir,
     patch,
 )
 
@@ -23,28 +24,28 @@ class LuaBuilder(Builder):
         match PLATFORM:
             case 'macos':
                 # Enable dlopen for librime-cloud
-                cflags += ' -DLUA_USE_MACOSX'
+                cflags.append('-DLUA_USE_MACOSX')
             case 'ios':
-                cflags += ' -DLUA_USE_IOS'
+                cflags.append('-DLUA_USE_IOS')
 
         command += [
             'make',
             'a',
             '-j8',
-            f'CFLAGS="{cflags}"'
+            f'CFLAGS={" ".join(cflags)}'
         ]
 
         match PLATFORM:
             case 'js':
                 command += [
                     'CC=emcc',
-                    'AR="emar q"',
+                    'AR=emar q',
                     'RANLIB=emranlib'
                 ]
             case 'harmony':
                 command += [
                     f'CC={HARMONY_NATIVE}/llvm/bin/clang',
-                    f'AR="{HARMONY_NATIVE}/llvm/bin/llvm-ar rc"',
+                    f'AR={HARMONY_NATIVE}/llvm/bin/llvm-ar rc',
                     f'RANLIB={HARMONY_NATIVE}/llvm/bin/llvm-ranlib'
                 ]
 
@@ -54,7 +55,7 @@ class LuaBuilder(Builder):
         usr = self.dest_dir + INSTALL_PREFIX
         include_lua_dir = usr + '/include/lua'
         lib_dir = usr + '/lib'
-        ensure('mkdir', ['-p', include_lua_dir, lib_dir])
+        mkdir(include_lua_dir, lib_dir)
         ensure('cp', [
             'lua.h',
             'luaconf.h',

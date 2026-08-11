@@ -1,3 +1,4 @@
+import glob
 import os
 import platform
 import shutil
@@ -72,16 +73,22 @@ tar = {
 
 os.environ['LC_ALL'] = 'C' # Reproducible: sort of .o of absl; package
 
-def ensure(program: str, args: list[str]):
-    command = " ".join([program, *args])
-    print(command)
-    if os.system(command) != 0:
+def ensure(program: str, args: list[str], **kwargs):
+    command = [program, *args]
+    print(" ".join(command))
+    result = subprocess.run(command, check=False, **kwargs)
+    if result.returncode != 0:
         raise SystemError("Command failed")
 
 
 def rmrf(path: str):
     if os.path.isdir(path):
         shutil.rmtree(path)
+
+
+def mkdir(*dirs: str):
+    for d in dirs:
+        os.makedirs(d, exist_ok=True)
 
 
 def patch(project: str, src: str | None = None, dst: str | None = None):
@@ -92,7 +99,7 @@ def patch(project: str, src: str | None = None, dst: str | None = None):
         ])
     else:
         os.chdir(project)
-        if os.system('git diff --ignore-submodules --exit-code') == 0:
+        if subprocess.run(['git', 'diff', '--ignore-submodules', '--exit-code'], check=False).returncode == 0:
             ensure('git', [
                 'apply',
                 f'{ROOT}/patches/{project.split("/")[-1]}.patch'
@@ -121,7 +128,7 @@ def steal(package: str, directories: tuple[str, ...] = ('share',)):
 
     cache(url)
     directory = f'build/{TARGET}/{package}{INSTALL_PREFIX}'
-    ensure('mkdir', ['-p', directory])
+    mkdir(directory)
     ensure(tar, [
         'xjf',
         f'cache/{prebuilt}',
@@ -137,30 +144,30 @@ def sed(file: str, command: str):
     ensure('rm', ['-f', bak])
 
 
-def get_platform_cflags() -> str:
+def get_platform_cflags() -> list[str]:
     match PLATFORM:
         case 'macos':
-            return f'-O3 -arch {MACOS_ARCH} -mmacosx-version-min={MACOS_VERSION}'
+            return ['-O3', '-arch', MACOS_ARCH, f'-mmacosx-version-min={MACOS_VERSION}']
         case 'ios':
-            arch = f'-arch {IOS_ARCH}'
+            arch = ['-arch', IOS_ARCH]
             if IOS_PLATFORM == 'OS64':
-                sdk = f'-isysroot {subprocess.check_output("xcrun --sdk iphoneos --show-sdk-path", shell=True, text=True).strip()}'
+                sdk = ['-isysroot', subprocess.check_output("xcrun --sdk iphoneos --show-sdk-path", shell=True, text=True).strip()]
                 version = f'-miphoneos-version-min={IOS_VERSION}'
             else:
-                sdk = f'-isysroot {subprocess.check_output("xcrun --sdk iphonesimulator --show-sdk-path", shell=True, text=True).strip()}'
+                sdk = ['-isysroot', subprocess.check_output("xcrun --sdk iphonesimulator --show-sdk-path", shell=True, text=True).strip()]
                 version = f'-mios-simulator-version-min={IOS_VERSION}'
-            return f'-O3 {arch} {sdk} {version}'
+            return ['-O3', *arch, *sdk, version]
         case 'harmony':
-            return f'-O3 -fPIC --target={OHOS_TARGET}'
+            return ['-O3', '-fPIC', f'--target={OHOS_TARGET}']
         case 'js':
             # Starting from Rust 1.93, wasm eh is enabled by default and we follow this change globally.
             # Thus we need explicitly enable wasm longjmp support for lua.
-            flag = '-O3 -fPIC -sSUPPORT_LONGJMP=wasm'
+            flag = ['-O3', '-fPIC', '-sSUPPORT_LONGJMP=wasm']
             if not DEBUG:
-                flag += ' -DNDEBUG' # Reproducible: assert.
+                flag.append('-DNDEBUG') # Reproducible: assert.
             return flag
         case _:
-            return ''
+            return []
 
 
 class Builder:
@@ -195,17 +202,17 @@ class Builder:
         lib_dir = f'{self.dest_dir}{INSTALL_PREFIX}/lib'
         if not os.path.exists(lib_dir):
             return
-        all_a = f'{lib_dir}/*.a'
+        all_a = glob.glob(f'{lib_dir}/*.a')
         match PLATFORM:
             case 'harmony':
-                ensure(f'{HARMONY_NATIVE}/llvm/bin/llvm-strip', ['--strip-unneeded', all_a])
+                ensure(f'{HARMONY_NATIVE}/llvm/bin/llvm-strip', ['--strip-unneeded', *all_a])
             case 'js':
-                ensure('emstrip', ['--strip-unneeded', all_a])
+                ensure('emstrip', ['--strip-unneeded', *all_a])
             case 'windows':
-                all_lib = f'{lib_dir}/*.lib'
-                ensure('llvm-strip', ['--strip-unneeded', all_lib])
+                all_lib = glob.glob(f'{lib_dir}/*.lib')
+                ensure('llvm-strip', ['--strip-unneeded', *all_lib])
             case _:
-                ensure('strip', ['-x', all_a])
+                ensure('strip', ['-x', *all_a])
 
     def pre_package(self):
         pass
@@ -225,13 +232,13 @@ class Builder:
             '--sort=name', '--mtime=@0',
             '--numeric-owner', '--owner=0', '--group=0', '--mode=go+u,go-w',
             '--force-local', # Don't interpret C: as remote address.
-            '-f', f'{self.dest_dir}{POSTFIX}.tar.bz2', '*'
+            '-f', f'{self.dest_dir}{POSTFIX}.tar.bz2', *glob.glob('*')
         ])
 
     def extract(self):
         directory = f'build/{USR}'
         os.chdir(ROOT)
-        ensure('mkdir', ['-p', directory])
+        mkdir(directory)
         ensure(tar, ['xf', f'{self.dest_dir}{POSTFIX}.tar.bz2', '-C', directory])
 
     def exec(self):
@@ -278,18 +285,18 @@ class CMakeBuilder(Builder):
             ]
             command += self.ios
 
-        c_cxx_flags = f'-ffile-prefix-map={os.path.abspath(self.src)}=.' # Reproducible: __FILE__
+        c_cxx_flags = [f'-ffile-prefix-map={os.path.abspath(self.src)}=.'] # Reproducible: __FILE__
         if self.definitions:
-            c_cxx_flags += ' ' + ' '.join(f'-D{definition}' for definition in self.definitions)
+            c_cxx_flags.extend(f'-D{definition}' for definition in self.definitions)
         if self.includes:
-            c_cxx_flags += ' ' + ' '.join(f'-I{include}' for include in self.includes)
+            c_cxx_flags.extend(f'-I{include}' for include in self.includes)
 
         if PLATFORM == 'windows':
-            c_cxx_flags += ' -mno-incremental-linker-compatible' # Reproducible: TimeDateStamp in llvm: WinCOFFObjectWriter.cpp
+            c_cxx_flags.append('-mno-incremental-linker-compatible') # Reproducible: TimeDateStamp in llvm: WinCOFFObjectWriter.cpp
 
         if PLATFORM == 'js':
             # emscripten defaults to full-static libs but we want plugins based on these dependencies to be dynamic.
-            c_cxx_flags += ' -fPIC'
+            c_cxx_flags.append('-fPIC')
             command += self.js
 
         if PLATFORM == 'macos':
@@ -302,8 +309,8 @@ class CMakeBuilder(Builder):
             command.append(f'-DDEPLOYMENT_TARGET={PLATFORM_VERSION[PLATFORM]}') # ios.toolchain.cmake overrides CMAKE_OSX_DEPLOYMENT_TARGET anyway.
 
         command += [
-            f'-DCMAKE_C_FLAGS="{c_cxx_flags}"',
-            f'-DCMAKE_CXX_FLAGS="{c_cxx_flags}"'
+            f'-DCMAKE_C_FLAGS={' '.join(c_cxx_flags)}',
+            f'-DCMAKE_CXX_FLAGS={' '.join(c_cxx_flags)}'
         ]
 
         ensure(command[0], [
@@ -316,7 +323,7 @@ class CMakeBuilder(Builder):
 
     def install(self):
         os.environ['DESTDIR'] = self.dest_dir
-        ensure('cmake', ['--install', self.build_, *(['> /dev/null'] if self.name == 'boost' else [])])
+        ensure('cmake', ['--install', self.build_], stdout=subprocess.DEVNULL if self.name == 'boost' else None)
 
 
 class MesonBuilder(Builder):
@@ -341,7 +348,7 @@ class MesonBuilder(Builder):
         if PLATFORM == 'ios':
             with open(f'{ROOT}/scripts/meson-ios-template.ini', 'r') as f:
                 template = f.read()
-            array = repr(get_platform_cflags().split(' '))
+            array = repr(get_platform_cflags())
             replacement = ''
             for key in ('c_args', 'cpp_args', 'c_link_args', 'cpp_link_args'):
                 replacement += f'{key} = {array}\n'
@@ -375,12 +382,13 @@ class MakeBuilder(Builder):
     target = ''
 
     def configure(self):
-        command = './configure'
+        command = ['./configure']
         if PLATFORM == 'js':
-            command = f'emconfigure {command}'
+            command = ['emconfigure', './configure']
         if not os.path.exists('configure'):
             ensure('autoreconf', ['-i'])
-        ensure(command, [
+        ensure(command[0], [
+            *command[1:],
             '-C',
             f'--prefix={INSTALL_PREFIX}',
             '--enable-static',
@@ -395,9 +403,9 @@ class MakeBuilder(Builder):
     def build(self):
         command = [
             '-j8',
-            self.target,
-            f'CFLAGS="{get_platform_cflags()}"',
-            f'CXXFLAGS="{get_platform_cflags()}"'
+            *([self.target] if self.target else []),
+            f'CFLAGS={' '.join(get_platform_cflags())}',
+            f'CXXFLAGS={' '.join(get_platform_cflags())}'
         ]
         if PLATFORM == 'harmony':
             # Use environment variable so that libcrypto-lib-cversion.o in openssl doesn't contain absolute path of clang.

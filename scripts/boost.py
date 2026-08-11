@@ -1,4 +1,5 @@
 import os
+import subprocess
 
 from common import MACOS_ARCH, PLATFORM, CMakeBuilder, cache, ensure, rmrf, sed
 
@@ -11,8 +12,8 @@ url = f'https://github.com/boostorg/boost/releases/download/{boost_dir}/{boost_t
 cache(url)
 
 if os.path.isdir('boost'):
-    pattern = 'VERSION ' + version.replace('.', '\\.')
-    if os.system(f"grep '{pattern}' boost/CMakeLists.txt") != 0:
+    pattern = 'VERSION ' + version.replace('.', '\\.') # XXX: 1.91.0-1 still has 1.91.0 in CMakeLists.txt.
+    if subprocess.run(['grep', pattern, 'boost/CMakeLists.txt'], check=False).returncode != 0:
         # Version mismatch
         rmrf('boost')
 
@@ -29,7 +30,7 @@ if not os.path.isdir('boost'):
     ])
 
 # For js, but harmless for non-windows platform so no need to revert.
-sed('boost/libs/container/include/boost/container/detail/thread_mutex.hpp', '"s/#if defined(BOOST_HAS_PTHREADS)/#if 1/"')
+sed('boost/libs/container/include/boost/container/detail/thread_mutex.hpp', 's/#if defined(BOOST_HAS_PTHREADS)/#if 1/')
 
 libs = "algorithm;bimap;container;crc;interprocess;iostreams;multi_index;ptr_container;scope_exit;signals2;uuid;vmd"
 
@@ -42,7 +43,7 @@ BOOST_CONTEXT_ABI = {
 }.get(MACOS_ARCH)
 
 CMakeBuilder('boost', [
-    f'-DBOOST_INCLUDE_LIBRARIES="{libs}"',
+    f'-DBOOST_INCLUDE_LIBRARIES={libs}',
     '-DBOOST_IOSTREAMS_ENABLE_BZIP2=Off',
     '-DBOOST_IOSTREAMS_ENABLE_ZLIB=Off',
     '-DBOOST_IOSTREAMS_ENABLE_LZMA=Off',

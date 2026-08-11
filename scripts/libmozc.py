@@ -4,6 +4,7 @@
 # linux -> js: build protoc first
 
 import platform
+from glob import glob
 
 from common import (
     INSTALL_PREFIX,
@@ -13,6 +14,7 @@ from common import (
     ar,
     cache,
     ensure,
+    mkdir,
     patch,
     rmrf,
     steal,
@@ -27,7 +29,7 @@ class MozcBuilder(CMakeBuilder):
     def configure(self):
         super().configure()
         oss_dir = f'{self.build_}/data_manager/oss'
-        ensure('mkdir', ['-p', oss_dir])
+        mkdir(oss_dir)
         if PLATFORM == 'js':
             ensure('ln', ['-sf', f'{ROOT}/patches/mozc_data.inc', f'{oss_dir}/mozc_data.inc'])
         else:
@@ -38,12 +40,12 @@ class MozcBuilder(CMakeBuilder):
         # Combine all .o files of absl to libabsl.a
         lib_dir = f'{self.dest_dir}{INSTALL_PREFIX}/lib'
         libabsl_a = f'{lib_dir}/libabsl.a'
-        all_libabsl_o = f'$(find {self.build_}/abseil-cpp -name "*.o" | sort)'
-        ensure(ar, ['rc', libabsl_a, all_libabsl_o])
+        all_libabsl_o = sorted(glob(f'{self.build_}/abseil-cpp/**/*.o', recursive=True))
+        ensure(ar, ['rc', libabsl_a, *all_libabsl_o])
 
         if PLATFORM == 'js':
             share_dir = f'{self.dest_dir}{INSTALL_PREFIX}/share/mozc'
-            ensure('mkdir', ['-p', share_dir])
+            mkdir(share_dir)
             ensure('cp', [f'{ROOT}/cache/mozc.data', share_dir])
 
     def pre_package(self):

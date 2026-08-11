@@ -1,6 +1,6 @@
 import os
 
-from common import CARGO_TARGET, INSTALL_PREFIX, ROOT, Builder, ensure, patch
+from common import CARGO_TARGET, INSTALL_PREFIX, ROOT, Builder, ensure, mkdir, patch
 
 project = 'cskk'
 patch(project)
@@ -19,7 +19,7 @@ class CskkBuilder(Builder):
         pkgconfig_dir = f'{lib_dir}/pkgconfig'
         share_dir = f'{usr}/share/libcskk'
 
-        ensure('mkdir', ['-p', include_dir, pkgconfig_dir, share_dir])
+        mkdir(include_dir, pkgconfig_dir, share_dir)
         ensure('cp', ['libcskk.h', include_dir])
         ensure('cp', [f'target/{CARGO_TARGET}/release/libcskk.a', lib_dir])
         ensure('cp', [f'{ROOT}/patches/cskk.pc', pkgconfig_dir])

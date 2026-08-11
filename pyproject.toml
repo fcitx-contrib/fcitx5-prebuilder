@@ -1,2 +1,5 @@
 [tool.ruff.lint]
 ignore = ["E501"] # unlimited line length
+
+[tool.pyrefly]
+search-path = ["scripts"]

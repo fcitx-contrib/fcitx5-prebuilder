@@ -74,6 +74,7 @@ ENABLED_LANGUAGES = [
     "fr",
     "he",
     "ja",
+    "ka",
     "ko",
     "ru",
     "vi",

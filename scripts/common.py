@@ -112,15 +112,22 @@ def patch(project: str, src: str | None = None, dst: str | None = None):
     if src and dst:
         ensure("cp", [f"patches/{src}", f"{project}/{dst}"])
     else:
-        os.chdir(project)
         if (
             subprocess.run(
-                ["git", "diff", "--ignore-submodules", "--exit-code"], check=False
+                ["git", "-C", project, "diff", "--ignore-submodules", "--exit-code"],
+                check=False,
             ).returncode
             == 0
         ):
-            ensure("git", ["apply", f"{ROOT}/patches/{project.split('/')[-1]}.patch"])
-        os.chdir(ROOT)
+            ensure(
+                "git",
+                [
+                    "-C",
+                    project,
+                    "apply",
+                    f"{ROOT}/patches/{project.split('/')[-1]}.patch",
+                ],
+            )
 
 
 def cache(url: str):

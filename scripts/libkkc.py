@@ -2,16 +2,16 @@ import os
 
 from common import XDG_DATA_DIRS, MakeBuilder, ensure, patch
 
-project = 'libkkc'
+project = "libkkc"
 
 # Disable gobject-introspection.
 # Disable tools and data.
 # Intl.bindtextdomain is not available on emscripten.
 patch(project)
 # Use vapi generated on Linux with gobject-introspection.
-ensure('cp', ['patches/marisa-glib.vapi', 'libkkc/marisa-glib'])
+ensure("cp", ["patches/marisa-glib.vapi", "libkkc/marisa-glib"])
 
 # valac uses it to locate gee-0.8.vapi
-os.environ['XDG_DATA_DIRS'] = XDG_DATA_DIRS
+os.environ["XDG_DATA_DIRS"] = XDG_DATA_DIRS
 
 MakeBuilder(project).exec()

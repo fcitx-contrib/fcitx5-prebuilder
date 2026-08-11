@@ -2,12 +2,12 @@ import os
 
 from common import XDG_DATA_DIRS, MakeBuilder, patch
 
-project = 'libskk'
+project = "libskk"
 
 # Fix build without gobject-introspection, disable tools and tests
 patch(project)
 
 # valac uses it to locate gee-0.8.vapi
-os.environ['XDG_DATA_DIRS'] = XDG_DATA_DIRS
+os.environ["XDG_DATA_DIRS"] = XDG_DATA_DIRS
 
-MakeBuilder(project, ['--disable-docs']).exec()
+MakeBuilder(project, ["--disable-docs"]).exec()

@@ -1,51 +1,68 @@
 diff --git a/CMakeLists.txt b/CMakeLists.txt
-index 5692e44..ca9e39d 100644
+index 7a7aa06..cdeaa98 100644
 --- a/CMakeLists.txt
 +++ b/CMakeLists.txt
-@@ -50,6 +50,7 @@ option(OPENCC_ENABLE_INSTALL "Generate install targets" ${_OPENCC_DEFAULT_ENABLE
+@@ -49,15 +49,12 @@ option(BUILD_SHARED_LIBS "Build opencc as shared library" ${_OPENCC_DEFAULT_BUIL
+ option(OPENCC_ENABLE_INSTALL "Generate install targets" ${_OPENCC_DEFAULT_ENABLE_INSTALL})
  option(ENABLE_GTEST "Build all tests." OFF)
  option(ENABLE_BENCHMARK "Build benchmark tests." OFF)
- option(ENABLE_DARTS "Build DartsDict (ocd format)." ON)
 +option(ENABLE_PLUGINS "" ON)
- option(BUILD_OPENCC_JIEBA_PLUGIN "Build Jieba segmentation as a loadable plugin." OFF)
++set(OPENCC_JIEBA_PLUGIN_DEFAULT ${ENABLE_PLUGINS})
+ # Top-level macOS builds enable the Jieba plugin by default so package
+ # managers that build with default options (e.g. Homebrew) ship it. Other
+ # platforms and subproject builds (FetchContent / add_subdirectory) keep it
+ # opt-in.
+-if (APPLE AND CMAKE_SOURCE_DIR STREQUAL CMAKE_CURRENT_SOURCE_DIR)
+-  set(OPENCC_JIEBA_PLUGIN_DEFAULT ON)
+-else()
+-  set(OPENCC_JIEBA_PLUGIN_DEFAULT OFF)
+-endif()
+ option(BUILD_OPENCC_JIEBA_PLUGIN "Build Jieba segmentation as a loadable plugin." ${OPENCC_JIEBA_PLUGIN_DEFAULT})
  option(BUILD_PYTHON "Build python library" OFF)
- option(USE_SYSTEM_DARTS "Use system version of Darts" OFF)
-@@ -287,10 +288,12 @@ endif()
- ######## Subdirectories
+ 
+@@ -364,18 +361,18 @@ endif()
  
  add_subdirectory(src)
--add_subdirectory(doc)
+ if(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/doc/CMakeLists.txt")
+-  add_subdirectory(doc)
+ elseif(BUILD_DOCUMENTATION)
+   message(FATAL_ERROR "BUILD_DOCUMENTATION requires the doc source directory.")
+ endif()
 +if(APPLE AND NOT IOS)
  add_subdirectory(data)
+-if(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/plugins/CMakeLists.txt")
 +endif()
 +if(ENABLE_PLUGINS)
- add_subdirectory(plugins)
--add_subdirectory(test)
-+endif()
- 
- if (ENABLE_BENCHMARK AND TARGET performance AND TARGET opencc_jieba)
-   target_compile_definitions(performance PRIVATE
+   add_subdirectory(plugins)
+ elseif(BUILD_OPENCC_JIEBA_PLUGIN)
+   message(FATAL_ERROR "BUILD_OPENCC_JIEBA_PLUGIN requires the plugins source directory.")
+ endif()
+ if(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/test/CMakeLists.txt")
+-  add_subdirectory(test)
+ elseif(ENABLE_GTEST)
+   message(FATAL_ERROR "ENABLE_GTEST requires the test source directory.")
+ endif()
 diff --git a/src/CMakeLists.txt b/src/CMakeLists.txt
-index d4edff8..1dfcd15 100644
+index 1753830..684dea1 100644
 --- a/src/CMakeLists.txt
 +++ b/src/CMakeLists.txt
-@@ -33,7 +33,6 @@ set(
-   MarisaDict.hpp
-   MaxMatchSegmentation.hpp
-   Optional.hpp
--  PluginSegmentation.hpp
+@@ -48,7 +48,6 @@ set(
+   DictConverter.hpp
    PhraseExtract.hpp
+   PipelineConverter.hpp
+-  PluginSegmentation.hpp
    PrefixMatch.hpp
-   Segmentation.hpp
-@@ -61,7 +60,6 @@ set(
-   Lexicon.cpp
-   MarisaDict.cpp
+   SerializedValues.hpp
+   SingleStageConverter.hpp
+@@ -70,7 +69,6 @@ set(
    MaxMatchSegmentation.cpp
--  PluginSegmentation.cpp
    PhraseExtract.cpp
+   PipelineConverter.cpp
+-  PluginSegmentation.cpp
    PrefixMatch.cpp
-   SerializedValues.cpp
-@@ -72,6 +70,11 @@ set(
+   SingleStageConverter.cpp
+   ResourceProvider.cpp
+@@ -83,6 +81,11 @@ set(
    UTF8Util.cpp
  )
  
@@ -57,7 +74,7 @@ index d4edff8..1dfcd15 100644
  set(UNITTESTS
    ConfigTest
    ConversionChainTest
-@@ -139,6 +142,8 @@ target_link_libraries(libopencc marisa)
+@@ -150,6 +153,8 @@ target_link_libraries(libopencc marisa)
  if (NOT BUILD_SHARED_LIBS)
    target_compile_definitions(libopencc PUBLIC Opencc_BUILT_AS_STATIC)
  endif()
@@ -66,7 +83,7 @@ index d4edff8..1dfcd15 100644
  # PluginSegmentation.cpp uses LoadLibrary on _WIN32 (MSVC and MinGW).
  # Only non-Windows targets may need libdl for dlopen.
  if (NOT CMAKE_SYSTEM_NAME STREQUAL "Windows")
-@@ -148,6 +153,7 @@ if (NOT CMAKE_SYSTEM_NAME STREQUAL "Windows")
+@@ -159,6 +164,7 @@ if (NOT CMAKE_SYSTEM_NAME STREQUAL "Windows")
      target_link_libraries(libopencc dl)
    endif ()
  endif ()
@@ -74,7 +91,7 @@ index d4edff8..1dfcd15 100644
  target_include_directories(libopencc PUBLIC
      $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>
      $<INSTALL_INTERFACE:${DIR_INCLUDE}/opencc>
-@@ -204,11 +210,13 @@ install(
+@@ -215,11 +221,13 @@ install(
    DESTINATION ${DIR_INCLUDE}/opencc
  )
  
@@ -88,7 +105,7 @@ index d4edff8..1dfcd15 100644
  
  # Gtest
  
-@@ -244,4 +252,6 @@ endif()
+@@ -255,4 +263,6 @@ endif()
  
  # Subdir
  
@@ -96,11 +113,11 @@ index d4edff8..1dfcd15 100644
  add_subdirectory(tools)
 +endif()
 diff --git a/src/Config.cpp b/src/Config.cpp
-index 6a80e5d..0ab2838 100644
+index fbed5af..03abdfd 100644
 --- a/src/Config.cpp
 +++ b/src/Config.cpp
-@@ -35,7 +35,9 @@
- #include "Exception.hpp"
+@@ -40,7 +40,9 @@
+ #include "Lexicon.hpp"
  #include "MarisaDict.hpp"
  #include "MaxMatchSegmentation.hpp"
 +#ifdef OPENCC_ENABLE_PLUGINS
@@ -109,15 +126,15 @@ index 6a80e5d..0ab2838 100644
  #include "TextDict.hpp"
  #include "UTF8Util.hpp"
  
-@@ -347,6 +349,7 @@ public:
+@@ -592,6 +594,7 @@ public:
        // Required: dict
-       DictPtr dict = ParseDict(GetObjectProperty(doc, "dict"));
+       DictPtr dict = ParseDict(GetObjectProperty(doc, "dict"), true);
        segmentation = SegmentationPtr(new MaxMatchSegmentation(dict));
 +#ifdef OPENCC_ENABLE_PLUGINS
      } else {
        PluginConfigPairs configPairs;
        configPairs.push_back(std::make_pair("__config_dir", configDirectory));
-@@ -374,6 +377,13 @@ public:
+@@ -619,6 +622,13 @@ public:
          configPairs.push_back(std::make_pair(key, it->value.GetString()));
        }
        segmentation = CreatePluginSegmentation(type, configPairs);

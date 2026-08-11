@@ -1,3 +1,3 @@
 from common import CMakeBuilder
 
-CMakeBuilder('libcurl.js').exec()
+CMakeBuilder("libcurl.js").exec()

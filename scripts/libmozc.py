@@ -20,71 +20,86 @@ from common import (
     steal,
 )
 
-no_addon = '-DBUILD_MOZC_ADDON=OFF'
-protoc_exe = ''
+no_addon = "-DBUILD_MOZC_ADDON=OFF"
+protoc_exe = ""
 options = [no_addon]
 
 
 class MozcBuilder(CMakeBuilder):
     def configure(self):
         super().configure()
-        oss_dir = f'{self.build_}/data_manager/oss'
+        oss_dir = f"{self.build_}/data_manager/oss"
         mkdir(oss_dir)
-        if PLATFORM == 'js':
-            ensure('ln', ['-sf', f'{ROOT}/patches/mozc_data.inc', f'{oss_dir}/mozc_data.inc'])
+        if PLATFORM == "js":
+            ensure(
+                "ln",
+                ["-sf", f"{ROOT}/patches/mozc_data.inc", f"{oss_dir}/mozc_data.inc"],
+            )
         else:
-            ensure('ln', ['-sf', f'{ROOT}/cache/mozc_data.inc', f'{oss_dir}/mozc_data.inc'])
+            ensure(
+                "ln", ["-sf", f"{ROOT}/cache/mozc_data.inc", f"{oss_dir}/mozc_data.inc"]
+            )
 
     def install(self):
         super().install()
         # Combine all .o files of absl to libabsl.a
-        lib_dir = f'{self.dest_dir}{INSTALL_PREFIX}/lib'
-        libabsl_a = f'{lib_dir}/libabsl.a'
-        all_libabsl_o = sorted(glob(f'{self.build_}/abseil-cpp/**/*.o', recursive=True))
-        ensure(ar, ['rc', libabsl_a, *all_libabsl_o])
+        lib_dir = f"{self.dest_dir}{INSTALL_PREFIX}/lib"
+        libabsl_a = f"{lib_dir}/libabsl.a"
+        all_libabsl_o = sorted(glob(f"{self.build_}/abseil-cpp/**/*.o", recursive=True))
+        ensure(ar, ["rc", libabsl_a, *all_libabsl_o])
 
-        if PLATFORM == 'js':
-            share_dir = f'{self.dest_dir}{INSTALL_PREFIX}/share/mozc'
+        if PLATFORM == "js":
+            share_dir = f"{self.dest_dir}{INSTALL_PREFIX}/share/mozc"
             mkdir(share_dir)
-            ensure('cp', [f'{ROOT}/cache/mozc.data', share_dir])
+            ensure("cp", [f"{ROOT}/cache/mozc.data", share_dir])
 
     def pre_package(self):
-        if PLATFORM != 'macos':
-            rmrf(f'{self.dest_dir}{INSTALL_PREFIX}/bin')
+        if PLATFORM != "macos":
+            rmrf(f"{self.dest_dir}{INSTALL_PREFIX}/bin")
+
 
 # Accelerate build by dropping irrelevant compilers.
-patch('libmozc/protobuf')
+patch("libmozc/protobuf")
 
-if PLATFORM == 'js':
-    if platform.system() == 'Linux': # Nothing to steal so build it.
-        build_dir = f'libmozc/build/linux-{platform.machine()}'
-        ensure('cmake', [
-            '-S', 'libmozc', '-B', build_dir,
-            '-G', 'Ninja', '-DCMAKE_BUILD_TYPE=Release',
-            no_addon
-        ])
-        ensure('cmake', [
-            '--build', build_dir,
-            '--target', 'protoc'
-        ])
-        protoc_exe = f'{ROOT}/{build_dir}/protobuf/protoc'
+if PLATFORM == "js":
+    if platform.system() == "Linux":  # Nothing to steal so build it.
+        build_dir = f"libmozc/build/linux-{platform.machine()}"
+        ensure(
+            "cmake",
+            [
+                "-S",
+                "libmozc",
+                "-B",
+                build_dir,
+                "-G",
+                "Ninja",
+                "-DCMAKE_BUILD_TYPE=Release",
+                no_addon,
+            ],
+        )
+        ensure("cmake", ["--build", build_dir, "--target", "protoc"])
+        protoc_exe = f"{ROOT}/{build_dir}/protobuf/protoc"
 
     # Fix RuntimeError: null function or function signature mismatch.
-    patch('libmozc/abseil-cpp')
+    patch("libmozc/abseil-cpp")
     # Unblock single-thread build since fcitx5-js already overrides pthread.
-    patch('libmozc/mozc')
+    patch("libmozc/mozc")
     # Use raw data instead of embed data into libmozc.so so that Chrome accepts it
     # without --enable-features=WebAssemblyUnlimitedSyncCompilation.
-    cache('https://github.com/fcitx-contrib/fcitx5-mozc/releases/download/latest/mozc.data')
+    cache(
+        "https://github.com/fcitx-contrib/fcitx5-mozc/releases/download/latest/mozc.data"
+    )
 else:
-    cache('https://github.com/fcitx-contrib/fcitx5-mozc/releases/download/latest/mozc_data.inc')
+    cache(
+        "https://github.com/fcitx-contrib/fcitx5-mozc/releases/download/latest/mozc_data.inc"
+    )
 
-if platform.system() == 'Darwin' and PLATFORM != 'macos':
-    steal('libmozc', ('bin',)) # extracted to install dir so need to remove on prepack.
-    protoc_exe = f'{MozcBuilder('libmozc').dest_dir}{INSTALL_PREFIX}/bin/protoc'
+if platform.system() == "Darwin" and PLATFORM != "macos":
+    steal("libmozc", ("bin",))  # extracted to install dir so need to remove on prepack.
+    protoc_exe = f"{MozcBuilder('libmozc').dest_dir}{INSTALL_PREFIX}/bin/protoc"
 
-if PLATFORM in ('ios', 'js'):
-    options.append(f'-DPROTOC_EXECUTABLE={protoc_exe}')
-    options.append('-Dprotobuf_BUILD_PROTOC_BINARIES=OFF')
+if PLATFORM in ("ios", "js"):
+    options.append(f"-DPROTOC_EXECUTABLE={protoc_exe}")
+    options.append("-Dprotobuf_BUILD_PROTOC_BINARIES=OFF")
 
-MozcBuilder('libmozc', options).exec()
+MozcBuilder("libmozc", options).exec()

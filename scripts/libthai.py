@@ -1,7 +1,7 @@
 from common import CMakeBuilder, patch
 
-project = 'libthai'
+project = "libthai"
 
-patch(project, 'libthai.cmake', 'CMakeLists.txt')
+patch(project, "libthai.cmake", "CMakeLists.txt")
 
 CMakeBuilder(project).exec()

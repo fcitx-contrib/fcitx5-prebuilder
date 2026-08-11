@@ -1,6 +1,6 @@
 from common import CMakeBuilder, patch
 
-project = 'libpinyin'
+project = "libpinyin"
 patch(project)
 
-CMakeBuilder(project, ['-DBUILD_UTILS=OFF']).exec()
+CMakeBuilder(project, ["-DBUILD_UTILS=OFF"]).exec()

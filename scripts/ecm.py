@@ -1,3 +1,3 @@
 from common import CMakeBuilder
 
-CMakeBuilder('ecm').exec()
+CMakeBuilder("ecm").exec()

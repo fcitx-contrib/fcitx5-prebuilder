@@ -6,7 +6,10 @@ from dependencies import dag, platform_projects
 
 
 def sort_projects(projects: list[str]) -> list[str]:
-    in_degree = {project: len([dep for dep in dag.get(project, []) if dep in projects]) for project in projects}
+    in_degree = {
+        project: len([dep for dep in dag.get(project, []) if dep in projects])
+        for project in projects
+    }
     adjacency_list = defaultdict(list)
 
     for project, deps in dag.items():
@@ -37,4 +40,4 @@ def sort_projects(projects: list[str]) -> list[str]:
 
 
 for project in sort_projects(platform_projects[sys.argv[1]]):
-    ensure('python', [f'scripts/{project}.py'] + sys.argv[1:])
+    ensure("python", [f"scripts/{project}.py"] + sys.argv[1:])

@@ -10,60 +10,56 @@ from common import (
     patch,
 )
 
-project = 'lua'
+project = "lua"
 
 # ios: disable dlopen.
 patch(project)
 
+
 class LuaBuilder(Builder):
     def build(self):
-        ensure('make', ['clean'])
-        command = ['emmake'] if PLATFORM == 'js' else []
+        ensure("make", ["clean"])
+        command = ["emmake"] if PLATFORM == "js" else []
 
         cflags = get_platform_cflags()
         match PLATFORM:
-            case 'macos':
+            case "macos":
                 # Enable dlopen for librime-cloud
-                cflags.append('-DLUA_USE_MACOSX')
-            case 'ios':
-                cflags.append('-DLUA_USE_IOS')
+                cflags.append("-DLUA_USE_MACOSX")
+            case "ios":
+                cflags.append("-DLUA_USE_IOS")
 
-        command += [
-            'make',
-            'a',
-            '-j8',
-            f'CFLAGS={" ".join(cflags)}'
-        ]
+        command += ["make", "a", "-j8", f"CFLAGS={' '.join(cflags)}"]
 
         match PLATFORM:
-            case 'js':
+            case "js":
+                command += ["CC=emcc", "AR=emar q", "RANLIB=emranlib"]
+            case "harmony":
                 command += [
-                    'CC=emcc',
-                    'AR=emar q',
-                    'RANLIB=emranlib'
-                ]
-            case 'harmony':
-                command += [
-                    f'CC={HARMONY_NATIVE}/llvm/bin/clang',
-                    f'AR={HARMONY_NATIVE}/llvm/bin/llvm-ar rc',
-                    f'RANLIB={HARMONY_NATIVE}/llvm/bin/llvm-ranlib'
+                    f"CC={HARMONY_NATIVE}/llvm/bin/clang",
+                    f"AR={HARMONY_NATIVE}/llvm/bin/llvm-ar rc",
+                    f"RANLIB={HARMONY_NATIVE}/llvm/bin/llvm-ranlib",
                 ]
 
         ensure(command[0], command[1:])
 
     def install(self):
         usr = self.dest_dir + INSTALL_PREFIX
-        include_lua_dir = usr + '/include/lua'
-        lib_dir = usr + '/lib'
+        include_lua_dir = usr + "/include/lua"
+        lib_dir = usr + "/lib"
         mkdir(include_lua_dir, lib_dir)
-        ensure('cp', [
-            'lua.h',
-            'luaconf.h',
-            'lualib.h',
-            'lauxlib.h',
-            f'{ROOT}/patches/lua.hpp',
-            include_lua_dir
-        ])
-        ensure('cp', ['liblua.a', lib_dir])
+        ensure(
+            "cp",
+            [
+                "lua.h",
+                "luaconf.h",
+                "lualib.h",
+                "lauxlib.h",
+                f"{ROOT}/patches/lua.hpp",
+                include_lua_dir,
+            ],
+        )
+        ensure("cp", ["liblua.a", lib_dir])
 
-LuaBuilder('lua').exec()
+
+LuaBuilder("lua").exec()

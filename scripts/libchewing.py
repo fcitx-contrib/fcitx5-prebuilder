@@ -8,12 +8,12 @@ from common import (
     steal,
 )
 
-project = 'libchewing'
+project = "libchewing"
 
 # Shrink binary size.
 patch(project)
 
-if PLATFORM != 'macos':
+if PLATFORM != "macos":
     steal(project)
 
 
@@ -21,16 +21,17 @@ class ChewingBuilder(CMakeBuilder):
     def install(self):
         super().install()
         # libchewing.a only has an empty .c, which is only useful for building .so.
-        ensure('cp', [
-            f'{self.build_}/libchewing_capi.a',
-            f'{self.dest_dir}{INSTALL_PREFIX}/lib/libchewing.a'
-        ])
+        ensure(
+            "cp",
+            [
+                f"{self.build_}/libchewing_capi.a",
+                f"{self.dest_dir}{INSTALL_PREFIX}/lib/libchewing.a",
+            ],
+        )
 
 
-ChewingBuilder(project, [
-    '-DBUILD_DOC=OFF',
-    '-DWITH_SQLITE3=OFF',
-    f'-DRust_CARGO_TARGET={CARGO_TARGET}'
-], js=[
-    '-DBUILD_DATA=OFF'
-]).exec()
+ChewingBuilder(
+    project,
+    ["-DBUILD_DOC=OFF", "-DWITH_SQLITE3=OFF", f"-DRust_CARGO_TARGET={CARGO_TARGET}"],
+    js=["-DBUILD_DATA=OFF"],
+).exec()

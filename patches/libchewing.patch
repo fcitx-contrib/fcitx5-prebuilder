@@ -1,5 +1,5 @@
 diff --git a/CMakeLists.txt b/CMakeLists.txt
-index ac03e10..8ce2852 100644
+index ecd720b3..d6bfb1a0 100644
 --- a/CMakeLists.txt
 +++ b/CMakeLists.txt
 @@ -78,7 +78,17 @@ corrosion_import_crate(MANIFEST_PATH Cargo.toml CRATES chewing_capi)
@@ -38,43 +38,39 @@ index ac03e10..8ce2852 100644
  # generate CMake Config files
  include(CMakePackageConfigHelpers)
 diff --git a/Cargo.toml b/Cargo.toml
-index 5197bad..622c1ff 100644
+index bfe59d1d..b5dc841c 100644
 --- a/Cargo.toml
 +++ b/Cargo.toml
-@@ -29,6 +29,7 @@ tempfile = { workspace = true }
+@@ -49,10 +49,10 @@ tempfile = { workspace = true }
  default = []
  sqlite = ["dep:rusqlite"]
- sqlite-bundled = ["sqlite", "rusqlite/bundled"]
+ sqlite-bundled = ["rusqlite/bundled", "sqlite"]
 +threading = []
  
- [workspace]
- members = ["capi", "fuzzer", "tests/testhelper", "tools"]
-@@ -44,7 +45,6 @@ lto = true
+ [profile.release]
  opt-level = 3
+-debug = true
+ lto = true
  panic = "abort"
  codegen-units = 1
--debug = true
- 
- [package.metadata.docs.rs]
- features = ["sqlite"]
 diff --git a/capi/Cargo.toml b/capi/Cargo.toml
-index e87d416..cfb932e 100644
+index c51380d7..f735f51d 100644
 --- a/capi/Cargo.toml
 +++ b/capi/Cargo.toml
-@@ -7,7 +7,7 @@ rust-version = "1.88"
- edition = "2024"
+@@ -7,7 +7,7 @@ rust-version.workspace = true
+ edition.workspace = true
  
  [lib]
 -crate-type = ["rlib", "staticlib"]
 +crate-type = ["staticlib"]
  
  [dependencies]
- chewing = { version = "0.12.0", path = ".." }
+ chewing = { workspace = true }
 diff --git a/src/dictionary/trie_buf.rs b/src/dictionary/trie_buf.rs
-index 722df3f..b6ef2e7 100644
+index 1e319365..170f9355 100644
 --- a/src/dictionary/trie_buf.rs
 +++ b/src/dictionary/trie_buf.rs
-@@ -231,6 +231,7 @@ impl TrieBuf {
+@@ -232,6 +232,7 @@ impl TrieBuf {
      }
  
      pub(crate) fn wait(&mut self) {
@@ -82,19 +78,19 @@ index 722df3f..b6ef2e7 100644
          if let Some(join_handle) = self.join_handle.take() {
              match join_handle.join() {
                  Ok(Err(error)) => {
-@@ -248,9 +249,11 @@ impl TrieBuf {
+@@ -249,9 +250,11 @@ impl TrieBuf {
              }
          }
      }
 +    }
  
      pub(crate) fn sync(&mut self) -> Result<(), UpdateDictionaryError> {
-         info!("Synchronize dictionary from disk...");
+         trace!("Synchronize dictionary from disk...");
 +    #[cfg(feature = "threading")] {
          let make_error = |e| UpdateDictionaryError {
              message: "synchornize dictionary from disk failed",
              source: Some(Box::new(e)),
-@@ -293,11 +296,12 @@ impl TrieBuf {
+@@ -294,11 +297,12 @@ impl TrieBuf {
                  self.trie = Some(trie);
              }
          }
@@ -108,16 +104,16 @@ index 722df3f..b6ef2e7 100644
              message: "failed to save snapshot",
              source: Some(Box::new(e)),
          };
-@@ -318,6 +322,7 @@ impl TrieBuf {
+@@ -319,6 +323,7 @@ impl TrieBuf {
              dirty: false,
              usage: self.usage,
          };
 +    #[cfg(feature = "threading")] {
          self.join_handle = Some(thread::spawn(move || {
              let mut builder = TrieBuilder::new();
-             info!("Saving snapshot...");
-@@ -340,6 +345,30 @@ impl TrieBuf {
-             info!("    Done");
+             trace!("Saving snapshot...");
+@@ -341,6 +346,30 @@ impl TrieBuf {
+             trace!("    Done");
              Ok(())
          }));
 +    }

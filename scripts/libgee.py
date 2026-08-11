@@ -1,6 +1,6 @@
 from common import MakeBuilder, patch
 
-project = 'libgee'
+project = "libgee"
 
 patch(project)
 

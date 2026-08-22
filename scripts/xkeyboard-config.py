@@ -9,4 +9,4 @@ class XKeyboardConfigBuilder(MesonBuilder):
         ensure("find", [self.dest_dir, "-name", "xkeyboard-config-2.mo", "-delete"])
 
 
-XKeyboardConfigBuilder("xkeyboard-config").exec()
+XKeyboardConfigBuilder("xkeyboard-config", keep_locale=True).exec()

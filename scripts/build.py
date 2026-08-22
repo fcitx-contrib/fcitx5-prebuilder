@@ -1,7 +1,7 @@
 import sys
 from collections import defaultdict, deque
 
-from common import ensure
+from common import PLATFORM, ensure
 from dependencies import dag, platform_projects
 
 
@@ -39,5 +39,5 @@ def sort_projects(projects: list[str]) -> list[str]:
     return sorted_projects
 
 
-for project in sort_projects(platform_projects[sys.argv[1]]):
+for project in sort_projects(platform_projects[PLATFORM]):
     ensure("python", [f"scripts/{project}.py"] + sys.argv[1:])

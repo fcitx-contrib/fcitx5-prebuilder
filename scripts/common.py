@@ -1,3 +1,4 @@
+import argparse
 import glob
 import os
 import platform
@@ -11,61 +12,83 @@ from dependencies import dag
 MACOS_VERSION = "13.3"  # Also need to update meson-macos-*.ini
 IOS_VERSION = "16.3"
 
-PLATFORM_VERSION = {"macos": MACOS_VERSION, "ios": IOS_VERSION}
 
-PLATFORM = cast(Literal["macos", "windows", "ios", "harmony", "js"], sys.argv[1])
-MACOS_ARCH = sys.argv[2] if PLATFORM == "macos" else ""
-WINDOWS_ARCH = sys.argv[2] if PLATFORM == "windows" else ""
-IOS_PLATFORM = (
-    cast(Literal["OS64", "SIMULATOR64", "SIMULATORARM64"], sys.argv[2])
-    if PLATFORM == "ios"
-    else ""
-)
+def parse_args(argv: list[str]) -> argparse.Namespace:
+    """Parse `<script> PLATFORM [ARG]`.
+
+    The second argument is a CPU architecture (macos / windows / harmony),
+    the SDK platform (ios), or absent (js).
+    """
+    parser = argparse.ArgumentParser(
+        description="Build fcitx5 dependencies for a target platform."
+    )
+    subparsers = parser.add_subparsers(
+        dest="platform", metavar="PLATFORM", required=True
+    )
+    for name, (arg, archs, help) in {
+        "macos": ("arch", ("arm64", "x86_64"), "macOS"),
+        "windows": ("arch", ("x86_64",), "Windows"),
+        "ios": ("sdk", ("OS64", "SIMULATOR64", "SIMULATORARM64"), "iOS"),
+        "harmony": ("arch", ("arm64-v8a", "x86_64"), "OpenHarmony"),
+    }.items():
+        sub = subparsers.add_parser(name, help=help)
+        sub.add_argument(arg, choices=archs)
+    subparsers.add_parser("js", help="JavaScript/WASM via Emscripten")
+    return parser.parse_args(argv)
+
+
+args = parse_args(sys.argv[1:])
+
+PLATFORM = cast(Literal["macos", "windows", "ios", "harmony", "js"], args.platform)
+
+# Per-platform values; always defined (some scripts import them
+# unconditionally, e.g. boost.py reads MACOS_ARCH on any platform).
+MACOS_ARCH = WINDOWS_ARCH = IOS_PLATFORM = OHOS_ARCH = ""
+match PLATFORM:
+    case "macos":
+        MACOS_ARCH = args.arch
+    case "windows":
+        WINDOWS_ARCH = args.arch
+    case "ios":
+        IOS_PLATFORM = cast(Literal["OS64", "SIMULATOR64", "SIMULATORARM64"], args.sdk)
+    case "harmony":
+        OHOS_ARCH = args.arch
+
 IOS_ARCH = "x86_64" if IOS_PLATFORM == "SIMULATOR64" else "arm64"
-OHOS_ARCH = sys.argv[2] if PLATFORM == "harmony" else ""
 OHOS_TARGET = f"{'aarch64' if OHOS_ARCH == 'arm64-v8a' else 'x86_64'}-linux-ohos"
 
-match PLATFORM:
-    case "macos":
-        POSTFIX = "-" + MACOS_ARCH
-    case "windows":
-        POSTFIX = "-" + WINDOWS_ARCH
-    case "harmony":
-        POSTFIX = "-" + OHOS_ARCH
-    case "ios" if IOS_PLATFORM != "OS64":
-        POSTFIX = "-" + IOS_ARCH
-    case _:  # iOS real device or JS
-        POSTFIX = ""
+POSTFIX = {
+    "macos": f"-{MACOS_ARCH}",
+    "windows": f"-{WINDOWS_ARCH}",
+    "harmony": f"-{OHOS_ARCH}",
+    "ios": "" if IOS_PLATFORM == "OS64" else f"-{IOS_ARCH}",
+    "js": "",
+}[PLATFORM]
 
-CARGO_TARGET = ""
-match PLATFORM:
-    case "macos":
-        CARGO_TARGET = f"{MACOS_ARCH.replace('arm64', 'aarch64')}-apple-darwin"
-    case "js":
-        CARGO_TARGET = "wasm32-unknown-emscripten"
+CARGO_TARGET = {
+    "macos": f"{MACOS_ARCH.replace('arm64', 'aarch64')}-apple-darwin",
+    "js": "wasm32-unknown-emscripten",
+}.get(PLATFORM, "")
 
+os.environ["LC_ALL"] = "C"  # Reproducible: sort of .o of absl; package
 if PLATFORM in ("macos", "ios"):
-    os.environ["ZERO_AR_DATE"] = (
-        "1"  # Reproducible: timestamp of __.SYMDEF SORTED and .o in .a
-    )
+    os.environ["ZERO_AR_DATE"] = "1"  # Reproducible: .a timestamps
     os.environ["MACOSX_DEPLOYMENT_TARGET"] = MACOS_VERSION  # cargo
+DEBUG = os.environ.get("DEBUG") == "1"
 
 ROOT = os.getcwd()
-
 INSTALL_PREFIX = "/usr"
 # macos-x86_64, ios-arm64, js, harmony-arm64-v8a
 TARGET = f"{PLATFORM}{POSTFIX}"
 # macos-x86_64/usr, ios-arm64/usr, js/usr
 USR = f"{TARGET}{INSTALL_PREFIX}"
-
 PKG_CONFIG_SYSROOT_DIR = f"{ROOT}/build/{TARGET}"
 PKG_CONFIG_PATH = f"{ROOT}/build/{USR}/lib/pkgconfig"
 XDG_DATA_DIRS = f"{ROOT}/build/{USR}/share"
-
-DEBUG = os.environ.get("DEBUG") == "1"
-
+# OpenHarmony native SDK
 HARMONY_NATIVE = "/tmp/command-line-tools/sdk/default/openharmony/native"
 
+# Locales kept when packaging; only iso-codes and xkeyboard-config ship them.
 ENABLED_LANGUAGES = [
     "ca",
     "da",
@@ -87,8 +110,6 @@ tar = {
     "Linux": "tar",
     "Windows": "C:/msys64/usr/bin/tar.exe",
 }.get(platform.system(), "gtar")
-
-os.environ["LC_ALL"] = "C"  # Reproducible: sort of .o of absl; package
 
 
 def ensure(program: str, args: list[str], **kwargs):
@@ -263,7 +284,6 @@ class Builder:
 
     def package(self):
         os.chdir(f"{self.dest_dir}{INSTALL_PREFIX}")
-        # We will see if other packages also need locale be packaged, or enable more languages.
         if self.name in ("iso-codes", "xkeyboard-config"):
             for code in os.listdir("share/locale"):
                 if code not in ENABLED_LANGUAGES:
@@ -362,13 +382,13 @@ class CMakeBuilder(Builder):
 
         if PLATFORM == "macos":
             command += [
-                f"-DCMAKE_OSX_DEPLOYMENT_TARGET={PLATFORM_VERSION[PLATFORM]}",
+                f"-DCMAKE_OSX_DEPLOYMENT_TARGET={MACOS_VERSION}",
                 f"-DCMAKE_OSX_ARCHITECTURES={MACOS_ARCH}",
             ]
             command += self.macos
         elif PLATFORM == "ios":
             command.append(
-                f"-DDEPLOYMENT_TARGET={PLATFORM_VERSION[PLATFORM]}"
+                f"-DDEPLOYMENT_TARGET={IOS_VERSION}"
             )  # ios.toolchain.cmake overrides CMAKE_OSX_DEPLOYMENT_TARGET anyway.
 
         command += [

@@ -30,4 +30,4 @@ class IsoCodesBuilder(MesonBuilder):
                 rmrf(code_path)
 
 
-IsoCodesBuilder("iso-codes").exec()
+IsoCodesBuilder("iso-codes", keep_locale=True).exec()

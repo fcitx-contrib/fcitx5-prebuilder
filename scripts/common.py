@@ -88,7 +88,7 @@ XDG_DATA_DIRS = f"{ROOT}/build/{USR}/share"
 # OpenHarmony native SDK
 HARMONY_NATIVE = "/tmp/command-line-tools/sdk/default/openharmony/native"
 
-# Locales kept when packaging; only iso-codes and xkeyboard-config ship them.
+# Locales kept when packaging, same with fcitx5/po/LINGUAS.
 ENABLED_LANGUAGES = [
     "ca",
     "da",
@@ -236,6 +236,7 @@ class Builder:
         src=".",
         definitions: list[str] | None = None,
         includes: list[str] | None = None,
+        keep_locale: bool = False,
     ):
         self.name = name
         # /path/to/build/ios-arm64/librime
@@ -250,6 +251,7 @@ class Builder:
         self.harmony = harmony or []
         self.definitions = definitions or []
         self.includes = includes or []
+        self.keep_locale = keep_locale
 
     def configure(self):
         pass
@@ -284,7 +286,7 @@ class Builder:
 
     def package(self):
         os.chdir(f"{self.dest_dir}{INSTALL_PREFIX}")
-        if self.name in ("iso-codes", "xkeyboard-config"):
+        if self.keep_locale:
             for code in os.listdir("share/locale"):
                 if code not in ENABLED_LANGUAGES:
                     rmrf(f"share/locale/{code}")

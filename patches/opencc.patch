@@ -1,8 +1,8 @@
 diff --git a/CMakeLists.txt b/CMakeLists.txt
-index 7a7aa06..cdeaa98 100644
+index ae5573c..5fc2bd0 100644
 --- a/CMakeLists.txt
 +++ b/CMakeLists.txt
-@@ -49,15 +49,12 @@ option(BUILD_SHARED_LIBS "Build opencc as shared library" ${_OPENCC_DEFAULT_BUIL
+@@ -49,18 +49,14 @@ option(BUILD_SHARED_LIBS "Build opencc as shared library" ${_OPENCC_DEFAULT_BUIL
  option(OPENCC_ENABLE_INSTALL "Generate install targets" ${_OPENCC_DEFAULT_ENABLE_INSTALL})
  option(ENABLE_GTEST "Build all tests." OFF)
  option(ENABLE_BENCHMARK "Build benchmark tests." OFF)
@@ -11,8 +11,11 @@ index 7a7aa06..cdeaa98 100644
  # Top-level macOS builds enable the Jieba plugin by default so package
  # managers that build with default options (e.g. Homebrew) ship it. Other
  # platforms and subproject builds (FetchContent / add_subdirectory) keep it
- # opt-in.
--if (APPLE AND CMAKE_SOURCE_DIR STREQUAL CMAKE_CURRENT_SOURCE_DIR)
+ # opt-in. Trimmed source packages ship without plugins/, so only default to
+ # ON when the plugin sources are actually present; an explicit
+ # -DBUILD_OPENCC_JIEBA_PLUGIN=ON without them still fails loudly below.
+-if (APPLE AND CMAKE_SOURCE_DIR STREQUAL CMAKE_CURRENT_SOURCE_DIR
+-    AND EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/plugins/CMakeLists.txt")
 -  set(OPENCC_JIEBA_PLUGIN_DEFAULT ON)
 -else()
 -  set(OPENCC_JIEBA_PLUGIN_DEFAULT OFF)
@@ -20,7 +23,7 @@ index 7a7aa06..cdeaa98 100644
  option(BUILD_OPENCC_JIEBA_PLUGIN "Build Jieba segmentation as a loadable plugin." ${OPENCC_JIEBA_PLUGIN_DEFAULT})
  option(BUILD_PYTHON "Build python library" OFF)
  
-@@ -364,18 +361,18 @@ endif()
+@@ -366,18 +362,18 @@ endif()
  
  add_subdirectory(src)
  if(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/doc/CMakeLists.txt")
@@ -43,10 +46,10 @@ index 7a7aa06..cdeaa98 100644
    message(FATAL_ERROR "ENABLE_GTEST requires the test source directory.")
  endif()
 diff --git a/src/CMakeLists.txt b/src/CMakeLists.txt
-index 1753830..684dea1 100644
+index 0cf4f3f..89e0191 100644
 --- a/src/CMakeLists.txt
 +++ b/src/CMakeLists.txt
-@@ -48,7 +48,6 @@ set(
+@@ -50,7 +50,6 @@ set(
    DictConverter.hpp
    PhraseExtract.hpp
    PipelineConverter.hpp
@@ -54,7 +57,7 @@ index 1753830..684dea1 100644
    PrefixMatch.hpp
    SerializedValues.hpp
    SingleStageConverter.hpp
-@@ -70,7 +69,6 @@ set(
+@@ -76,7 +75,6 @@ set(
    MaxMatchSegmentation.cpp
    PhraseExtract.cpp
    PipelineConverter.cpp
@@ -62,7 +65,7 @@ index 1753830..684dea1 100644
    PrefixMatch.cpp
    SingleStageConverter.cpp
    ResourceProvider.cpp
-@@ -83,6 +81,11 @@ set(
+@@ -89,6 +87,11 @@ set(
    UTF8Util.cpp
  )
  
@@ -73,8 +76,8 @@ index 1753830..684dea1 100644
 +
  set(UNITTESTS
    ConfigTest
-   ConversionChainTest
-@@ -150,6 +153,8 @@ target_link_libraries(libopencc marisa)
+   ConversionAmbiguitiesTest
+@@ -158,6 +161,8 @@ target_link_libraries(libopencc marisa)
  if (NOT BUILD_SHARED_LIBS)
    target_compile_definitions(libopencc PUBLIC Opencc_BUILT_AS_STATIC)
  endif()
@@ -83,7 +86,7 @@ index 1753830..684dea1 100644
  # PluginSegmentation.cpp uses LoadLibrary on _WIN32 (MSVC and MinGW).
  # Only non-Windows targets may need libdl for dlopen.
  if (NOT CMAKE_SYSTEM_NAME STREQUAL "Windows")
-@@ -159,6 +164,7 @@ if (NOT CMAKE_SYSTEM_NAME STREQUAL "Windows")
+@@ -167,6 +172,7 @@ if (NOT CMAKE_SYSTEM_NAME STREQUAL "Windows")
      target_link_libraries(libopencc dl)
    endif ()
  endif ()
@@ -91,7 +94,7 @@ index 1753830..684dea1 100644
  target_include_directories(libopencc PUBLIC
      $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>
      $<INSTALL_INTERFACE:${DIR_INCLUDE}/opencc>
-@@ -215,11 +221,13 @@ install(
+@@ -223,11 +229,13 @@ install(
    DESTINATION ${DIR_INCLUDE}/opencc
  )
  
@@ -105,7 +108,7 @@ index 1753830..684dea1 100644
  
  # Gtest
  
-@@ -255,4 +263,6 @@ endif()
+@@ -263,4 +271,6 @@ endif()
  
  # Subdir
  

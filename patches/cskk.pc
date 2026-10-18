@@ -5,6 +5,6 @@ includedir=${prefix}/include
 
 Name: libcskk
 Description: SKK (Simple Kana Kanji) henkan library
-Version: 3.2.0
+Version: 4.0.0
 Libs: -L${libdir} -lcskk
 Cflags: -I${includedir}

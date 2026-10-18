@@ -10,6 +10,17 @@ When asked to perform a routine dependency update, update the top-level Git subm
 
 Unless listed as an exception below, update each dependency to its newest stable tagged release. Do not select a prerelease, release candidate, beta, alpha, development snapshot, or an untagged branch commit as the latest stable release.
 
+### Preserve existing revisions and never downgrade
+
+Version selection must never move a dependency backward merely to put it on a stable release tag. The revision and version pin present when the update starts are the minimum baseline, including any pre-existing local submodule checkout that is newer than the recorded top-level gitlink. Existing untagged commits, prereleases, development snapshots, and maintained branches may contain required fixes; treat those selections as intentional.
+
+- If the newest stable release predates the existing selection or does not contain its commits, keep the existing selection. Do not replace it with an older stable release, remove its fixes, or adapt patches to make such a downgrade build.
+- For dependencies without an explicit branch-tracking exception below, an existing untagged or prerelease selection does not authorize moving to a newer untagged commit or prerelease. Keep it until a stable release incorporates it, unless the user explicitly requests otherwise.
+- Before changing a submodule gitlink, verify that the selected commit contains the starting revision with `git merge-base --is-ancestor <starting-revision> <selected-revision>`, and check that the release version does not decrease. Fetch enough history to establish ancestry when the checkout is shallow; do not infer it from commit dates or version numbers alone.
+- For a branch-tracking dependency whose existing local commits have been squash-merged or rebased upstream, a different commit history alone is not a downgrade. If ancestry fails, an update to the upstream branch is allowed when the starting and selected commits have exactly the same complete Git tree (including nested submodule gitlinks), share a verified common baseline, and the upstream merge is verified. Report the old and new commits and the identical tree ID; do not infer equivalence from commit subjects or dates.
+- If a candidate would drop existing changes or requires a history replacement that cannot be verified by the identical-tree exception above, preserve the existing selection and report the condition. Such a downgrade or unverified replacement requires explicit user authorization.
+- Apply the same no-downgrade rule to root-level version pins. Stable-release selection and the branch-tracking exceptions below are subject to this rule.
+
 Update these closely related community-maintained dependencies to the latest commit on their upstream `master` branch instead of a release tag:
 
 - `anthy-cmake`

@@ -1,5 +1,5 @@
 diff --git a/src/base/system_util.cc b/src/base/system_util.cc
-index 0981fa1..3cae8ca 100644
+index 0981fa1..7833d30 100644
 --- a/src/base/system_util.cc
 +++ b/src/base/system_util.cc
 @@ -31,7 +31,9 @@
@@ -12,21 +12,21 @@ index 0981fa1..3cae8ca 100644
  
  #include "absl/base/no_destructor.h"
  #include "absl/log/check.h"
-@@ -150,9 +152,10 @@ std::string UserProfileDirectoryImpl::GetDir() {
+@@ -150,6 +152,13 @@ std::string UserProfileDirectoryImpl::GetDir() {
      return dir_;
    }
    const std::string dir = GetUserProfileDirectory();
--  if (absl::Status s = FileUtil::CreateDirectory(dir);
--      !s.ok() && !absl::IsAlreadyExists(s)) {
--    LOG(ERROR) << "Failed to create directory: " << dir << ": " << s;
++  const std::string parent = FileUtil::Dirname(dir);
 +  std::error_code error;
-+  std::filesystem::create_directories(dir, error);
++  std::filesystem::create_directories(parent, error);
 +  if (error) {
-+    LOG(ERROR) << "Failed to create directory: " << dir << ": " << error.message();
-   }
-   if (absl::Status s = FileUtil::DirectoryExists(dir); !s.ok()) {
-     LOG(ERROR) << "User profile directory doesn't exist: " << dir << ": " << s;
-@@ -168,6 +171,15 @@ void UserProfileDirectoryImpl::SetDir(const std::string& dir) {
++    LOG(ERROR) << "Failed to create directory: " << parent << ": "
++               << error.message();
++  }
+   if (absl::Status s = FileUtil::CreateDirectory(dir);
+       !s.ok() && !absl::IsAlreadyExists(s)) {
+     LOG(ERROR) << "Failed to create directory: " << dir << ": " << s;
+@@ -168,6 +177,15 @@ void UserProfileDirectoryImpl::SetDir(const std::string& dir) {
  }
  
  std::string UserProfileDirectoryImpl::GetUserProfileDirectory() const {
@@ -37,12 +37,12 @@ index 0981fa1..3cae8ca 100644
 +  // Originally ~/Library/Application Support/Mozc on macOS and /tmp on wasm.
 +  // Store user history in ~/.local/share/fcitx5 like pinyin and rime.
 +  const std::string home = Environ::GetEnv("HOME");
-+  return FileUtil::JoinPath(home, ".local/share/fcitx5/Mozc");
++  return FileUtil::JoinPath(home, ".local/share/fcitx5/mozc");
 +#if 0
    if constexpr (port::IsChromeos()) {
      // TODO(toka): Must use passed in user profile dir which passed in. If mojo
      // platform the user profile is determined on runtime.
-@@ -252,6 +264,7 @@ std::string UserProfileDirectoryImpl::GetUserProfileDirectory() const {
+@@ -252,6 +270,7 @@ std::string UserProfileDirectoryImpl::GetUserProfileDirectory() const {
  
  #endif  // Platforms
    }

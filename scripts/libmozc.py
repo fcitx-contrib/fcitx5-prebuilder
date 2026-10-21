@@ -61,6 +61,10 @@ class MozcBuilder(CMakeBuilder):
 # Accelerate build by dropping irrelevant compilers.
 patch("libmozc/protobuf")
 
+# Set and create profile directories.
+# Unblock single-thread wasm build since fcitx5-js already overrides pthread.
+patch("libmozc/mozc")
+
 if PLATFORM == "js":
     if platform.system() == "Linux":  # Nothing to steal so build it.
         build_dir = f"libmozc/build/linux-{platform.machine()}"
@@ -82,8 +86,6 @@ if PLATFORM == "js":
 
     # Fix RuntimeError: null function or function signature mismatch.
     patch("libmozc/abseil-cpp")
-    # Unblock single-thread build since fcitx5-js already overrides pthread.
-    patch("libmozc/mozc")
     # Use raw data instead of embed data into libmozc.so so that Chrome accepts it
     # without --enable-features=WebAssemblyUnlimitedSyncCompilation.
     cache(

@@ -1,15 +1,66 @@
+diff --git a/src/base/system_util.cc b/src/base/system_util.cc
+index 0981fa1..7833d30 100644
+--- a/src/base/system_util.cc
++++ b/src/base/system_util.cc
+@@ -31,7 +31,9 @@
+ 
+ #include <cstdint>
+ #include <cstring>
++#include <filesystem>
+ #include <string>
++#include <system_error>
+ 
+ #include "absl/base/no_destructor.h"
+ #include "absl/log/check.h"
+@@ -150,6 +152,13 @@ std::string UserProfileDirectoryImpl::GetDir() {
+     return dir_;
+   }
+   const std::string dir = GetUserProfileDirectory();
++  const std::string parent = FileUtil::Dirname(dir);
++  std::error_code error;
++  std::filesystem::create_directories(parent, error);
++  if (error) {
++    LOG(ERROR) << "Failed to create directory: " << parent << ": "
++               << error.message();
++  }
+   if (absl::Status s = FileUtil::CreateDirectory(dir);
+       !s.ok() && !absl::IsAlreadyExists(s)) {
+     LOG(ERROR) << "Failed to create directory: " << dir << ": " << s;
+@@ -168,6 +177,15 @@ void UserProfileDirectoryImpl::SetDir(const std::string& dir) {
+ }
+ 
+ std::string UserProfileDirectoryImpl::GetUserProfileDirectory() const {
++  if constexpr (port::IsIos()) {
++    const std::string data_home = Environ::GetEnv("FCITX_DATA_HOME");
++    return FileUtil::JoinPath(data_home, "mozc");
++  }
++  // Originally ~/Library/Application Support/Mozc on macOS and /tmp on wasm.
++  // Store user history in ~/.local/share/fcitx5 like pinyin and rime.
++  const std::string home = Environ::GetEnv("HOME");
++  return FileUtil::JoinPath(home, ".local/share/fcitx5/mozc");
++#if 0
+   if constexpr (port::IsChromeos()) {
+     // TODO(toka): Must use passed in user profile dir which passed in. If mojo
+     // platform the user profile is determined on runtime.
+@@ -252,6 +270,7 @@ std::string UserProfileDirectoryImpl::GetUserProfileDirectory() const {
+ 
+ #endif  // Platforms
+   }
++#endif
+ }
+ 
+ }  // namespace
 diff --git a/src/base/thread.h b/src/base/thread.h
-index 08c7587..66ec76b 100644
+index 00f04af..b58c3cb 100644
 --- a/src/base/thread.h
 +++ b/src/base/thread.h
-@@ -43,10 +43,6 @@
+@@ -43,9 +43,6 @@
  #include "absl/synchronization/mutex.h"
  #include "absl/synchronization/notification.h"
  
 -#if defined(__wasm__) && !defined(__EMSCRIPTEN_PTHREADS__)
 -#error "Please build with -pthreads for thread."
 -#endif  // defined(__wasm__) && !defined(__EMSCRIPTEN_PTHREADS__)
--
+ 
  #include <thread>  // NOLINT(build/c++11): this is external environment only.
  
- namespace mozc {

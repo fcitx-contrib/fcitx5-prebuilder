@@ -1,3 +1,13 @@
+diff --git a/Cargo.toml b/Cargo.toml
+index 433c120..50f5af8 100644
+--- a/Cargo.toml
++++ b/Cargo.toml
+@@ -15,2 +15,5 @@ rust-version = "1.72"
+ [profile.release]
++# Avoid duplicate symbols when Xcode 27 strip removes LLVM suffixes.
++lto = true
++codegen-units = 1
+ strip = "debuginfo"
 diff --git a/cskk/Cargo.toml b/cskk/Cargo.toml
 index 0ae5dce..a99f311 100644
 --- a/cskk/Cargo.toml

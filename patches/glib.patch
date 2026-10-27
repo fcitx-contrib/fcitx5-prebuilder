@@ -2,6 +2,15 @@ diff --git a/meson.build b/meson.build
 index 29b9ccb49..42e8aed47 100644
 --- a/meson.build
 +++ b/meson.build
+@@ -748,7 +748,7 @@ functions = [
+   'memmem',
+   'mmap',
+   'newlocale',
+-  'pipe2',
++  # Revert this change when the minimum supported macOS version is 27.
+   'poll',
+   'prlimit',
+   'readlink',
 @@ -2303,47 +2303,10 @@ endif
  # proxy-libintl subproject.
  # FIXME: glib-gettext.m4 has much more checks to detect broken/incompatible

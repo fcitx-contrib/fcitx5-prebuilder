@@ -18,11 +18,11 @@ index 8faa61f..5170fa2 100644
      OUTPUT_NAME "rime" PREFIX "lib"
      ARCHIVE_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR}/lib)
 diff --git a/src/rime/engine.cc b/src/rime/engine.cc
-index 4a54f64..2efe0c9 100644
+index 67d4f81..e6b60a0 100644
 --- a/src/rime/engine.cc
 +++ b/src/rime/engine.cc
-@@ -52,7 +52,6 @@ class ConcreteEngine : public Engine {
-   vector<of<Filter>> filters_;
+@@ -120,7 +120,6 @@ class ConcreteEngine : public Engine {
+   vector<ComponentEntry<Filter>> filters_;
    vector<of<Formatter>> formatters_;
    vector<of<Processor>> post_processors_;
 -  an<Switcher> switcher_;

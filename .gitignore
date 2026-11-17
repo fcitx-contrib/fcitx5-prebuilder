@@ -8,3 +8,5 @@ mozc.data
 cache/mozc_data.inc
 meson-ios-*.ini
 !meson-ios-template.ini
+/icu
+/cache/icu4c-*.tgz

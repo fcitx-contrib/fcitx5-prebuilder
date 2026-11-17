@@ -111,13 +111,10 @@ class ICUBuilder(MakeBuilder):
         for directory in ("bin", "sbin", "lib/icu"):
             rmrf(f"{self.dest_dir}{INSTALL_PREFIX}/{directory}")
         data_dir = f"{self.dest_dir}{INSTALL_PREFIX}/share/icu/{version}"
-        if PLATFORM == "js":
-            # Keep data outside WASM to stay below Chromium's sync compile limit.
-            rmrf(f"{data_dir}/config")
-            for filename in ("install-sh", "mkinstalldirs"):
-                os.remove(f"{data_dir}/{filename}")
-        else:
-            rmrf(f"{self.dest_dir}{INSTALL_PREFIX}/share/icu")
+        # Retain the license and runtime data; remove only build-support files.
+        rmrf(f"{data_dir}/config")
+        for filename in ("install-sh", "mkinstalldirs"):
+            os.remove(f"{data_dir}/{filename}")
 
 
 ICUBuilder("icu").exec()
